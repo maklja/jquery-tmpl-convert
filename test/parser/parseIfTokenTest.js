@@ -29,7 +29,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(22);
 			expect(ifStartTag)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.IF_START.name);
 			expect(ifStartTag)
 				.to.have.property('statement')
@@ -46,7 +46,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(29);
 			expect(ifEndTag)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.IF_END.name);
 			expect(ifEndTag).to.have.property('statement').that.is.empty;
 		});
@@ -75,7 +75,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(20);
 			expect(unknown)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.UNKNOWN.name);
 			expect(unknown)
 				.to.have.property('statement')
@@ -91,7 +91,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(28);
 			expect(ifEndTag)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.IF_END.name);
 			expect(ifEndTag).to.have.property('statement').that.is.empty;
 		});
@@ -120,7 +120,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(38);
 			expect(ifStartTag)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.IF_START.name);
 			expect(ifStartTag)
 				.to.have.property('statement')
@@ -137,7 +137,7 @@ describe('parse IF token', function() {
 				.to.have.property('endPosition')
 				.that.is.equal(45);
 			expect(ifEndTag)
-				.to.have.property('type')
+				.to.have.property('name')
 				.that.is.equal(tokens.IF_END.name);
 			expect(ifEndTag).to.have.property('statement').that.is.empty;
 		});

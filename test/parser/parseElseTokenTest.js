@@ -29,7 +29,7 @@ describe('parse ELSE token', function() {
 				.to.have.property('endPosition')
 				.to.be.equal(8);
 			expect(elseToken)
-				.to.have.property('type')
+				.to.have.property('name')
 				.to.be.equal(tokens.ELSE.name);
 			expect(elseToken).to.have.property('statement').to.be.empty;
 		});
@@ -59,7 +59,7 @@ describe('parse ELSE token', function() {
 				.to.have.property('endPosition')
 				.to.be.equal(24);
 			expect(elseToken)
-				.to.have.property('type')
+				.to.have.property('name')
 				.to.be.equal(tokens.ELSE_IF.name);
 			expect(elseToken)
 				.to.have.property('statement')

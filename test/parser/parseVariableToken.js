@@ -5,7 +5,7 @@ const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
 
 describe('parse VAR token', function() {
-	it('startPosition 0, endPosition 7 and type is var', function() {
+	it('startPosition 0, endPosition 7 and name is var', function() {
 		// eslint-disable-next-line
 		const template = '${test}';
 		const parser = new Parser(template);
@@ -23,8 +23,8 @@ describe('parse VAR token', function() {
 			.to.have.property('endPosition')
 			.that.is.equal(7);
 		expect(token)
-			.to.have.property('type')
-			.that.is.equal(tokens.VARIABLE.name);
+			.to.have.property('name')
+			.that.is.equal(tokens.VAR.name);
 		expect(token)
 			.to.have.property('statement')
 			.that.is.equal('test');

@@ -1,5 +1,5 @@
 const { UNKNOWN, tokens } = require('../tokens/tokens');
-const Token = require('./model/Token');
+const Token = require('../model/Token');
 const { tokenStart, tokenEnd } = require('./token_parsers/tokenParser');
 
 module.exports = class Parser {
@@ -41,7 +41,6 @@ module.exports = class Parser {
 
 			if (tokenPattern != null) {
 				token = this._createToken(tokenPattern);
-				this.seekPosition(token.endPosition);
 			} else {
 				token = this._createUnknownToken();
 			}
@@ -56,16 +55,36 @@ module.exports = class Parser {
 			statementPositionStart = this.position + tokenPattern.start.length;
 
 		this.seekPosition(statementPositionStart);
-		while (
-			tokenEnd(this._text, this.position, tokenPattern.end) === false
-		) {
+		let tokenEndFound = tokenEnd(
+			this._text,
+			this.position,
+			tokenPattern.end
+		);
+		while (tokenEndFound === false && this.hasNextCharacter()) {
 			statement += this.nextCharacter();
+			tokenEndFound = tokenEnd(
+				this._text,
+				this.position,
+				tokenPattern.end
+			);
 		}
 
+		// if we did not found closing tag then this is unknown token
+		if (tokenEndFound === false) {
+			return new Token(
+				UNKNOWN.name,
+				startPosition,
+				this.position,
+				this._text.substring(startPosition, this._text.length)
+			);
+		}
+
+		// we found closing tag, so we need to set position behind it
+		this.seekPosition(this.position + tokenPattern.end.length);
 		return new Token(
 			tokenPattern.name,
 			startPosition,
-			this.position + tokenPattern.end.length,
+			this.position,
 			statement.trim()
 		);
 	}

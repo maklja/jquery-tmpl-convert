@@ -2,7 +2,7 @@ const UNKNOWN = {
 	name: 'unknown'
 };
 
-const VARIABLE = {
+const VAR = {
 	name: 'var',
 	start: '${',
 	end: '}'
@@ -15,7 +15,7 @@ const IF_START = {
 };
 
 const ELSE_IF = {
-	name: 'else',
+	name: 'else_if',
 	start: '{{else ',
 	end: '}}'
 };
@@ -69,7 +69,7 @@ const TMPL = {
 };
 
 const tokens = [
-	VARIABLE,
+	VAR,
 	IF_START,
 	// else must go before else if
 	ELSE,
@@ -86,7 +86,7 @@ const tokens = [
 
 module.exports = {
 	UNKNOWN,
-	VARIABLE,
+	VAR,
 	IF_START,
 	// else must go before else if
 	ELSE,

@@ -15,12 +15,12 @@ class Token {
 		this._endPosition = position;
 	}
 
-	get type() {
-		return this._type;
+	get name() {
+		return this._name;
 	}
 
-	set type(type) {
-		this._type = type;
+	set name(name) {
+		this._name = name;
 	}
 
 	get statement() {
@@ -31,8 +31,8 @@ class Token {
 		this._statement = statement;
 	}
 
-	constructor(type, startPosition, endPosition, statement) {
-		this._type = type;
+	constructor(name, startPosition, endPosition, statement) {
+		this._name = name;
 		this._startPosition = startPosition;
 		this._endPosition = endPosition;
 		this._statement = statement;
