@@ -5,13 +5,12 @@ const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
 
 describe('Parser', function() {
-	it('initialize parser, tokens are empty and position is 0', function() {
+	it('initialize parser, tokens are empty and position is 0', () => {
 		const parser = new Parser('{{if}}Show it{{/if}}');
 		expect(parser.tokens).to.be.empty;
-		expect(parser.position).to.be.equal(0);
 	});
 
-	it('syntax error, there is no closing tag on {{if ...', function() {
+	it('syntax error, there is no closing tag on {{if ...', () => {
 		const parser = new Parser('{{if testShow it{{/if');
 		parser.parse();
 

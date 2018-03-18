@@ -1,24 +1,25 @@
-const tokenStart = (text, position, tokenValue) => {
-	for (let curChar of tokenValue) {
-		if (curChar !== text[position++]) {
-			return false;
-		}
-	}
+const newLinesRegex = /(\r\n\t|\n|\r\t)/gm;
+const findAllTokensRegex = /({{(.+?)}})|(\${(.+?)})/g;
+const tokenWithoutStatement = tokenName =>
+	new RegExp(`(${tokenName}(\\((.*?)\\))?)`, 'g');
+const tokenFunctionWithParameters = tokenName =>
+	new RegExp(`${tokenName}(\\((.+?)\\))+`, 'g');
 
-	return true;
-};
+const getBracketLengths = (token, pattern) => {
+	const bracketLengths = token
+		.split(token.match(pattern).pop())
+		.map(brackets => brackets.length);
 
-const tokenEnd = (text, position, tokenEndValue) => {
-	for (let curChar of tokenEndValue) {
-		if (curChar !== text[position++]) {
-			return false;
-		}
-	}
-
-	return true;
+	return {
+		startLength: bracketLengths[0],
+		endLength: bracketLengths[1]
+	};
 };
 
 module.exports = {
-	tokenStart,
-	tokenEnd
+	newLinesRegex,
+	findAllTokensRegex,
+	tokenWithoutStatement,
+	tokenFunctionWithParameters,
+	getBracketLengths
 };

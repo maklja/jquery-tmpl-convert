@@ -31,11 +31,16 @@ class Token {
 		this._statement = statement;
 	}
 
-	constructor(name, startPosition, endPosition, statement) {
+	get params() {
+		return this._params;
+	}
+
+	constructor(name, startPosition, endPosition, statement, params = null) {
 		this._name = name;
 		this._startPosition = startPosition;
 		this._endPosition = endPosition;
 		this._statement = statement;
+		this._params = params;
 	}
 }
 

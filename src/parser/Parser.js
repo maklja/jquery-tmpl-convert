@@ -1,118 +1,178 @@
-const { UNKNOWN, tokens } = require('../tokens/tokens');
+const { UNKNOWN, VAR, tokens } = require('../tokens/tokens');
 const Token = require('../model/Token');
-const { tokenStart, tokenEnd } = require('./token_parsers/tokenParser');
+const {
+	newLinesRegex,
+	findAllTokensRegex,
+	tokenWithoutStatement,
+	tokenFunctionWithParameters,
+	getBracketLengths
+} = require('./token_parsers/tokenParser');
 
 module.exports = class Parser {
 	constructor(text, tokensParam = tokens) {
 		this._text = text;
-		this._position = 0;
 		this._tokenPatterns = tokensParam.filter(curToken => {
 			return curToken.name !== UNKNOWN.name;
 		});
 
 		this._tokens = [];
-		this._currentTextToken = null;
-	}
-
-	get position() {
-		return this._position;
 	}
 
 	get tokens() {
 		return this._tokens;
 	}
 
-	hasNextCharacter() {
-		return this._position < this._text.length;
-	}
-
-	nextCharacter() {
-		return this._text[this._position++];
-	}
-
-	seekPosition(position) {
-		this._position = position;
-	}
-
 	parse() {
-		while (this.hasNextCharacter()) {
-			let tokenPattern = this._findTokenPatternMatch(),
-				token;
+		// strip all new lines in text
+		let text = this._text.replace(newLinesRegex, '').trim(),
+			// ekstract all tokens bettween {{}} and ${}
+			tokens = text.match(findAllTokensRegex),
+			tokenModels = [],
+			// position in text that is used like begin index for search
+			// this is used for getting start and end position of token inside
+			// text
+			positionInText = 0;
 
-			if (tokenPattern != null) {
-				token = this._createToken(tokenPattern);
-			} else {
-				token = this._createUnknownToken();
+		if (tokens != null) {
+			for (let curToken of tokens) {
+				// find pattern for token
+				let patternModel = this._findTokenPatternMatch(curToken),
+					// search begin of the token inside text
+					tokenPositionBegin = text.indexOf(curToken, positionInText);
+
+				// move new postion behind the current token
+				// to prevent double search in prevous text
+				positionInText = tokenPositionBegin + curToken.length;
+				// pattern does not exitst this is probably invalid token
+				if (patternModel == null) {
+					tokenModels.push(
+						this._createNewToken(
+							UNKNOWN.name,
+							tokenPositionBegin,
+							positionInText,
+							curToken
+						)
+					);
+				} else {
+					tokenModels.push(
+						this._createNewToken(
+							patternModel.name,
+							tokenPositionBegin,
+							positionInText,
+							// extract statement
+							this._getTokenStatement(curToken, patternModel),
+							// extract token parameters if any exists
+							this._getTokenParams(curToken, patternModel.token)
+						)
+					);
+				}
 			}
-
-			this._tokens.push(token);
 		}
+
+		// extract all remaining unknown tokens
+		let unknownTokenModels = this._findUnknownTokens(text, tokenModels);
+
+		this._tokens = tokenModels
+			// merge known tokens with unknown tokens
+			.concat(unknownTokenModels)
+			// and then sort tokens by starting position because order of tokens in array
+			// is very important to be corect like original input text
+			.sort(
+				(tokenX, tokenY) => tokenX.startPosition - tokenY.startPosition
+			);
 	}
 
-	_createToken(tokenPattern) {
-		let statement = '',
-			startPosition = this.position,
-			statementPositionStart = this.position + tokenPattern.start.length;
+	_findUnknownTokens(text, knownTokenModels) {
+		let beginIndex = 0,
+			unknownTokenModels = [];
+		// we need to find all parts of text between known tokens
+		// all those parts that are not found by token regex are considered
+		// unknown tokens
+		for (let curToken of knownTokenModels) {
+			// extract part of text between begin of text and token
+			// or between two known tokens
+			let statement = text.substring(beginIndex, curToken.startPosition);
+			if (statement.length > 0) {
+				unknownTokenModels.push(
+					this._createNewToken(
+						UNKNOWN.name,
+						beginIndex,
+						curToken.startPosition,
+						statement
+					)
+				);
+			}
+			beginIndex = curToken.endPosition;
+		}
 
-		this.seekPosition(statementPositionStart);
-		let tokenEndFound = tokenEnd(
-			this._text,
-			this.position,
-			tokenPattern.end
-		);
-		while (tokenEndFound === false && this.hasNextCharacter()) {
-			statement += this.nextCharacter();
-			tokenEndFound = tokenEnd(
-				this._text,
-				this.position,
-				tokenPattern.end
+		// collect all characters after know token
+		// and create one more unknown token at the end
+		if (beginIndex < text.length) {
+			unknownTokenModels.push(
+				this._createNewToken(
+					UNKNOWN.name,
+					beginIndex,
+					text.length,
+					text.substring(beginIndex, text.length)
+				)
 			);
 		}
 
-		// if we did not found closing tag then this is unknown token
-		if (tokenEndFound === false) {
-			return new Token(
-				UNKNOWN.name,
-				startPosition,
-				this.position,
-				this._text.substring(startPosition, this._text.length)
+		return unknownTokenModels;
+	}
+
+	_getTokenStatement(token, patternModel) {
+		if (patternModel.name === VAR.name) {
+			return token
+				.match(patternModel.pattern)
+				.pop()
+				.trim();
+		} else {
+			const { startLength, endLength } = getBracketLengths(
+				token,
+				patternModel.pattern
 			);
+			let statementBegin =
+					token.match(tokenWithoutStatement(patternModel.token)).pop()
+						.length + startLength,
+				statementEnd = token.length - endLength;
+
+			return token.substring(statementBegin, statementEnd).trim();
 		}
-
-		// we found closing tag, so we need to set position behind it
-		this.seekPosition(this.position + tokenPattern.end.length);
-		return new Token(
-			tokenPattern.name,
-			startPosition,
-			this.position,
-			statement.trim()
-		);
 	}
 
-	_createUnknownToken() {
-		let startPosition = this.position,
-			unknownTokenStatment = '';
+	_getTokenParams(token, tokenName) {
+		if (tokenName != null) {
+			let tokenParameters = tokenFunctionWithParameters(tokenName).exec(
+				token
+			);
 
-		do {
-			unknownTokenStatment += this.nextCharacter();
-		} while (
-			this.hasNextCharacter() &&
-			this._findTokenPatternMatch() == null
-		);
-
-		return new Token(
-			UNKNOWN.name,
-			startPosition,
-			this.position - 1,
-			unknownTokenStatment
-		);
+			if (tokenParameters != null) {
+				return tokenParameters
+					.pop()
+					.split(',')
+					.map(param => param.trim());
+			}
+		}
+		return null;
 	}
 
-	_findTokenPatternMatch() {
+	_findTokenPatternMatch(token) {
+		// try to find pattern for token
 		let tokenPattern = this._tokenPatterns.find(curTokenPattern => {
-			return tokenStart(this._text, this.position, curTokenPattern.start);
+			return token.match(curTokenPattern.pattern) != null;
 		});
 
 		return tokenPattern;
+	}
+
+	_createNewToken(
+		name,
+		positionStart,
+		positionEnd,
+		statement,
+		params = null
+	) {
+		return new Token(name, positionStart, positionEnd, statement, params);
 	}
 };

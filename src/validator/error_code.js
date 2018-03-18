@@ -26,9 +26,17 @@ const MISSING_STARTING_TOKEN = {
 	code: 104
 };
 
+const MISSING_SIBLING_TOKEN = {
+	message(token, afterToken) {
+		return `Token type ${token.name} must go after ${afterToken}`;
+	},
+	code: 105
+};
+
 module.exports = {
 	STATMENT_MISSING,
 	UNEXPECTED_STATMENT,
 	MISSING_CLOSING_TOKEN,
-	MISSING_STARTING_TOKEN
+	MISSING_STARTING_TOKEN,
+	MISSING_SIBLING_TOKEN
 };

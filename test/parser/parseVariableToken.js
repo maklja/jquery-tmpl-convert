@@ -4,8 +4,8 @@ const expect = chai.expect;
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
 
-describe('parse VAR token', function() {
-	it('startPosition 0, endPosition 7 and name is var', function() {
+describe('parse VAR token', () => {
+	it('startPosition 0, endPosition 7 and name is var', () => {
 		// eslint-disable-next-line
 		const template = '${test}';
 		const parser = new Parser(template);
@@ -30,7 +30,7 @@ describe('parse VAR token', function() {
 			.that.is.equal('test');
 	});
 
-	it('variable for statement', function() {
+	it('variable for statement', () => {
 		// eslint-disable-next-line
 		const template = '${test}';
 		const parser = new Parser(template);
@@ -46,7 +46,7 @@ describe('parse VAR token', function() {
 			.that.is.equal('test');
 	});
 
-	it('object property for statement', function() {
+	it('object property for statement', () => {
 		// eslint-disable-next-line
 		const template = '${test.length}';
 		const parser = new Parser(template);
@@ -62,7 +62,7 @@ describe('parse VAR token', function() {
 			.that.is.equal('test.length');
 	});
 
-	it('function call for statement', function() {
+	it('function call for statement', () => {
 		// eslint-disable-next-line
 		const template = '${test()}';
 		const parser = new Parser(template);
