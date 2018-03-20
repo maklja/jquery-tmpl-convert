@@ -3,6 +3,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
+const { compareTokenState } = require('../utils/utils');
 
 describe('parse ELSE token', () => {
 	describe('valid ELSE token', () => {
@@ -22,16 +23,7 @@ describe('parse ELSE token', () => {
 		it('check ELSE token', () => {
 			const elseToken = parser.tokens[0];
 
-			expect(elseToken)
-				.to.have.property('startPosition')
-				.to.be.equal(0);
-			expect(elseToken)
-				.to.have.property('endPosition')
-				.to.be.equal(8);
-			expect(elseToken)
-				.to.have.property('name')
-				.to.be.equal(tokens.ELSE.name);
-			expect(elseToken).to.have.property('statement').to.be.empty;
+			compareTokenState(elseToken, 0, 8, tokens.ELSE.name, '');
 		});
 	});
 
@@ -52,18 +44,13 @@ describe('parse ELSE token', () => {
 		it('check ELSE_IF token', () => {
 			const elseToken = parser.tokens[0];
 
-			expect(elseToken)
-				.to.have.property('startPosition')
-				.to.be.equal(0);
-			expect(elseToken)
-				.to.have.property('endPosition')
-				.to.be.equal(24);
-			expect(elseToken)
-				.to.have.property('name')
-				.to.be.equal(tokens.ELSE.name);
-			expect(elseToken)
-				.to.have.property('statement')
-				.to.be.equal('logicalStatment');
+			compareTokenState(
+				elseToken,
+				0,
+				24,
+				tokens.ELSE.name,
+				'logicalStatment'
+			);
 		});
 	});
 });

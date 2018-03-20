@@ -47,7 +47,7 @@ module.exports = class Validator {
 
 	_validateToken(token, rule) {
 		let validationErrors = [];
-		if (rule.hasStatement && !token.statement) {
+		if (rule.hasStatement && !token.expression) {
 			validationErrors.push(
 				new ValidationError(
 					token,
@@ -55,7 +55,7 @@ module.exports = class Validator {
 					STATMENT_MISSING.code
 				)
 			);
-		} else if (rule.hasStatement === false && token.statement) {
+		} else if (rule.hasStatement === false && token.expression) {
 			validationErrors.push(
 				new ValidationError(
 					token,

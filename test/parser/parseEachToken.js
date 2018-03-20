@@ -3,6 +3,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
+const { compareTokenState } = require('../utils/utils');
 
 describe('parse EACH token', () => {
 	describe('valid EACH_START token', () => {
@@ -22,33 +23,18 @@ describe('parse EACH token', () => {
 
 		it('check EACH_START token', () => {
 			let eachStartTag = parser.tokens[0];
-			expect(eachStartTag)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(eachStartTag)
-				.to.have.property('endPosition')
-				.that.is.equal(19);
-			expect(eachStartTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_START.name);
-			expect(eachStartTag)
-				.to.have.property('statement')
-				.that.is.equal('collection');
+			compareTokenState(
+				eachStartTag,
+				0,
+				19,
+				tokens.EACH_START.name,
+				'collection'
+			);
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = parser.tokens[1];
-
-			expect(eachEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(19);
-			expect(eachEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(28);
-			expect(eachEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_END.name);
-			expect(eachEndTag).to.have.property('statement').that.is.empty;
+			compareTokenState(eachEndTag, 19, 28, tokens.EACH_END.name, '');
 		});
 	});
 
@@ -79,33 +65,20 @@ describe('parse EACH token', () => {
 				.with.lengthOf(2)
 				// check if expected values are equal
 				.that.is.deep.equal(['index', 'value']);
-			expect(eachStartTag)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(eachStartTag)
-				.to.have.property('endPosition')
-				.that.is.equal(33);
-			expect(eachStartTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_START.name);
-			expect(eachStartTag)
-				.to.have.property('statement')
-				.that.is.equal('collection');
+
+			compareTokenState(
+				eachStartTag,
+				0,
+				33,
+				tokens.EACH_START.name,
+				'collection'
+			);
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = parser.tokens[1];
 
-			expect(eachEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(33);
-			expect(eachEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(42);
-			expect(eachEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_END.name);
-			expect(eachEndTag).to.have.property('statement').that.is.empty;
+			compareTokenState(eachEndTag, 33, 42, tokens.EACH_END.name, '');
 		});
 	});
 
@@ -126,32 +99,19 @@ describe('parse EACH token', () => {
 		it('check UNKNOWN token', () => {
 			let unknown = parser.tokens[0];
 
-			expect(unknown)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(unknown)
-				.to.have.property('endPosition')
-				.that.is.equal(23);
-			expect(unknown)
-				.to.have.property('name')
-				.that.is.equal(tokens.UNKNOWN.name);
-			expect(unknown)
-				.to.have.property('statement')
-				.that.is.equal('{{eachlogicalStatment}}');
+			compareTokenState(
+				unknown,
+				0,
+				23,
+				tokens.UNKNOWN.name,
+				'{{eachlogicalStatment}}'
+			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = parser.tokens[1];
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(23);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(32);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+
+			compareTokenState(ifEndTag, 23, 32, tokens.EACH_END.name, '');
 		});
 	});
 
@@ -172,32 +132,19 @@ describe('parse EACH token', () => {
 		it('check UNKNOWN token', () => {
 			let unknown = parser.tokens[0];
 
-			expect(unknown)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(unknown)
-				.to.have.property('endPosition')
-				.that.is.equal(37);
-			expect(unknown)
-				.to.have.property('name')
-				.that.is.equal(tokens.UNKNOWN.name);
-			expect(unknown)
-				.to.have.property('statement')
-				.that.is.equal('{{each(index, value logicalStatment}}');
+			compareTokenState(
+				unknown,
+				0,
+				37,
+				tokens.UNKNOWN.name,
+				'{{each(index, value logicalStatment}}'
+			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = parser.tokens[1];
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(37);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(46);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+
+			compareTokenState(ifEndTag, 37, 46, tokens.EACH_END.name, '');
 		});
 	});
 
@@ -219,33 +166,20 @@ describe('parse EACH token', () => {
 
 		it('check EACH_START token', () => {
 			let ifStartTag = parser.tokens[0];
-			expect(ifStartTag)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(ifStartTag)
-				.to.have.property('endPosition')
-				.that.is.equal(40);
-			expect(ifStartTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_START.name);
-			expect(ifStartTag)
-				.to.have.property('statement')
-				.that.is.equal('logicalStatment');
+
+			compareTokenState(
+				ifStartTag,
+				0,
+				40,
+				tokens.EACH_START.name,
+				'logicalStatment'
+			);
 		});
 
 		it('check EACH_END token', () => {
 			let ifEndTag = parser.tokens[1];
 
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(40);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(49);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.EACH_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+			compareTokenState(ifEndTag, 40, 49, tokens.EACH_END.name, '');
 		});
 	});
 });

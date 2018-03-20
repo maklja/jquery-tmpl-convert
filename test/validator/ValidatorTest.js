@@ -225,8 +225,8 @@ describe('Rule Matcher test', () => {
 		it('valid ELSE_IF and ELSE tokens', () => {
 			const validateTokens = [
 				new Token(tokens.IF_START.name, 0, 10, 'test.length'),
-				new Token(tokens.ELSE_IF.name, 0, 10, 'otherTest.length'),
-				new Token(tokens.ELSE_IF.name, 0, 10, 'array.length'),
+				new Token(tokens.ELSE.name, 0, 10, 'otherTest.length'),
+				new Token(tokens.ELSE.name, 0, 10, 'array.length'),
 				new Token(tokens.ELSE.name, 0, 10),
 				new Token(tokens.IF_END.name, 0, 10)
 			];
@@ -252,7 +252,7 @@ describe('Rule Matcher test', () => {
 
 		it('invalid ELSE_IF token missing sibling IF_START or ELSE_IF', () => {
 			const validateTokens = [
-				new Token(tokens.ELSE_IF.name, 0, 10, 'test.length')
+				new Token(tokens.ELSE.name, 0, 10, 'test.length')
 			];
 
 			const validator = new Validator(validateTokens);

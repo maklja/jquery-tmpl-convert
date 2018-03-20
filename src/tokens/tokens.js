@@ -13,20 +13,14 @@ const VAR = {
 const IF_START = {
 	name: 'if_start',
 	token: 'if',
-	pattern: /(if(\((.*?)\))?) .+?(?=}})/g
-};
-
-const ELSE_IF = {
-	name: 'else_if',
-	pattern: /(if(\((.*?)\))?)( .+)?/,
-	start: '{{else ',
-	end: '}}'
+	pattern: /if .+?(?=}})/g
 };
 
 const ELSE = {
 	name: 'else',
 	token: 'else',
-	pattern: /else( .+?(?=}}))?/g
+	pattern: /else( .+?(?=}}))?/g,
+	hasEndToken: true
 };
 
 const IF_END = {
@@ -37,9 +31,8 @@ const IF_END = {
 
 const HTML = {
 	name: 'html',
-	pattern: /(html(\((.*?)\))?)( .+)?/g,
-	start: '{{html',
-	end: '}}'
+	token: 'html',
+	pattern: /html .+?(?=}})/g
 };
 
 const EACH_START = {
@@ -58,38 +51,33 @@ const EACH_END = {
 const WRAP_START = {
 	name: 'wrap_start',
 	token: 'wrap',
-	start: '{{wrap ',
-	end: '}}'
+	pattern: /(wrap(\((.*?)\))?) .+?(?=}})/g
 };
 
 const WRAP_END = {
 	name: 'wrap-end',
 	token: '/wrap',
-	start: '{{/wrap}',
-	end: ''
+	pattern: /\/wrap(?=}})/g
 };
 
 const TMPL = {
 	name: 'tmpl',
 	token: 'tmpl',
-	start: '{{tmpl',
-	end: '}}'
+	pattern: /(tmpl(\((.*?)\))?) .+?(?=}})/g
 };
 
 const tokens = [
 	VAR,
 	IF_START,
-	// else must go before else if
 	ELSE,
-	// ELSE_IF,
 	IF_END,
-	// HTML,
+	HTML,
 	EACH_START,
-	EACH_END
-	// WRAP_START,
-	// WRAP_END,
-	// TMPL,
-	// UNKNOWN
+	EACH_END,
+	WRAP_START,
+	WRAP_END,
+	TMPL,
+	UNKNOWN
 ];
 
 module.exports = {
@@ -98,7 +86,6 @@ module.exports = {
 	IF_START,
 	// else must go before else if
 	ELSE,
-	ELSE_IF,
 	IF_END,
 	HTML,
 	EACH_START,

@@ -23,8 +23,8 @@ class Token {
 		this._name = name;
 	}
 
-	get statement() {
-		return this._statement;
+	get expression() {
+		return this._expression;
 	}
 
 	set statement(statement) {
@@ -35,11 +35,11 @@ class Token {
 		return this._params;
 	}
 
-	constructor(name, startPosition, endPosition, statement, params = null) {
+	constructor(name, startPosition, endPosition, expression, params = null) {
 		this._name = name;
 		this._startPosition = startPosition;
 		this._endPosition = endPosition;
-		this._statement = statement;
+		this._expression = expression;
 		this._params = params;
 	}
 }

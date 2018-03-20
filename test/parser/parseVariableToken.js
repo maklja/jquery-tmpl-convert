@@ -1,6 +1,7 @@
 const chai = require('chai');
 
 const expect = chai.expect;
+const { compareTokenState } = require('../utils/utils');
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
 
@@ -16,18 +17,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		expect(token)
-			.to.have.property('startPosition')
-			.that.is.equal(0);
-		expect(token)
-			.to.have.property('endPosition')
-			.that.is.equal(7);
-		expect(token)
-			.to.have.property('name')
-			.that.is.equal(tokens.VAR.name);
-		expect(token)
-			.to.have.property('statement')
-			.that.is.equal('test');
+		compareTokenState(token, 0, 7, tokens.VAR.name, 'test');
 	});
 
 	it('variable for statement', () => {
@@ -41,9 +31,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		expect(token)
-			.to.have.property('statement')
-			.that.is.equal('test');
+		compareTokenState(token, 0, 7, tokens.VAR.name, 'test');
 	});
 
 	it('object property for statement', () => {
@@ -57,9 +45,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		expect(token)
-			.to.have.property('statement')
-			.that.is.equal('test.length');
+		compareTokenState(token, 0, 14, tokens.VAR.name, 'test.length');
 	});
 
 	it('function call for statement', () => {
@@ -73,8 +59,6 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		expect(token)
-			.to.have.property('statement')
-			.that.is.equal('test()');
+		compareTokenState(token, 0, 9, tokens.VAR.name, 'test()');
 	});
 });

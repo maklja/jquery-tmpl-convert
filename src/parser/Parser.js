@@ -1,5 +1,7 @@
+const jsep = require('jsep');
 const { UNKNOWN, VAR, tokens } = require('../tokens/tokens');
 const Token = require('../model/Token');
+const Expression = require('../model/Expression');
 const {
 	newLinesRegex,
 	findAllTokensRegex,
@@ -10,11 +12,15 @@ const {
 
 module.exports = class Parser {
 	constructor(text, tokensParam = tokens) {
+		// target text
 		this._text = text;
+
+		// all token patterns
 		this._tokenPatterns = tokensParam.filter(curToken => {
 			return curToken.name !== UNKNOWN.name;
 		});
 
+		// contains all found tokens
 		this._tokens = [];
 	}
 
@@ -50,7 +56,7 @@ module.exports = class Parser {
 							UNKNOWN.name,
 							tokenPositionBegin,
 							positionInText,
-							curToken
+							new Expression(curToken)
 						)
 					);
 				} else {
@@ -98,7 +104,7 @@ module.exports = class Parser {
 						UNKNOWN.name,
 						beginIndex,
 						curToken.startPosition,
-						statement
+						new Expression(statement)
 					)
 				);
 			}
@@ -113,7 +119,7 @@ module.exports = class Parser {
 					UNKNOWN.name,
 					beginIndex,
 					text.length,
-					text.substring(beginIndex, text.length)
+					new Expression(text.substring(beginIndex, text.length))
 				)
 			);
 		}
@@ -122,8 +128,9 @@ module.exports = class Parser {
 	}
 
 	_getTokenStatement(token, patternModel) {
+		let expressionValue = null;
 		if (patternModel.name === VAR.name) {
-			return token
+			expressionValue = token
 				.match(patternModel.pattern)
 				.pop()
 				.trim();
@@ -132,13 +139,17 @@ module.exports = class Parser {
 				token,
 				patternModel.pattern
 			);
-			let statementBegin =
+			let expressionBegin =
 					token.match(tokenWithoutStatement(patternModel.token)).pop()
 						.length + startLength,
-				statementEnd = token.length - endLength;
+				expressionEnd = token.length - endLength;
 
-			return token.substring(statementBegin, statementEnd).trim();
+			expressionValue = token
+				.substring(expressionBegin, expressionEnd)
+				.trim();
 		}
+
+		return new Expression(expressionValue, jsep(expressionValue));
 	}
 
 	_getTokenParams(token, tokenName) {

@@ -32,15 +32,9 @@ const END_TAG_RULE = {
 const ELSE_RULE = {
 	ruleFor: [tokens.ELSE],
 	closeToken: null,
-	afterTokens: [tokens.IF_START, tokens.ELSE_IF],
-	hasStatement: false
-};
-
-const ELSE_IF_RULE = {
-	ruleFor: [tokens.ELSE_IF],
-	closeToken: null,
-	afterTokens: [tokens.IF_START, tokens.ELSE_IF],
-	hasStatement: true
+	afterTokens: [tokens.IF_START, tokens.ELSE_RULE],
+	// have statement if it is ELSE_IF otherwise it does not have statement
+	hasStatement: null
 };
 
 const HTML_RULE = {
@@ -71,7 +65,6 @@ const rules = [
 	EACH_RULE,
 	HTML_RULE,
 	ELSE_RULE,
-	ELSE_IF_RULE,
 	WRAP_RULE,
 	TMPL_RULE
 ];

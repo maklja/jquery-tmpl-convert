@@ -79,7 +79,7 @@ describe('Node Tree Maker', function() {
 
 		it('IF - ELSE IF - ELSE node', function() {
 			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const elseIfToken = new Token(tokens.ELSE_IF.name, 0, 0, null);
+			const elseIfToken = new Token(tokens.ELSE.name, 0, 0, null);
 			const elseToken = new Token(tokens.ELSE.name, 0, 0, null);
 			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
 			const validateTokens = [

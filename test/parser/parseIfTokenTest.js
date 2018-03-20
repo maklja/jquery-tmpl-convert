@@ -3,6 +3,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
+const { compareTokenState } = require('../utils/utils');
 
 describe('parse IF token', () => {
 	describe('valid IF_START token', () => {
@@ -22,33 +23,20 @@ describe('parse IF token', () => {
 
 		it('check IF_START token', () => {
 			let ifStartTag = parser.tokens[0];
-			expect(ifStartTag)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(ifStartTag)
-				.to.have.property('endPosition')
-				.that.is.equal(22);
-			expect(ifStartTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.IF_START.name);
-			expect(ifStartTag)
-				.to.have.property('statement')
-				.that.is.equal('logicalStatment');
+
+			compareTokenState(
+				ifStartTag,
+				0,
+				22,
+				tokens.IF_START.name,
+				'logicalStatment'
+			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = parser.tokens[1];
 
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(22);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(29);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.IF_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+			compareTokenState(ifEndTag, 22, 29, tokens.IF_END.name, '');
 		});
 	});
 	describe('invalid if token no space between tag and statement', () => {
@@ -68,32 +56,19 @@ describe('parse IF token', () => {
 		it('check UNKNOWN token', () => {
 			let unknown = parser.tokens[0];
 
-			expect(unknown)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(unknown)
-				.to.have.property('endPosition')
-				.that.is.equal(21);
-			expect(unknown)
-				.to.have.property('name')
-				.that.is.equal(tokens.UNKNOWN.name);
-			expect(unknown)
-				.to.have.property('statement')
-				.that.is.equal('{{iflogicalStatment}}');
+			compareTokenState(
+				unknown,
+				0,
+				21,
+				tokens.UNKNOWN.name,
+				'{{iflogicalStatment}}'
+			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = parser.tokens[1];
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(21);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(28);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.IF_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+
+			compareTokenState(ifEndTag, 21, 28, tokens.IF_END.name, '');
 		});
 	});
 	describe('valid if token with multiple spaces around statment', () => {
@@ -113,33 +88,20 @@ describe('parse IF token', () => {
 
 		it('check IF_START token', () => {
 			let ifStartTag = parser.tokens[0];
-			expect(ifStartTag)
-				.to.have.property('startPosition')
-				.that.is.equal(0);
-			expect(ifStartTag)
-				.to.have.property('endPosition')
-				.that.is.equal(38);
-			expect(ifStartTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.IF_START.name);
-			expect(ifStartTag)
-				.to.have.property('statement')
-				.that.is.equal('logicalStatment');
+
+			compareTokenState(
+				ifStartTag,
+				0,
+				38,
+				tokens.IF_START.name,
+				'logicalStatment'
+			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = parser.tokens[1];
 
-			expect(ifEndTag)
-				.to.have.property('startPosition')
-				.that.is.equal(38);
-			expect(ifEndTag)
-				.to.have.property('endPosition')
-				.that.is.equal(45);
-			expect(ifEndTag)
-				.to.have.property('name')
-				.that.is.equal(tokens.IF_END.name);
-			expect(ifEndTag).to.have.property('statement').that.is.empty;
+			compareTokenState(ifEndTag, 38, 45, tokens.IF_END.name, '');
 		});
 	});
 });
