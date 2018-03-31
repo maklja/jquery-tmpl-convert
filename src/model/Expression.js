@@ -1,14 +1,8 @@
-module.exports = class Expression {
-	get value() {
-		return this._value;
-	}
+const Token = require('./Token');
+const { VAR } = require('../tokens/tokens');
 
-	get tree() {
-		return this._tree;
-	}
-
-	constructor(expressionValue, tree) {
-		this._value = expressionValue;
-		this._tree = tree;
+module.exports = class Expression extends Token {
+	constructor(value, tree, position) {
+		super(VAR.name, value, tree, position);
 	}
 };

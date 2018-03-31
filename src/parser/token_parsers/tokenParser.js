@@ -1,25 +1,52 @@
 const newLinesRegex = /(\r\n\t|\n|\r\t)/gm;
 const findAllTokensRegex = /({{(.+?)}})|(\${(.+?)})/g;
-const tokenWithoutStatement = tokenName =>
-	new RegExp(`(${tokenName}(\\((.*?)\\))?)`, 'g');
-const tokenFunctionWithParameters = tokenName =>
-	new RegExp(`${tokenName}(\\((.+?)\\))+`, 'g');
+// eslint-disable-next-line
+const findAllExpressionsRegex = '(\\${(.+?)})';
+const findAllStatementsRegex = '({{(.+?)}})';
 
-const getBracketLengths = (token, pattern) => {
-	const bracketLengths = token
-		.split(token.match(pattern).pop())
-		.map(brackets => brackets.length);
+const isCompound = tokenTree => tokenTree.type === 'Compound';
+const isIdentifier = tokenTree => tokenTree.type === 'Identifier';
+const isBinaryExpression = tokenTree => tokenTree.type === 'BinaryExpression';
+const isLiteral = tokenTree => tokenTree.type === 'Literal';
+const isMemberExpression = tokenTree => tokenTree.type === 'MemberExpression';
+const isCallExpression = tokenTree => tokenTree.type === 'CallExpression';
 
-	return {
-		startLength: bracketLengths[0],
-		endLength: bracketLengths[1]
-	};
+const extractTokenText = tree => {
+	if (isIdentifier(tree)) {
+		return tree.name;
+	} else if (isLiteral(tree)) {
+		return tree.raw;
+	} else if (isMemberExpression(tree)) {
+		return `${extractTokenText(tree.object)}.${extractTokenText(
+			tree.property
+		)}`;
+	} else if (isCallExpression(tree)) {
+		let argumentsText = tree.arguments
+			.map(curParam => extractTokenText(curParam))
+			.join(',');
+		return `${extractTokenText(tree.callee)}(${argumentsText})`;
+	} else {
+		throw new Error(`Unsupported token type ${tree.type}`);
+	}
 };
+
+const isClosingToken = tokenTree =>
+	isBinaryExpression(tokenTree) &&
+	tokenTree.operator === '/' &&
+	tokenTree.left === false &&
+	isIdentifier(tokenTree.right);
 
 module.exports = {
 	newLinesRegex,
 	findAllTokensRegex,
-	tokenWithoutStatement,
-	tokenFunctionWithParameters,
-	getBracketLengths
+	findAllExpressionsRegex,
+	findAllStatementsRegex,
+	isCompound,
+	isIdentifier,
+	isBinaryExpression,
+	isLiteral,
+	isMemberExpression,
+	isCallExpression,
+	isClosingToken,
+	extractTokenText
 };

@@ -1,6 +1,6 @@
 module.exports = class ValidationError {
 	get message() {
-		return this._message;
+		return this._error.message;
 	}
 
 	get errorCode() {
@@ -11,9 +11,13 @@ module.exports = class ValidationError {
 		return this._token;
 	}
 
-	constructor(token, message, errorCode) {
-		this._message = message;
+	get error() {
+		return this._error;
+	}
+
+	constructor(token, errorCode, error) {
 		this._errorCode = errorCode;
 		this._token = token;
+		this._error = error;
 	}
 };

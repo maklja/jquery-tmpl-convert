@@ -1,13 +1,13 @@
-const STATMENT_MISSING = {
+const EXPRESSION_MISSING = {
 	message(token) {
-		return `Statement is mandatory for token type ${token.name}`;
+		return `Expression is mandatory for token type ${token.name}`;
 	},
 	code: 101
 };
 
-const UNEXPECTED_STATMENT = {
+const UNEXPECTED_EXPRESSION = {
 	message(token) {
-		return `Token type ${token.name} can't have statement`;
+		return `Token type ${token.name} can't have expression`;
 	},
 	code: 102
 };
@@ -33,10 +33,18 @@ const MISSING_SIBLING_TOKEN = {
 	code: 105
 };
 
+const PARSE_ERROR = {
+	message(msg) {
+		return `Parse failed: ${msg}`;
+	},
+	code: 106
+};
+
 module.exports = {
-	STATMENT_MISSING,
-	UNEXPECTED_STATMENT,
+	EXPRESSION_MISSING,
+	UNEXPECTED_EXPRESSION,
 	MISSING_CLOSING_TOKEN,
 	MISSING_STARTING_TOKEN,
-	MISSING_SIBLING_TOKEN
+	MISSING_SIBLING_TOKEN,
+	PARSE_ERROR
 };

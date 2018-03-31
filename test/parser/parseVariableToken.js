@@ -1,9 +1,12 @@
 const chai = require('chai');
 
 const expect = chai.expect;
-const { compareTokenState } = require('../utils/utils');
+const {
+	compareExpressionTokenState,
+	compareValidationErrorState
+} = require('../utils/utils');
 const Parser = require('../../src/parser/Parser');
-const tokens = require('../../src/tokens/tokens');
+const { PARSE_ERROR } = require('../../src/validator/error_code');
 
 describe('parse VAR token', () => {
 	it('startPosition 0, endPosition 7 and name is var', () => {
@@ -17,9 +20,11 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareTokenState(token, 0, 7, tokens.VAR.name, 'test');
+		compareExpressionTokenState(token, 'test', {
+			expectedStartPosition: 0,
+			expectedEndPosition: 7
+		});
 	});
-
 	it('variable for statement', () => {
 		// eslint-disable-next-line
 		const template = '${test}';
@@ -31,7 +36,10 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareTokenState(token, 0, 7, tokens.VAR.name, 'test');
+		compareExpressionTokenState(token, 'test', {
+			expectedStartPosition: 0,
+			expectedEndPosition: 7
+		});
 	});
 
 	it('object property for statement', () => {
@@ -45,7 +53,10 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareTokenState(token, 0, 14, tokens.VAR.name, 'test.length');
+		compareExpressionTokenState(token, 'test.length', {
+			expectedStartPosition: 0,
+			expectedEndPosition: 14
+		});
 	});
 
 	it('function call for statement', () => {
@@ -59,6 +70,47 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareTokenState(token, 0, 9, tokens.VAR.name, 'test()');
+		compareExpressionTokenState(token, 'test()', {
+			expectedStartPosition: 0,
+			expectedEndPosition: 9
+		});
+	});
+
+	it('invalid expression, parse failed', () => {
+		// eslint-disable-next-line
+		const template = '${test({)}';
+		const parser = new Parser(template);
+		parser.parse();
+
+		// parse failed so we have 1 error
+		expect(parser.parseErrors)
+			.to.be.an('array')
+			.that.have.lengthOf(1);
+
+		compareValidationErrorState(
+			// take the only error from the array
+			parser.parseErrors[0],
+			template,
+			PARSE_ERROR.code
+		);
+	});
+
+	it('invalid expression, empty expression', () => {
+		// eslint-disable-next-line
+		const template = '${   }';
+		const parser = new Parser(template);
+		parser.parse();
+
+		// parse failed so we have 1 error
+		expect(parser.parseErrors)
+			.to.be.an('array')
+			.that.have.lengthOf(1);
+
+		compareValidationErrorState(
+			// take the only error from the array
+			parser.parseErrors[0],
+			template,
+			PARSE_ERROR.code
+		);
 	});
 });

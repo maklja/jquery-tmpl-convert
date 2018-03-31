@@ -1,46 +1,29 @@
 class Token {
-	get startPosition() {
-		return this._startPosition;
-	}
-
-	set startPosition(position) {
-		this._startPosition = position;
-	}
-
-	get endPosition() {
-		return this._endPosition;
-	}
-
-	set endPosition(position) {
-		this._endPosition = position;
-	}
-
 	get name() {
 		return this._name;
 	}
 
-	set name(name) {
+	get value() {
+		return this._value;
+	}
+
+	get tree() {
+		return this._tree;
+	}
+
+	get position() {
+		return this._position;
+	}
+
+	set position(position) {
+		this._position = position;
+	}
+
+	constructor(name, value, tree, position) {
 		this._name = name;
-	}
-
-	get expression() {
-		return this._expression;
-	}
-
-	set statement(statement) {
-		this._statement = statement;
-	}
-
-	get params() {
-		return this._params;
-	}
-
-	constructor(name, startPosition, endPosition, expression, params = null) {
-		this._name = name;
-		this._startPosition = startPosition;
-		this._endPosition = endPosition;
-		this._expression = expression;
-		this._params = params;
+		this._value = value;
+		this._tree = tree;
+		this._position = position;
 	}
 }
 

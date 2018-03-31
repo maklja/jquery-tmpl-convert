@@ -1,8 +1,8 @@
 const ValidationError = require('../model/ValidationError');
-const { findRule } = require('../utils/rules.js');
+
 const {
-	STATMENT_MISSING,
-	UNEXPECTED_STATMENT,
+	EXPRESSION_MISSING,
+	UNEXPECTED_EXPRESSION,
 	MISSING_CLOSING_TOKEN,
 	MISSING_STARTING_TOKEN,
 	MISSING_SIBLING_TOKEN
@@ -10,19 +10,24 @@ const {
 
 module.exports = class Validator {
 	constructor(tokens) {
+		this._tokens = tokens;
 		this._validationErrors = [];
 		this._closeTokenMissing = [];
-		this._tokens = tokens;
 	}
 
 	validate() {
-		this._validationErrors = [];
-		this._closeTokenMissing = [];
-
 		for (let curToken of this._tokens) {
-			let rule = findRule(curToken);
-			if (rule != null) {
-				let errors = this._validateToken(curToken, rule);
+			if (curToken == null) {
+				throw new Error('Token parameter can not be null');
+			}
+
+			let tokenPatternRule = curToken.pattern;
+			if (tokenPatternRule != null) {
+				let errors = this._validateStatementToken(
+					curToken,
+					tokenPatternRule
+				);
+
 				if (errors.length > 0) {
 					this._validationErrors = this._validationErrors.concat(
 						errors
@@ -36,8 +41,10 @@ module.exports = class Validator {
 			this._validationErrors.push(
 				new ValidationError(
 					missingClosingToken,
-					MISSING_CLOSING_TOKEN.message(missingClosingToken),
-					MISSING_CLOSING_TOKEN.code
+					MISSING_CLOSING_TOKEN.code,
+					new Error(
+						MISSING_CLOSING_TOKEN.message(missingClosingToken)
+					)
 				)
 			);
 		}
@@ -45,64 +52,82 @@ module.exports = class Validator {
 		return this._validationErrors;
 	}
 
-	_validateToken(token, rule) {
+	_validateStatementToken(token, tokenPatternRule) {
 		let validationErrors = [];
-		if (rule.hasStatement && !token.expression) {
-			validationErrors.push(
-				new ValidationError(
-					token,
-					STATMENT_MISSING.message(token),
-					STATMENT_MISSING.code
-				)
-			);
-		} else if (rule.hasStatement === false && token.expression) {
-			validationErrors.push(
-				new ValidationError(
-					token,
-					UNEXPECTED_STATMENT.message(token),
-					UNEXPECTED_STATMENT.code
-				)
-			);
-		}
 
-		this._checkMissingClosingToken(token, rule);
-		this._checkSiblingTokens(token, rule, validationErrors);
-		this._checkClosingToken(token, rule, validationErrors);
+		this._checkExpression(token, tokenPatternRule, validationErrors);
+		this._checkMissingClosingToken(token, tokenPatternRule);
+		this._checkSiblingTokens(token, tokenPatternRule, validationErrors);
+		this._checkClosingToken(token, tokenPatternRule, validationErrors);
 
 		return validationErrors;
 	}
 
-	_checkMissingClosingToken(token, rule) {
+	_checkExpression(token, tokenPatternRule, validationErrors) {
+		if (
+			tokenPatternRule.hasExpression &&
+			tokenPatternRule.expressionMandatory &&
+			!token.expression
+		) {
+			validationErrors.push(
+				new ValidationError(
+					token,
+					EXPRESSION_MISSING.code,
+					new Error(EXPRESSION_MISSING.message(token))
+				)
+			);
+		} else if (
+			tokenPatternRule.hasExpression === false &&
+			token.expression
+		) {
+			validationErrors.push(
+				new ValidationError(
+					token,
+					UNEXPECTED_EXPRESSION.code,
+					new Error(UNEXPECTED_EXPRESSION.message(token))
+				)
+			);
+		}
+	}
+
+	_checkMissingClosingToken(token, tokenPatternRule) {
 		// if token has closing tag
-		if (rule.closeToken != null) {
+		if (tokenPatternRule.hasClosing) {
 			this._closeTokenMissing.push(token);
 		}
 	}
 
-	_checkSiblingTokens(token, rule, validationErrors) {
-		if (rule.afterTokens) {
+	_checkSiblingTokens(token, tokenPatternRule, validationErrors) {
+		if (tokenPatternRule.afterTokens) {
 			let lastToken = this.peekLastTokenWithoutClosing();
 
 			if (
 				lastToken == null ||
-				rule.afterTokens.find(
+				tokenPatternRule.afterTokens.find(
 					curToken => curToken.name === lastToken.name
 				) === null
 			) {
 				validationErrors.push(
 					new ValidationError(
 						token,
-						MISSING_SIBLING_TOKEN.message(token),
-						MISSING_SIBLING_TOKEN.code
+						MISSING_SIBLING_TOKEN.code,
+						new Error(
+							MISSING_SIBLING_TOKEN.message(
+								token,
+								tokenPatternRule.afterTokens
+									.map(token => token.name)
+									.join(', ')
+							)
+						)
 					)
 				);
 			}
 		}
 	}
 
-	_checkClosingToken(token, rule, validationErrors) {
+	_checkClosingToken(token, tokenPatternRule, validationErrors) {
 		// if token is closing token
-		if (!rule.isCloseToken) {
+		if (token.isClosing === false) {
 			return;
 		}
 
@@ -110,24 +135,23 @@ module.exports = class Validator {
 			validationErrors.push(
 				new ValidationError(
 					token,
-					MISSING_STARTING_TOKEN.message(token),
-					MISSING_STARTING_TOKEN.code
+					MISSING_STARTING_TOKEN.code,
+					new Error(MISSING_STARTING_TOKEN.message(token))
 				)
 			);
 			return;
 		}
 
-		let lastToken = this.peekLastTokenWithoutClosing(),
-			lastTokenRule = findRule(lastToken);
+		let lastToken = this.peekLastTokenWithoutClosing();
 
-		if (lastTokenRule.closeToken.name === token.name) {
+		if (lastToken.name === token.name) {
 			this._closeTokenMissing.pop();
 		} else {
 			validationErrors.push(
 				new ValidationError(
 					token,
-					MISSING_STARTING_TOKEN.message(token),
-					MISSING_STARTING_TOKEN.code
+					MISSING_STARTING_TOKEN.code,
+					new Error(MISSING_STARTING_TOKEN.message(token))
 				)
 			);
 		}
