@@ -1,43 +1,13 @@
-const {
-	isIdentifier,
-	isCallExpression
-} = require('../parser/token_parsers/tokenParser');
+const { isIdentifier, isCallExpression } = require('../parser/parserUtils');
 
-const UNKNOWN = {
-	name: 'unknown'
-};
-
-const PARAM = {
-	name: 'param'
-};
-
-const VAR = {
-	name: 'var'
-};
-
-const IF = {
-	name: 'if'
-};
-
-const ELSE = {
-	name: 'else'
-};
-
-const HTML = {
-	name: 'html'
-};
-
-const EACH = {
-	name: 'each'
-};
-
-const WRAP = {
-	name: 'wrap'
-};
-
-const TMPL = {
-	name: 'tmpl'
-};
+const UNKNOWN = 'unknown';
+const VAR = 'var';
+const IF = 'if';
+const ELSE = 'else';
+const HTML = 'html';
+const EACH = 'each';
+const WRAP = 'wrap';
+const TMPL = 'tmpl';
 
 const CLOSING_RULE = {
 	hasClosing: false,
@@ -47,7 +17,7 @@ const CLOSING_RULE = {
 };
 
 const IF_RULE = {
-	name: IF.name,
+	name: IF,
 	hasClosing: true,
 	hasExpression: true,
 	expressionMandatory: true,
@@ -56,13 +26,13 @@ const IF_RULE = {
 
 const IF_CLOSE_RULE = Object.assign(
 	{
-		name: IF.name
+		name: IF
 	},
 	CLOSING_RULE
 );
 
 const EACH_RULE = {
-	name: EACH.name,
+	name: EACH,
 	hasClosing: true,
 	hasExpression: true,
 	expressionMandatory: true,
@@ -71,13 +41,13 @@ const EACH_RULE = {
 
 const EACH_CLOSE_RULE = Object.assign(
 	{
-		name: EACH.name
+		name: EACH
 	},
 	CLOSING_RULE
 );
 
 const WRAP_RULE = {
-	name: WRAP.name,
+	name: WRAP,
 	hasClosing: true,
 	hasExpression: true,
 	expressionMandatory: true,
@@ -86,13 +56,13 @@ const WRAP_RULE = {
 
 const WRAP_CLOSE_RULE = Object.assign(
 	{
-		name: WRAP.name
+		name: WRAP
 	},
 	CLOSING_RULE
 );
 
 const TMPL_RULE = {
-	name: TMPL.name,
+	name: TMPL,
 	hasClosing: false,
 	hasExpression: true,
 	expressionMandatory: true,
@@ -100,7 +70,7 @@ const TMPL_RULE = {
 };
 
 const HTML_RULE = {
-	name: HTML.name,
+	name: HTML,
 	hasClosing: false,
 	hasExpression: true,
 	expressionMandatory: true,
@@ -108,11 +78,11 @@ const HTML_RULE = {
 };
 
 const ELSE_RULE = {
-	name: ELSE.name,
+	name: ELSE,
 	hasClosing: false,
 	hasExpression: true,
 	expressionMandatory: false,
-	afterTokens: [IF.name, ELSE.name]
+	afterTokens: [IF, ELSE]
 };
 
 const tokenPatterns = {
@@ -177,7 +147,6 @@ const findStatementTokenPatternByName = (tokenName, isClosingToken = false) => {
 module.exports = {
 	VAR,
 	UNKNOWN,
-	PARAM,
 	IF,
 	ELSE,
 	HTML,

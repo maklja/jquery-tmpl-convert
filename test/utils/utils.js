@@ -89,7 +89,7 @@ const compareUnknownTokenState = (
 		.to.be.an.instanceOf(Unknown)
 		.to.have.property('name')
 		// compare token name
-		.that.is.equal(UNKNOWN.name);
+		.that.is.equal(UNKNOWN);
 
 	expect(unknownToken)
 		.to.have.property('position')

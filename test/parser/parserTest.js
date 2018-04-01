@@ -16,6 +16,8 @@ describe('Parser', () => {
 	it('initialize parser, tokens are empty', () => {
 		const parser = new Parser('{{if}}Show it{{/if}}');
 		expect(parser.tokens).to.be.empty;
+		expect(parser.parseErrors).to.be.empty;
+		expect(parser.isValidatingTokens).to.be.true;
 	});
 
 	it('syntax error, there is no closing tag on {{if ...', () => {
@@ -50,7 +52,7 @@ describe('Parser', () => {
 		compareStatementTokenState(
 			htmlToken,
 			// token is valid and it is HTML token
-			tokens.HTML.name,
+			tokens.HTML,
 			// token value, in this case token value is same as name
 			'html',
 			{
@@ -111,7 +113,7 @@ describe('Parser', () => {
 		compareStatementTokenState(
 			tmplToken,
 			// token is valid and it is TMPL token
-			tokens.TMPL.name,
+			tokens.TMPL,
 			// token value, in this case token value is same as name
 			'tmpl',
 			{
@@ -142,7 +144,7 @@ describe('Parser', () => {
 		compareStatementTokenState(
 			tmplToken,
 			// token is valid and it is TMPL token
-			tokens.TMPL.name,
+			tokens.TMPL,
 			// token value, in this case token value is same as name
 			'tmpl(param1,param2)',
 			{

@@ -2,17 +2,43 @@ const chai = require('chai');
 
 const expect = chai.expect;
 const NodeTreeMaker = require('../../src/nodes/NodeTreeMaker');
-const Token = require('../../src/model/Token');
-const tokens = require('../../src/tokens/tokens');
+const Expression = require('../../src/model/Expression');
+const Statement = require('../../src/model/Statement');
+const Unknown = require('../../src/model/Unknown');
+const {
+	WRAP,
+	EACH,
+	IF,
+	ELSE,
+	HTML,
+	TMPL,
+	findStatementTokenPatternByName
+} = require('../../src/tokens/tokens');
 
-describe('Node Tree Maker', function() {
-	describe('Test IF token tree making', function() {
-		it('IF node', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
-			const validateTokens = [ifStartToken, ifEndToken];
+describe('Node Tree Maker', () => {
+	describe('Test IF token tree making', () => {
+		it('IF node', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
+			const tokens = [ifStartToken, ifEndToken];
 
-			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
+			const nodeTreeMaker = new NodeTreeMaker(tokens);
 			const treeNodes = nodeTreeMaker.createTree();
 
 			expect(treeNodes)
@@ -34,10 +60,34 @@ describe('Node Tree Maker', function() {
 				.to.be.an('array').that.is.empty;
 		});
 
-		it('IF - ELSE node', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const elseToken = new Token(tokens.ELSE.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
+		it('IF - ELSE node', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const elseToken = new Statement(
+				ELSE,
+				'else',
+				null,
+				null,
+				false,
+				null,
+				findStatementTokenPatternByName(ELSE)
+			);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
 			const validateTokens = [ifStartToken, elseToken, ifEndToken];
 
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
@@ -77,11 +127,43 @@ describe('Node Tree Maker', function() {
 				.to.be.an('array').that.is.empty;
 		});
 
-		it('IF - ELSE IF - ELSE node', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const elseIfToken = new Token(tokens.ELSE.name, 0, 0, null);
-			const elseToken = new Token(tokens.ELSE.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
+		it('IF - ELSE IF - ELSE node', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const elseIfToken = new Statement(
+				ELSE,
+				'else',
+				null,
+				new Expression('otherTest.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(ELSE)
+			);
+			const elseToken = new Statement(
+				ELSE,
+				'else',
+				null,
+				null,
+				false,
+				null,
+				findStatementTokenPatternByName(ELSE)
+			);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
 			const validateTokens = [
 				ifStartToken,
 				elseIfToken,
@@ -141,15 +223,26 @@ describe('Node Tree Maker', function() {
 		});
 	});
 
-	describe('Test EACH token tree making', function() {
-		it('EACH node', function() {
-			const eachStartToken = new Token(
-				tokens.EACH_START.name,
-				0,
-				0,
-				null
+	describe('Test EACH token tree making', () => {
+		it('EACH node', () => {
+			const eachStartToken = new Statement(
+				EACH,
+				'each',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(EACH)
 			);
-			const eachEndToken = new Token(tokens.EACH_END.name, 0, 0);
+			const eachEndToken = new Statement(
+				EACH,
+				'each',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(EACH, true)
+			);
 			const validateTokens = [eachStartToken, eachEndToken];
 
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
@@ -175,15 +268,26 @@ describe('Node Tree Maker', function() {
 		});
 	});
 
-	describe('Test WRAP token tree making', function() {
-		it('WRAP node', function() {
-			const wrapStartToken = new Token(
-				tokens.WRAP_START.name,
-				0,
-				0,
-				null
+	describe('Test WRAP token tree making', () => {
+		it('WRAP node', () => {
+			const wrapStartToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				new Expression('#test', null),
+				false,
+				null,
+				findStatementTokenPatternByName(WRAP)
 			);
-			const wrapEndToken = new Token(tokens.WRAP_END.name, 0, 0);
+			const wrapEndToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(WRAP, true)
+			);
 			const validateTokens = [wrapStartToken, wrapEndToken];
 
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
@@ -209,7 +313,7 @@ describe('Node Tree Maker', function() {
 		});
 	});
 
-	describe('Test other tokens', function() {
+	describe('Test other tokens', () => {
 		const testNodeState = token => {
 			const validateTokens = [token];
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
@@ -228,28 +332,26 @@ describe('Node Tree Maker', function() {
 			expect(varNode).to.have.property('siblings').that.is.empty;
 		};
 
-		it('VAR node', function() {
-			testNodeState(new Token(tokens.VAR.name, 0, 0, 'test'));
+		it('VAR node', () => {
+			testNodeState(new Expression('test'));
 		});
 
-		it('UNKOWN node', function() {
-			testNodeState(new Token(tokens.UNKNOWN.name, 0, 0, 'test//test'));
+		it('UNKOWN node', () => {
+			testNodeState(new Unknown('test//test'));
 		});
 
-		it('HTML node', function() {
-			testNodeState(
-				new Token(tokens.HTML.name, 0, 0, '<span>Test</span>')
-			);
+		it('HTML node', () => {
+			testNodeState(new Statement(HTML, '<span>Test</span>'));
 		});
 
-		it('TMPL node', function() {
-			testNodeState(new Token(tokens.TMPL.name, 0, 0, '#otherTmpl'));
+		it('TMPL node', () => {
+			testNodeState(new Statement(TMPL, '#otherTmpl'));
 		});
 	});
 
-	describe('Complex token structure', function() {
+	describe('Complex token structure', () => {
 		const unknowTokenBetween = (startToken, endToken) => {
-			const unknownToken = new Token(tokens.UNKNOWN.name, 0, 0);
+			const unknownToken = new Unknown();
 			const validateTokens = [startToken, unknownToken, endToken];
 
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
@@ -274,33 +376,71 @@ describe('Node Tree Maker', function() {
 				.that.have.lengthOf(1);
 		};
 
-		it('UNKNOWN token inside IF', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
+		it('UNKNOWN token inside IF', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
 
 			unknowTokenBetween(ifStartToken, ifEndToken);
 		});
 
-		it('UNKNOWN token inside EACH', function() {
-			const eachStartToken = new Token(
-				tokens.EACH_START.name,
-				0,
-				0,
-				null
+		it('UNKNOWN token inside EACH', () => {
+			const eachStartToken = new Statement(
+				EACH,
+				'each',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(EACH)
 			);
-			const eachEndToken = new Token(tokens.EACH_END.name, 0, 0);
+			const eachEndToken = new Statement(
+				EACH,
+				'each',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(EACH, true)
+			);
 
 			unknowTokenBetween(eachStartToken, eachEndToken);
 		});
 
-		it('UNKNOWN token inside WRAO', function() {
-			const wrapStartToken = new Token(
-				tokens.WRAP_START.name,
-				0,
-				0,
-				null
+		it('UNKNOWN token inside WRAP', () => {
+			const wrapStartToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				new Expression('#test', null),
+				false,
+				null,
+				findStatementTokenPatternByName(WRAP)
 			);
-			const wrapEndToken = new Token(tokens.WRAP_END.name, 0, 0);
+			const wrapEndToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(WRAP, true)
+			);
 
 			unknowTokenBetween(wrapStartToken, wrapEndToken);
 		});
@@ -351,16 +491,43 @@ describe('Node Tree Maker', function() {
 			expect(innerNode).to.have.property('children').that.is.empty;
 		};
 
-		it('IF token inside EACH', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
-			const eachStartToken = new Token(
-				tokens.EACH_START.name,
-				0,
-				0,
-				null
+		it('IF token inside EACH', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
 			);
-			const eachEndToken = new Token(tokens.EACH_END.name, 0, 0);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
+			const eachStartToken = new Statement(
+				EACH,
+				'each',
+				null,
+				new Expression('collection', null),
+				false,
+				null,
+				findStatementTokenPatternByName(EACH)
+			);
+			const eachEndToken = new Statement(
+				EACH,
+				'each',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(EACH, true)
+			);
 			testOuterAndInnerClosingToken(
 				eachStartToken,
 				eachEndToken,
@@ -369,21 +536,43 @@ describe('Node Tree Maker', function() {
 			);
 		});
 
-		it('WRAP token inside EACH', function() {
-			const wrapStartToken = new Token(
-				tokens.WRAP_START.name,
-				0,
-				0,
-				null
+		it('WRAP token inside EACH', () => {
+			const wrapStartToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				new Expression('#test', null),
+				false,
+				null,
+				findStatementTokenPatternByName(WRAP)
 			);
-			const wrapEndToken = new Token(tokens.WRAP_END.name, 0, 0);
-			const eachStartToken = new Token(
-				tokens.EACH_START.name,
-				0,
-				0,
-				null
+			const wrapEndToken = new Statement(
+				WRAP,
+				'wrap',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(WRAP, true)
 			);
-			const eachEndToken = new Token(tokens.EACH_END.name, 0, 0);
+			const eachStartToken = new Statement(
+				EACH,
+				'each',
+				null,
+				new Expression('collection', null),
+				false,
+				null,
+				findStatementTokenPatternByName(EACH)
+			);
+			const eachEndToken = new Statement(
+				EACH,
+				'each',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(EACH, true)
+			);
 			testOuterAndInnerClosingToken(
 				eachStartToken,
 				eachEndToken,
@@ -392,21 +581,43 @@ describe('Node Tree Maker', function() {
 			);
 		});
 
-		it('IF token inside IF', function() {
-			const ifInnerStartToken = new Token(
-				tokens.IF_START.name,
-				0,
-				0,
-				null
+		it('IF token inside IF', () => {
+			const ifOuterStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
 			);
-			const ifInnerEndToken = new Token(tokens.IF_END.name, 0, 0);
-			const ifOuterStartToken = new Token(
-				tokens.IF_START.name,
-				0,
-				0,
-				null
+			const ifOuterEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
 			);
-			const ifOuterEndToken = new Token(tokens.IF_END.name, 0, 0);
+			const ifInnerStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('otherArray.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const ifInnerEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
 			testOuterAndInnerClosingToken(
 				ifOuterStartToken,
 				ifOuterEndToken,
@@ -415,16 +626,43 @@ describe('Node Tree Maker', function() {
 			);
 		});
 
-		it('two root IF tokens', function() {
-			const ifStartToken = new Token(tokens.IF_START.name, 0, 0, null);
-			const ifEndToken = new Token(tokens.IF_END.name, 0, 0);
-			const ifOtherStartToken = new Token(
-				tokens.IF_START.name,
-				0,
-				0,
-				null
+		it('two root IF tokens', () => {
+			const ifStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('test.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
 			);
-			const ifOtherEndToken = new Token(tokens.IF_END.name, 0, 0);
+			const ifEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
+			const ifOtherStartToken = new Statement(
+				IF,
+				'if',
+				null,
+				new Expression('otherArray.length', null),
+				false,
+				null,
+				findStatementTokenPatternByName(IF)
+			);
+			const ifOtherEndToken = new Statement(
+				IF,
+				'if',
+				null,
+				null,
+				true,
+				null,
+				findStatementTokenPatternByName(IF, true)
+			);
 			const validateTokens = [
 				ifStartToken,
 				ifEndToken,

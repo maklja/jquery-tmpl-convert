@@ -31,7 +31,7 @@ describe('parse IF token', () => {
 
 			compareStatementTokenState(
 				ifStartTag,
-				tokens.IF.name,
+				tokens.IF,
 				'if',
 				{
 					expectedStartPosition: 0,
@@ -56,7 +56,7 @@ describe('parse IF token', () => {
 
 			compareStatementTokenState(
 				ifEndTag,
-				tokens.IF.name,
+				tokens.IF,
 				'if',
 				{
 					expectedStartPosition: 22,
@@ -96,7 +96,7 @@ describe('parse IF token', () => {
 
 			compareStatementTokenState(
 				ifEndTag,
-				tokens.IF.name,
+				tokens.IF,
 				'if',
 				{
 					expectedStartPosition: 21,
@@ -128,7 +128,7 @@ describe('parse IF token', () => {
 
 			compareStatementTokenState(
 				ifStartTag,
-				tokens.IF.name,
+				tokens.IF,
 				'if',
 				{
 					expectedStartPosition: 0,
@@ -153,7 +153,7 @@ describe('parse IF token', () => {
 
 			compareStatementTokenState(
 				ifEndTag,
-				tokens.IF.name,
+				tokens.IF,
 				'if',
 				{
 					expectedStartPosition: 38,

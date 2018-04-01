@@ -6,6 +6,8 @@ const Expression = require('../model/Expression');
 const Parameter = require('../model/Parameter');
 const ValidationError = require('../model/ValidationError');
 const { PARSE_ERROR } = require('../validator/error_code');
+const Validator = require('../validator/Validator');
+const NodeTreeMaker = require('../nodes/NodeTreeMaker');
 
 const {
 	newLinesRegex,
@@ -17,7 +19,7 @@ const {
 	isClosingToken,
 	extractTokenText,
 	isCallExpression
-} = require('./token_parsers/tokenParser');
+} = require('./parserUtils');
 
 // RegExp remember state so watch it how you use it
 const findAllStatements = new RegExp(findAllStatementsRegex);
@@ -33,10 +35,15 @@ class Parser {
 		return this._parseErrors;
 	}
 
-	constructor(rawText) {
+	get isValidatingTokens() {
+		return this._validateTokens;
+	}
+
+	constructor(rawText, validateTokens = true) {
 		this._rawText = rawText;
 		this._tokens = [];
 		this._parseErrors = [];
+		this._validateTokens = validateTokens;
 	}
 
 	parse() {
@@ -107,7 +114,27 @@ class Parser {
 				(tokenX, tokenY) =>
 					tokenX.position.begin - tokenY.position.begin
 			);
+
+		// if validation flag is true
+		if (this._validateTokens === true) {
+			// create new instance of validator
+			let validator = new Validator(this._tokens);
+			// validate all found tokens by rules and merge them with existing errors found by parser
+			parseErrors = parseErrors.concat(validator.validate());
+		}
+
 		this._parseErrors = parseErrors;
+	}
+
+	getNoteTree() {
+		if (this._parseErrors.length > 0) {
+			throw new Error(
+				'Can not create node tree if there are validation errors'
+			);
+		}
+		const nodeTreeMaker = new NodeTreeMaker(this._tokens);
+
+		return nodeTreeMaker.createTree();
 	}
 
 	_parseExpressionToken(token, tokenPosition) {

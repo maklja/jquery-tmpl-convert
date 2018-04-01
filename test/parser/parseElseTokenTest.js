@@ -29,7 +29,7 @@ describe('parse ELSE token', () => {
 
 			compareStatementTokenState(
 				elseToken,
-				tokens.ELSE.name,
+				tokens.ELSE,
 				'else',
 				{
 					expectedStartPosition: 0,
@@ -60,7 +60,7 @@ describe('parse ELSE token', () => {
 
 			compareStatementTokenState(
 				elseToken,
-				tokens.ELSE.name,
+				tokens.ELSE,
 				'else',
 				{
 					expectedStartPosition: 0,

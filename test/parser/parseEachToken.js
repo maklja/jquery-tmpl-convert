@@ -31,7 +31,7 @@ describe('parse EACH token', () => {
 			let eachStartTag = this.tokens[0];
 			compareStatementTokenState(
 				eachStartTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 0,
@@ -54,7 +54,7 @@ describe('parse EACH token', () => {
 			let eachEndTag = this.tokens[1];
 			compareStatementTokenState(
 				eachEndTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 19,
@@ -104,7 +104,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachStartTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each(index,value)',
 				{
 					expectedStartPosition: 0,
@@ -125,7 +125,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachEndTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 33,
@@ -165,7 +165,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachEndTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 23,
@@ -209,7 +209,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachEndTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 37,
@@ -242,7 +242,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachStartTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 0,
@@ -267,7 +267,7 @@ describe('parse EACH token', () => {
 
 			compareStatementTokenState(
 				eachEndTag,
-				tokens.EACH.name,
+				tokens.EACH,
 				'each',
 				{
 					expectedStartPosition: 40,

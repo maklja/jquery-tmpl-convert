@@ -34,22 +34,22 @@ describe('Rule Matcher test', () => {
 		it('valid if token with statement', () => {
 			const validator = new Validator([
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('test.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				),
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			]);
 			// first validate start IF token
@@ -61,22 +61,22 @@ describe('Rule Matcher test', () => {
 		it('invalid if token without statement', () => {
 			const validator = new Validator([
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null, // mandatory expression is null
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				),
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			]);
 
@@ -98,22 +98,22 @@ describe('Rule Matcher test', () => {
 		it('invalid IF_END token unexpected statement', () => {
 			const validator = new Validator([
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('collection.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				),
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('unexpected.expression', null), // close if does not have expression
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			]);
 
@@ -134,13 +134,13 @@ describe('Rule Matcher test', () => {
 		it("IF_END token doesn't exists", () => {
 			const validator = new Validator([
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('collection.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				)
 			]);
 
@@ -160,13 +160,13 @@ describe('Rule Matcher test', () => {
 		it('IF_START token does not exists', () => {
 			const validator = new Validator([
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			]);
 
@@ -189,22 +189,22 @@ describe('Rule Matcher test', () => {
 		it('valid each token with statement', () => {
 			const validateTokens = [
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					new Statement('collection', null),
 					false,
 					null,
-					findStatementTokenPatternByName(EACH.name)
+					findStatementTokenPatternByName(EACH)
 				),
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(EACH.name, true)
+					findStatementTokenPatternByName(EACH, true)
 				)
 			];
 			const validator = new Validator(validateTokens);
@@ -216,22 +216,22 @@ describe('Rule Matcher test', () => {
 		it('invalid each token without statement', () => {
 			const validateTokens = [
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					null, // mandatory statement missing
 					false,
 					null,
-					findStatementTokenPatternByName(EACH.name)
+					findStatementTokenPatternByName(EACH)
 				),
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(EACH.name, true)
+					findStatementTokenPatternByName(EACH, true)
 				)
 			];
 			const validator = new Validator(validateTokens);
@@ -251,22 +251,22 @@ describe('Rule Matcher test', () => {
 		it('invalid EACH_END token unexpected statement', () => {
 			const validateTokens = [
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					new Statement('collection', null),
 					false,
 					null,
-					findStatementTokenPatternByName(EACH.name)
+					findStatementTokenPatternByName(EACH)
 				),
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					new Statement('unexpected.statement', null),
 					true,
 					null,
-					findStatementTokenPatternByName(EACH.name, true)
+					findStatementTokenPatternByName(EACH, true)
 				)
 			];
 
@@ -287,13 +287,13 @@ describe('Rule Matcher test', () => {
 		it("EACH_END token doesn't exists", () => {
 			const validateTokens = [
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					new Statement('collection', null),
 					false,
 					null,
-					findStatementTokenPatternByName(EACH.name)
+					findStatementTokenPatternByName(EACH)
 				)
 			];
 
@@ -314,13 +314,13 @@ describe('Rule Matcher test', () => {
 		it('EACH_START token does not exists', () => {
 			const validateTokens = [
 				new Statement(
-					EACH.name,
+					EACH,
 					'each',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(EACH.name, true)
+					findStatementTokenPatternByName(EACH, true)
 				)
 			];
 
@@ -343,31 +343,31 @@ describe('Rule Matcher test', () => {
 		it('valid ELSE token', () => {
 			const validateTokens = [
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('test.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				),
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					null,
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				),
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			];
 			const validator = new Validator(validateTokens);
@@ -379,49 +379,49 @@ describe('Rule Matcher test', () => {
 		it('valid ELSE_IF and ELSE tokens', () => {
 			const validateTokens = [
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					new Expression('test.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(IF.name)
+					findStatementTokenPatternByName(IF)
 				),
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					new Expression('otherTest.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				),
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					new Expression('test', null),
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				),
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					null,
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				),
 				new Statement(
-					IF.name,
+					IF,
 					'if',
 					null,
 					null,
 					true,
 					null,
-					findStatementTokenPatternByName(IF.name, true)
+					findStatementTokenPatternByName(IF, true)
 				)
 			];
 
@@ -434,13 +434,13 @@ describe('Rule Matcher test', () => {
 		it('invalid ELSE token missing sibling IF_START', () => {
 			const validateTokens = [
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					null,
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				)
 			];
 
@@ -461,13 +461,13 @@ describe('Rule Matcher test', () => {
 		it('invalid ELSE_IF token missing sibling IF_START or ELSE_IF', () => {
 			const validateTokens = [
 				new Statement(
-					ELSE.name,
+					ELSE,
 					'else',
 					null,
 					new Statement('test.length', null),
 					false,
 					null,
-					findStatementTokenPatternByName(ELSE.name)
+					findStatementTokenPatternByName(ELSE)
 				)
 			];
 

@@ -1,31 +1,4 @@
-const { findRule } = require('../utils/rules.js');
-
-class Node {
-	get children() {
-		return this._children;
-	}
-
-	get siblings() {
-		return this._siblings;
-	}
-
-	get token() {
-		return this._token;
-	}
-
-	get closingToken() {
-		return this._closingToken;
-	}
-	set closingToken(closingToken) {
-		this._closingToken = closingToken;
-	}
-
-	constructor(token) {
-		this._children = [];
-		this._token = token;
-		this._siblings = [];
-	}
-}
+const Node = require('../model/Node');
 
 module.exports = class NodeTreeMaker {
 	constructor(tokens) {
@@ -36,12 +9,12 @@ module.exports = class NodeTreeMaker {
 
 	createTree() {
 		for (let curToken of this._tokens) {
-			let rule = findRule(curToken) || {},
+			let rule = curToken.pattern || {},
 				node = new Node(curToken);
 
 			this._insertTokenToNodeTree(this._nodes, node, rule);
 
-			if (rule.closeToken != null) {
+			if (rule.hasClosing === true) {
 				this._closeTokenMissing.push(node);
 			}
 		}
@@ -58,11 +31,8 @@ module.exports = class NodeTreeMaker {
 		// then all nodes after him are either
 		// children nodes or closing node
 		if (lastNodeOnStack != null) {
-			let lastTokenRule = findRule(lastNodeOnStack.token);
 			// if this is closing token
-			if (
-				this._closeNode(lastNodeOnStack, lastTokenRule, node) === false
-			) {
+			if (this._closeNode(lastNodeOnStack, node) === false) {
 				if (
 					this._addSiblingNode(lastNodeOnStack, node, rule) === false
 				) {
@@ -75,9 +45,12 @@ module.exports = class NodeTreeMaker {
 		}
 	}
 
-	_closeNode(nodeToClose, nodeToCloseRule, closingNode) {
+	_closeNode(nodeToClose, closingNode) {
 		// if closing token match open token
-		if (nodeToCloseRule.closeToken.name === closingNode.token.name) {
+		if (
+			closingNode.token.isClosing &&
+			nodeToClose.token.name === closingNode.token.name
+		) {
 			// close the token
 			nodeToClose.closingToken = closingNode.token;
 			// remove it from the stack of open nodes
@@ -93,14 +66,12 @@ module.exports = class NodeTreeMaker {
 		if (rule.afterTokens != null) {
 			const afterTokenExists =
 				rule.afterTokens.find(
-					token => token.name === sliblingNode.token.name
+					token => token === sliblingNode.token.name
 				) != null;
 			if (afterTokenExists) {
 				sliblingNode.siblings.push(node);
 
 				return true;
-			} else {
-				// TODO error
 			}
 		}
 
