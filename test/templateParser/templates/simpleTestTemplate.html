@@ -1,0 +1,22 @@
+<script id="varTemplate" type="text/x-jquery-tmpl">
+	<div>
+		<span>${data.length}</span>
+	</div>
+</script>
+
+<script id="ifTemplate" type="text/x-jquery-tmpl">
+	<div>
+		{{if data}}
+		<span>${data}</span>
+		{{/if}}
+	</div>
+</script>
+
+<!-- wrong type on script -->
+<script id="ifTemplate" type="invald-type">
+	<div>
+		{{if data}}
+		<span>${data}</span>
+		{{/if}}
+	</div>
+</script>
