@@ -1,5 +1,3 @@
-const { isIdentifier, isCallExpression } = require('../parser/parserUtils');
-
 const UNKNOWN = 'unknown';
 const VAR = 'var';
 const IF = 'if';
@@ -102,31 +100,6 @@ const tokenClosePatterns = {
 	callExpression: [EACH_CLOSE_RULE, WRAP_CLOSE_RULE]
 };
 
-const findStatementTokenPattern = (statementTree, isClosingToken) => {
-	let patternTypes = null,
-		statementName = null;
-
-	if (isIdentifier(statementTree)) {
-		patternTypes = isClosingToken
-			? tokenClosePatterns.identifier
-			: tokenPatterns.identifier;
-		statementName = statementTree.name;
-	} else if (isCallExpression(statementTree)) {
-		patternTypes = isClosingToken
-			? tokenClosePatterns.callExpression
-			: tokenPatterns.callExpression;
-		statementName = statementTree.callee.name;
-	} else {
-		return null;
-	}
-
-	return patternTypes.find(
-		curTokenPattern =>
-			// if pattern name and statment token name are same
-			curTokenPattern.name === statementName
-	);
-};
-
 const findStatementTokenPatternByName = (tokenName, isClosingToken = false) => {
 	if (isClosingToken) {
 		return [IF_CLOSE_RULE, EACH_CLOSE_RULE, WRAP_CLOSE_RULE].find(
@@ -153,6 +126,7 @@ module.exports = {
 	EACH,
 	WRAP,
 	TMPL,
-	findStatementTokenPattern,
+	tokenPatterns,
+	tokenClosePatterns,
 	findStatementTokenPatternByName
 };

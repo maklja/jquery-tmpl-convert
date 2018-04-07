@@ -8,7 +8,7 @@ const {
 	compareExpressionTokenState,
 	compareValidationErrorState
 } = require('../utils/utils');
-const { PARSE_ERROR } = require('../../src/validator/error_code');
+const { PARSE_ERROR } = require('../../src/model/error_code');
 const Parser = require('../../src/parser/Parser');
 const tokens = require('../../src/tokens/tokens');
 
@@ -29,13 +29,7 @@ describe('Parser', () => {
 		compareUnknownTokenState(
 			unknownToken,
 			// token value, in this case token value is same as name
-			'{{if testShow it{{/if',
-			{
-				// token begins from start of the text for token
-				expectedStartPosition: 0,
-				// tokens ends
-				expectedEndPosition: 21
-			}
+			'{{if testShow it{{/if'
 		);
 
 		// we expect that parse errors do not exists because regex won't find
@@ -55,20 +49,11 @@ describe('Parser', () => {
 			tokens.HTML,
 			// token value, in this case token value is same as name
 			'html',
-			{
-				// token begins from start of the text for token
-				expectedStartPosition: 0,
-				// tokens ends
-				expectedEndPosition: 17
-			},
 			false
 		);
 
 		// expected expression value
-		compareExpressionTokenState(htmlToken.expression, 'testShow', {
-			expectedStartPosition: 7,
-			expectedEndPosition: 15
-		});
+		compareExpressionTokenState(htmlToken.expression, 'testShow');
 
 		// token is valid
 		expect(parser.parseErrors).to.be.an('array').that.is.empty;
@@ -83,13 +68,7 @@ describe('Parser', () => {
 		compareUnknownTokenState(
 			unknownToken,
 			// UNKNOWN token will have all text from statement
-			'{{html(test, test) testShow}}',
-			{
-				// token begins from start of the text for token
-				expectedStartPosition: 0,
-				// tokens ends
-				expectedEndPosition: 29
-			}
+			'{{html(test, test) testShow}}'
 		);
 
 		// token is valid because there is no pattern for html as function call
@@ -116,20 +95,11 @@ describe('Parser', () => {
 			tokens.TMPL,
 			// token value, in this case token value is same as name
 			'tmpl',
-			{
-				// token begins from start of the text for token
-				expectedStartPosition: 0,
-				// tokens ends
-				expectedEndPosition: 20
-			},
 			false
 		);
 
 		// expected expression value
-		compareExpressionTokenState(tmplToken.expression, '"#testTmpl"', {
-			expectedStartPosition: 7,
-			expectedEndPosition: 18
-		});
+		compareExpressionTokenState(tmplToken.expression, '"#testTmpl"');
 
 		// token is valid
 		expect(parser.parseErrors).to.be.an('array').that.is.empty;
@@ -147,20 +117,11 @@ describe('Parser', () => {
 			tokens.TMPL,
 			// token value, in this case token value is same as name
 			'tmpl(param1,param2)',
-			{
-				// token begins from start of the text for token
-				expectedStartPosition: 0,
-				// tokens ends
-				expectedEndPosition: 36
-			},
 			false
 		);
 
 		// expected expression value
-		compareExpressionTokenState(tmplToken.expression, '"#testTmpl"', {
-			expectedStartPosition: 23,
-			expectedEndPosition: 34
-		});
+		compareExpressionTokenState(tmplToken.expression, '"#testTmpl"');
 
 		// token is valid
 		expect(parser.parseErrors).to.be.an('array').that.is.empty;
@@ -175,15 +136,9 @@ describe('Parser', () => {
 
 		// first parameter has value 'param1' and second one has value 'param2'
 		let param1 = tmplToken.parameters[0];
-		compareParameterTokenState(param1, 'param1', {
-			expectedStartPosition: 7,
-			expectedEndPosition: 13
-		});
+		compareParameterTokenState(param1, 'param1');
 
 		let param2 = tmplToken.parameters[1];
-		compareParameterTokenState(param2, 'param2', {
-			expectedStartPosition: 15,
-			expectedEndPosition: 21
-		});
+		compareParameterTokenState(param2, 'param2');
 	});
 });

@@ -6,7 +6,7 @@ const {
 	compareValidationErrorState
 } = require('../utils/utils');
 const Parser = require('../../src/parser/Parser');
-const { PARSE_ERROR } = require('../../src/validator/error_code');
+const { PARSE_ERROR } = require('../../src/model/error_code');
 
 describe('parse VAR token', () => {
 	it('startPosition 0, endPosition 7 and name is var', () => {
@@ -20,10 +20,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareExpressionTokenState(token, 'test', {
-			expectedStartPosition: 0,
-			expectedEndPosition: 7
-		});
+		compareExpressionTokenState(token, 'test');
 	});
 	it('variable for statement', () => {
 		// eslint-disable-next-line
@@ -36,10 +33,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareExpressionTokenState(token, 'test', {
-			expectedStartPosition: 0,
-			expectedEndPosition: 7
-		});
+		compareExpressionTokenState(token, 'test');
 	});
 
 	it('object property for statement', () => {
@@ -53,10 +47,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareExpressionTokenState(token, 'test.length', {
-			expectedStartPosition: 0,
-			expectedEndPosition: 14
-		});
+		compareExpressionTokenState(token, 'test.length');
 	});
 
 	it('function call for statement', () => {
@@ -70,10 +61,7 @@ describe('parse VAR token', () => {
 			.that.have.lengthOf(1);
 
 		let token = parser.tokens[0];
-		compareExpressionTokenState(token, 'test()', {
-			expectedStartPosition: 0,
-			expectedEndPosition: 9
-		});
+		compareExpressionTokenState(token, 'test()');
 	});
 
 	it('invalid expression, parse failed', () => {

@@ -6,7 +6,7 @@ const {
 	MISSING_CLOSING_TOKEN,
 	MISSING_STARTING_TOKEN,
 	MISSING_SIBLING_TOKEN
-} = require('./error_code');
+} = require('../model/error_code');
 
 module.exports = class Validator {
 	constructor(tokens) {

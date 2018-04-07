@@ -40,11 +40,19 @@ const PARSE_ERROR = {
 	code: 106
 };
 
+const CONVERT_ERROR = {
+	message(msg) {
+		return `Convert failed: ${msg}`;
+	},
+	code: 107
+};
+
 module.exports = {
 	EXPRESSION_MISSING,
 	UNEXPECTED_EXPRESSION,
 	MISSING_CLOSING_TOKEN,
 	MISSING_STARTING_TOKEN,
 	MISSING_SIBLING_TOKEN,
-	PARSE_ERROR
+	PARSE_ERROR,
+	CONVERT_ERROR
 };

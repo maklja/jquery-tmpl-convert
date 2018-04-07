@@ -29,41 +29,19 @@ describe('parse IF token', () => {
 		it('check IF_START token', () => {
 			let ifStartTag = this.tokens[0];
 
-			compareStatementTokenState(
-				ifStartTag,
-				tokens.IF,
-				'if',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 22
-				},
-				false
-			);
+			compareStatementTokenState(ifStartTag, tokens.IF, 'if', false);
 
 			// expected expression value
 			compareExpressionTokenState(
 				ifStartTag.expression,
-				'logicalStatment',
-				{
-					expectedStartPosition: 5,
-					expectedEndPosition: 20
-				}
+				'logicalStatment'
 			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				ifEndTag,
-				tokens.IF,
-				'if',
-				{
-					expectedStartPosition: 22,
-					expectedEndPosition: 29
-				},
-				true
-			);
+			compareStatementTokenState(ifEndTag, tokens.IF, 'if', true);
 		});
 	});
 
@@ -85,25 +63,13 @@ describe('parse IF token', () => {
 		it('check UNKNOWN token', () => {
 			let unknown = this.tokens[0];
 
-			compareUnknownTokenState(unknown, '{{iflogicalStatment}}', {
-				expectedStartPosition: 0,
-				expectedEndPosition: 21
-			});
+			compareUnknownTokenState(unknown, '{{iflogicalStatment}}');
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				ifEndTag,
-				tokens.IF,
-				'if',
-				{
-					expectedStartPosition: 21,
-					expectedEndPosition: 28
-				},
-				true
-			);
+			compareStatementTokenState(ifEndTag, tokens.IF, 'if', true);
 		});
 	});
 
@@ -126,41 +92,19 @@ describe('parse IF token', () => {
 		it('check IF_START token', () => {
 			let ifStartTag = this.tokens[0];
 
-			compareStatementTokenState(
-				ifStartTag,
-				tokens.IF,
-				'if',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 38
-				},
-				false
-			);
+			compareStatementTokenState(ifStartTag, tokens.IF, 'if', false);
 
 			// expected expression value
 			compareExpressionTokenState(
 				ifStartTag.expression,
-				'logicalStatment',
-				{
-					expectedStartPosition: 13,
-					expectedEndPosition: 28
-				}
+				'logicalStatment'
 			);
 		});
 
 		it('check IF_END token', () => {
 			let ifEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				ifEndTag,
-				tokens.IF,
-				'if',
-				{
-					expectedStartPosition: 38,
-					expectedEndPosition: 45
-				},
-				true
-			);
+			compareStatementTokenState(ifEndTag, tokens.IF, 'if', true);
 		});
 	});
 });

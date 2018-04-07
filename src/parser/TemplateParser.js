@@ -113,7 +113,7 @@ module.exports = class TemplateParser {
 
 			curTmplModel.errors = parser.parseErrors;
 			if (curTmplModel.errors.length === 0) {
-				curTmplModel.tokenNodes = parser.getNoteTree();
+				curTmplModel.tokenNodes = parser.getNodeTree();
 			}
 		}
 	}

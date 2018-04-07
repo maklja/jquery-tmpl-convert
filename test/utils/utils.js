@@ -12,18 +12,8 @@ const compareStatementTokenState = (
 	token,
 	expectedTokenName,
 	expectedTokenValue,
-	{ expectedStartPosition, expectedEndPosition },
 	isClosing
 ) => {
-	expect(token)
-		.to.have.property('position')
-		// compare token postion in text
-		.that.is.an('object')
-		.that.is.deep.equal({
-			begin: expectedStartPosition,
-			end: expectedEndPosition
-		});
-
 	expect(token)
 		.to.have.property('name')
 		// compare token name
@@ -40,65 +30,26 @@ const compareStatementTokenState = (
 		.that.is.equal(isClosing);
 };
 
-const compareExpressionTokenState = (
-	token,
-	expectedExpressionValue,
-	{ expectedStartPosition, expectedEndPosition }
-) => {
+const compareExpressionTokenState = (token, expectedExpressionValue) => {
 	expect(token)
 		.that.is.instanceOf(Expression)
 		.that.have.property('value')
 		.and.is.equal(expectedExpressionValue);
-
-	expect(token)
-		.to.have.property('position')
-		// compare token postion in text
-		.that.is.an('object')
-		.that.is.deep.equal({
-			begin: expectedStartPosition,
-			end: expectedEndPosition
-		});
 };
 
-const compareParameterTokenState = (
-	token,
-	expectedExpressionValue,
-	{ expectedStartPosition, expectedEndPosition }
-) => {
+const compareParameterTokenState = (token, expectedExpressionValue) => {
 	expect(token)
 		.that.is.instanceOf(Parameter)
 		.that.have.property('value')
 		.and.is.equal(expectedExpressionValue);
-
-	expect(token)
-		.to.have.property('position')
-		// compare token postion in text
-		.that.is.an('object')
-		.that.is.deep.equal({
-			begin: expectedStartPosition,
-			end: expectedEndPosition
-		});
 };
 
-const compareUnknownTokenState = (
-	unknownToken,
-	expectedTokenValue,
-	{ expectedStartPosition, expectedEndPosition }
-) => {
+const compareUnknownTokenState = (unknownToken, expectedTokenValue) => {
 	expect(unknownToken)
 		.to.be.an.instanceOf(Unknown)
 		.to.have.property('name')
 		// compare token name
 		.that.is.equal(UNKNOWN);
-
-	expect(unknownToken)
-		.to.have.property('position')
-		// compare token postion in text
-		.that.is.an('object')
-		.that.is.deep.equal({
-			begin: expectedStartPosition,
-			end: expectedEndPosition
-		});
 
 	expect(unknownToken)
 		.to.have.property('value')

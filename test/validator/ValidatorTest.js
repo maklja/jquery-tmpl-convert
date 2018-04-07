@@ -7,7 +7,7 @@ const {
 	MISSING_CLOSING_TOKEN,
 	MISSING_STARTING_TOKEN,
 	MISSING_SIBLING_TOKEN
-} = require('../../src/validator/error_code');
+} = require('../../src/model/error_code');
 const {
 	EACH,
 	IF,

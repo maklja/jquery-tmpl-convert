@@ -1,13 +1,15 @@
 const jsep = require('jsep');
-const { findStatementTokenPattern } = require('../tokens/tokens');
+const { tokenPatterns, tokenClosePatterns } = require('../tokens/tokens');
 const Unknown = require('../model/Unknown');
 const Statement = require('../model/Statement');
 const Expression = require('../model/Expression');
 const Parameter = require('../model/Parameter');
 const ValidationError = require('../model/ValidationError');
-const { PARSE_ERROR } = require('../validator/error_code');
+const { PARSE_ERROR } = require('../model/error_code');
 const Validator = require('../validator/Validator');
 const NodeTreeMaker = require('../nodes/NodeTreeMaker');
+
+const { isExpression, isStatement, isUnknown } = require('../utils/helpers');
 
 const {
 	newLinesRegex,
@@ -25,6 +27,20 @@ const {
 const findAllStatements = new RegExp(findAllStatementsRegex);
 const findAllExpressions = new RegExp(findAllExpressionsRegex);
 const findAllExpressionsGlobal = new RegExp(findAllExpressionsRegex, 'g');
+
+const jQueryTemplateValue = token => {
+	if (isStatement(token)) {
+		let closing = token.isClosing ? '/' : '',
+			expression = token.expression ? ` ${token.expression.value}` : '';
+		return `{{${closing}${token.value}${expression}}}`;
+	} else if (isExpression(token)) {
+		return `\${${token.value}}`;
+	} else if (isUnknown(token)) {
+		return token.value;
+	} else {
+		// TODO
+	}
+};
 
 class Parser {
 	get tokens() {
@@ -67,19 +83,25 @@ class Parser {
 						curToken,
 						text,
 						positionInText
+					),
+					// extract unknown token in front of current token, if there is any
+					unknownTokenBefore = this._extractUnknownToken(
+						text,
+						positionInText,
+						tokenPosition.begin
 					);
 
 				try {
+					// if unknown token is present before current token, add it
+					// before curren token
+					if (unknownTokenBefore != null) {
+						tokenModels.push(unknownTokenBefore);
+					}
+
 					if (isExpression) {
-						tokenModel = this._parseExpressionToken(
-							curToken,
-							tokenPosition.begin
-						);
+						tokenModel = this._parseExpressionToken(curToken);
 					} else {
-						tokenModel = this._parseStatementToken(
-							curToken,
-							tokenPosition.begin
-						);
+						tokenModel = this._parseStatementToken(curToken);
 					}
 				} catch (e) {
 					// if token creation failed, then create new Unknown token
@@ -94,26 +116,18 @@ class Parser {
 
 				// even is token is not valid position behind it
 				positionInText = tokenPosition.end;
-
-				// set position in text on token, we do
-				// not care about type of the token
-				tokenModel.position = tokenPosition;
 				tokenModels.push(tokenModel);
 			}
 		}
 
-		// extract all remaining unknown tokens
-		let unknownTokenModels = this._findUnknownTokens(text, tokenModels);
-
-		this._tokens = tokenModels
-			// merge known tokens with unknown tokens
-			.concat(unknownTokenModels)
-			// and then sort tokens by starting position because order of tokens in array
-			// is very important to be corect like original input text
-			.sort(
-				(tokenX, tokenY) =>
-					tokenX.position.begin - tokenY.position.begin
+		// extract all remaining unknown tokens at the end
+		if (positionInText < text.length) {
+			tokenModels.push(
+				this._extractUnknownToken(text, positionInText, text.length)
 			);
+		}
+
+		this._tokens = tokenModels;
 
 		// if validation flag is true
 		if (this._validateTokens === true) {
@@ -126,7 +140,7 @@ class Parser {
 		this._parseErrors = parseErrors;
 	}
 
-	getNoteTree() {
+	getNodeTree() {
 		if (this._parseErrors.length > 0) {
 			throw new Error(
 				'Can not create node tree if there are validation errors'
@@ -137,7 +151,7 @@ class Parser {
 		return nodeTreeMaker.createTree();
 	}
 
-	_parseExpressionToken(token, tokenPosition) {
+	_parseExpressionToken(token) {
 		let tokenValue = token.match(findAllExpressions).pop();
 
 		if (tokenValue.trim().length === 0) {
@@ -149,10 +163,10 @@ class Parser {
 		// parse token
 		let expressionTree = jsep(tokenValue);
 
-		return this._createExpression(expressionTree, token, tokenPosition);
+		return this._createExpression(expressionTree, token);
 	}
 
-	_parseStatementToken(token, tokenPosition) {
+	_parseStatementToken(token) {
 		// extract content between parentheses
 		let tokenValue = token.match(findAllStatements).pop(),
 			// parse token
@@ -165,7 +179,7 @@ class Parser {
 		if (statementAndExpression != null) {
 			let { statementTree, expressionTree } = statementAndExpression,
 				// check if pattern for token exists
-				statementTokenPattern = findStatementTokenPattern(
+				statementTokenPattern = this.findStatementTokenPattern(
 					statementTree,
 					closingToken
 				);
@@ -176,14 +190,9 @@ class Parser {
 				// create expression model only if expression tree exists
 				let expressionModel = this._createExpression(
 						expressionTree,
-						token,
-						tokenPosition
+						token
 					),
-					params = this._getParams(
-						statementTree,
-						token,
-						tokenPosition
-					);
+					params = this._getParams(statementTree, token);
 
 				return new Statement(
 					statementTokenPattern.name,
@@ -212,64 +221,28 @@ class Parser {
 		}
 	}
 
-	_createExpression(expressionTree, tokenText, tokenPosition) {
+	_createExpression(expressionTree, tokenText) {
 		if (expressionTree != null) {
 			// get expression value
 			let value = extractTokenText(expressionTree);
-			return new Expression(
-				value,
-				expressionTree,
-				this._getTokenPositionInText(value, tokenText, tokenPosition)
-			);
+			return new Expression(value, expressionTree);
 		}
 
 		return null;
 	}
 
-	_findUnknownTokens(text, knownTokenModels) {
-		// start from text begining
-		let beginIndex = 0,
-			unknownTokenModels = [];
-		// we need to find all parts of text between known tokens
-		// all those parts that are not found by token regex are considered
-		// unknown tokens
-		for (let curToken of knownTokenModels) {
-			// extract part of text between begin of text and token
-			// or between two known tokens
-			let unknownValue = text.substring(
-				beginIndex,
-				curToken.position.begin
-			);
-			if (unknownValue.length > 0) {
-				unknownTokenModels.push(
-					this._createUnknownToken(unknownValue, {
-						begin: beginIndex,
-						end: curToken.position.begin
-					})
-				);
-			}
-			beginIndex = curToken.position.end;
-		}
+	_extractUnknownToken(text, fromPosition, toPosition) {
+		let unknownValue = text.substring(fromPosition, toPosition);
 
-		// collect all characters after know token
-		// and create one more unknown token at the end
-		if (beginIndex < text.length) {
-			unknownTokenModels.push(
-				this._createUnknownToken(
-					text.substring(beginIndex, text.length),
-					{
-						begin: beginIndex,
-						end: text.length
-					}
-				)
-			);
+		if (unknownValue.length > 0) {
+			return this._createUnknownToken(unknownValue);
+		} else {
+			return null;
 		}
-
-		return unknownTokenModels;
 	}
 
-	_createUnknownToken(value, position) {
-		return new Unknown(value, position);
+	_createUnknownToken(value) {
+		return new Unknown(value);
 	}
 
 	_getTokenPositionInText(tokenValue, text, fromPosition, offset = 0) {
@@ -285,26 +258,15 @@ class Parser {
 		};
 	}
 
-	_getParams(tokenTree, tokenText, tokenPosition) {
+	_getParams(tokenTree, tokenText) {
 		// only call expressions have parameters
 		if (isCallExpression(tokenTree)) {
 			// all parameters model
-			let params = [],
-				// pointer of position inside tokenText
-				postionInTokenText = 0;
+			let params = [];
 
 			for (let curParam of tokenTree.arguments) {
-				let curParamValue = extractTokenText(curParam),
-					// extract position of the current parameter
-					paramPosition = this._getTokenPositionInText(
-						curParamValue,
-						tokenText,
-						postionInTokenText,
-						tokenPosition
-					);
-				params.push(
-					new Parameter(curParamValue, curParam, paramPosition)
-				);
+				let curParamValue = extractTokenText(curParam);
+				params.push(new Parameter(curParamValue, curParam));
 			}
 
 			return params;
@@ -335,6 +297,31 @@ class Parser {
 		}
 
 		return null;
+	}
+
+	findStatementTokenPattern(statementTree, isClosingToken) {
+		let patternTypes = null,
+			statementName = null;
+
+		if (isIdentifier(statementTree)) {
+			patternTypes = isClosingToken
+				? tokenClosePatterns.identifier
+				: tokenPatterns.identifier;
+			statementName = statementTree.name;
+		} else if (isCallExpression(statementTree)) {
+			patternTypes = isClosingToken
+				? tokenClosePatterns.callExpression
+				: tokenPatterns.callExpression;
+			statementName = statementTree.callee.name;
+		} else {
+			return null;
+		}
+
+		return patternTypes.find(
+			curTokenPattern =>
+				// if pattern name and statment token name are same
+				curTokenPattern.name === statementName
+		);
 	}
 }
 module.exports = Parser;

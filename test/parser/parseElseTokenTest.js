@@ -27,16 +27,7 @@ describe('parse ELSE token', () => {
 		it('check ELSE token', () => {
 			const elseToken = this.tokens[0];
 
-			compareStatementTokenState(
-				elseToken,
-				tokens.ELSE,
-				'else',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 8
-				},
-				false
-			);
+			compareStatementTokenState(elseToken, tokens.ELSE, 'else', false);
 		});
 	});
 
@@ -58,25 +49,12 @@ describe('parse ELSE token', () => {
 		it('check ELSE_IF token', () => {
 			const elseToken = this.tokens[0];
 
-			compareStatementTokenState(
-				elseToken,
-				tokens.ELSE,
-				'else',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 24
-				},
-				false
-			);
+			compareStatementTokenState(elseToken, tokens.ELSE, 'else', false);
 
 			// expected expression value
 			compareExpressionTokenState(
 				elseToken.expression,
-				'logicalStatment',
-				{
-					expectedStartPosition: 7,
-					expectedEndPosition: 22
-				}
+				'logicalStatment'
 			);
 		});
 	});

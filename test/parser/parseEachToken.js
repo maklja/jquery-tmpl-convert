@@ -33,18 +33,11 @@ describe('parse EACH token', () => {
 				eachStartTag,
 				tokens.EACH,
 				'each',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 19
-				},
 				false
 			);
 
 			// expected expression value
-			compareExpressionTokenState(eachStartTag.expression, 'collection', {
-				expectedStartPosition: 7,
-				expectedEndPosition: 17
-			});
+			compareExpressionTokenState(eachStartTag.expression, 'collection');
 
 			// we do not have any parameters in statement
 			expect(eachStartTag).that.have.property('parameters').that.is.null;
@@ -52,16 +45,7 @@ describe('parse EACH token', () => {
 
 		it('check EACH_END token', () => {
 			let eachEndTag = this.tokens[1];
-			compareStatementTokenState(
-				eachEndTag,
-				tokens.EACH,
-				'each',
-				{
-					expectedStartPosition: 19,
-					expectedEndPosition: 28
-				},
-				true
-			);
+			compareStatementTokenState(eachEndTag, tokens.EACH, 'each', true);
 		});
 	});
 
@@ -93,46 +77,24 @@ describe('parse EACH token', () => {
 				.with.lengthOf(2);
 
 			// check if expected values are equal
-			compareParameterTokenState(eachStartTag.parameters[0], 'index', {
-				expectedStartPosition: 7,
-				expectedEndPosition: 12
-			});
-			compareParameterTokenState(eachStartTag.parameters[1], 'value', {
-				expectedStartPosition: 14,
-				expectedEndPosition: 19
-			});
+			compareParameterTokenState(eachStartTag.parameters[0], 'index');
+			compareParameterTokenState(eachStartTag.parameters[1], 'value');
 
 			compareStatementTokenState(
 				eachStartTag,
 				tokens.EACH,
 				'each(index,value)',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 33
-				},
 				false
 			);
 
 			// expected expression value
-			compareExpressionTokenState(eachStartTag.expression, 'collection', {
-				expectedStartPosition: 21,
-				expectedEndPosition: 31
-			});
+			compareExpressionTokenState(eachStartTag.expression, 'collection');
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				eachEndTag,
-				tokens.EACH,
-				'each',
-				{
-					expectedStartPosition: 33,
-					expectedEndPosition: 42
-				},
-				true
-			);
+			compareStatementTokenState(eachEndTag, tokens.EACH, 'each', true);
 		});
 	});
 
@@ -154,25 +116,13 @@ describe('parse EACH token', () => {
 		it('check UNKNOWN token', () => {
 			let unknown = this.tokens[0];
 
-			compareUnknownTokenState(unknown, '{{eachlogicalStatment}}', {
-				expectedStartPosition: 0,
-				expectedEndPosition: 23
-			});
+			compareUnknownTokenState(unknown, '{{eachlogicalStatment}}');
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				eachEndTag,
-				tokens.EACH,
-				'each',
-				{
-					expectedStartPosition: 23,
-					expectedEndPosition: 32
-				},
-				true
-			);
+			compareStatementTokenState(eachEndTag, tokens.EACH, 'each', true);
 		});
 	});
 
@@ -196,27 +146,14 @@ describe('parse EACH token', () => {
 
 			compareUnknownTokenState(
 				unknown,
-				'{{each(index, value logicalStatment}}',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 37
-				}
+				'{{each(index, value logicalStatment}}'
 			);
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				eachEndTag,
-				tokens.EACH,
-				'each',
-				{
-					expectedStartPosition: 37,
-					expectedEndPosition: 46
-				},
-				true
-			);
+			compareStatementTokenState(eachEndTag, tokens.EACH, 'each', true);
 		});
 	});
 
@@ -244,37 +181,20 @@ describe('parse EACH token', () => {
 				eachStartTag,
 				tokens.EACH,
 				'each',
-				{
-					expectedStartPosition: 0,
-					expectedEndPosition: 40
-				},
 				false
 			);
 
 			// expected expression value
 			compareExpressionTokenState(
 				eachStartTag.expression,
-				'logicalStatment',
-				{
-					expectedStartPosition: 15,
-					expectedEndPosition: 30
-				}
+				'logicalStatment'
 			);
 		});
 
 		it('check EACH_END token', () => {
 			let eachEndTag = this.tokens[1];
 
-			compareStatementTokenState(
-				eachEndTag,
-				tokens.EACH,
-				'each',
-				{
-					expectedStartPosition: 40,
-					expectedEndPosition: 49
-				},
-				true
-			);
+			compareStatementTokenState(eachEndTag, tokens.EACH, 'each', true);
 		});
 	});
 });
