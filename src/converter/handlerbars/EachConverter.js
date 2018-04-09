@@ -1,4 +1,5 @@
 const AbstractConverter = require('./AbstractConverter');
+const { EACH } = require('../../tokens/tokens');
 
 class EachConverter extends AbstractConverter {
 	constructor(templateConverter) {
@@ -46,7 +47,7 @@ class EachConverter extends AbstractConverter {
 	}
 
 	canConvert(node) {
-		return node.name === 'each';
+		return node.name === EACH;
 	}
 
 	_replaceExpression(replace) {
@@ -60,7 +61,7 @@ class EachConverter extends AbstractConverter {
 	}
 
 	convertComplited(node, context) {
-		if (node.name === 'each') {
+		if (node.name === EACH) {
 			// each statement is closed remove index and value parameters
 			this._eachStatementParms.pop();
 

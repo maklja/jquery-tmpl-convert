@@ -1,6 +1,7 @@
 const AbstractConverter = require('./AbstractConverter');
 const ValidationError = require('../../model/ValidationError');
 const { CONVERT_ERROR } = require('../../model/error_code');
+const { TMPL } = require('../../tokens/tokens');
 
 class TmplConverter extends AbstractConverter {
 	constructor(templateConverter) {
@@ -63,7 +64,7 @@ class TmplConverter extends AbstractConverter {
 	}
 
 	canConvert(node) {
-		return node.name === 'tmpl';
+		return node.name === TMPL;
 	}
 
 	getClosingToken(node) {

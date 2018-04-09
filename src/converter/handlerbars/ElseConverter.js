@@ -1,4 +1,5 @@
 const AbstractConverter = require('./AbstractConverter');
+const { ELSE } = require('../../tokens/tokens');
 
 class ElseConverter extends AbstractConverter {
 	constructor(templateConverter) {
@@ -14,7 +15,7 @@ class ElseConverter extends AbstractConverter {
 	}
 
 	canConvert(node) {
-		return node.name === 'else';
+		return node.name === ELSE;
 	}
 
 	_convertElseStatement(node) {

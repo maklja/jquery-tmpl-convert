@@ -53,7 +53,7 @@ describe('Test handlebars HTML converter', () => {
 			compareStatementTokenState(
 				htmlToken,
 				tokens.HTML,
-				'{item.viewTmpl}',
+				'item.viewTmpl',
 				false
 			);
 

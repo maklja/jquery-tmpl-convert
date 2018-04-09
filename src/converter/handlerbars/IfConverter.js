@@ -1,4 +1,5 @@
 const AbstractConverter = require('./AbstractConverter');
+const { IF } = require('../../tokens/tokens');
 
 class IfConverter extends AbstractConverter {
 	constructor(templateConverter) {
@@ -10,7 +11,7 @@ class IfConverter extends AbstractConverter {
 	}
 
 	canConvert(node) {
-		return node.name === 'if';
+		return node.name === IF;
 	}
 }
 

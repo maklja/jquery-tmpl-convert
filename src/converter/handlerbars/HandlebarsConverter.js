@@ -1,3 +1,4 @@
+const htmlBeautify = require('html-beautify');
 const TemplateParser = require('../../parser/TemplateParser');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
@@ -9,8 +10,8 @@ const ElseConverter = require('./ElseConverter');
 const HTMLConverter = require('./HTMLConverter');
 const EachConverter = require('./EachConverter');
 const TmplConverter = require('./TmplConverter');
-const { hbsTemplateValue } = require('../../utils/helpers');
-const htmlBeautify = require('html-beautify');
+const { isExpression, isStatement, isUnknown } = require('../../utils/helpers');
+const { HTML } = require('../../tokens/tokens');
 
 class HandlebarsConverter {
 	get convertTemplates() {
@@ -59,7 +60,9 @@ class HandlebarsConverter {
 							this.SCRIPT_TYPE,
 							curTemplateModel.path,
 							// try to beautify html output
-							htmlBeautify(hbsTemplateValue(this._convertTokens))
+							htmlBeautify(
+								this.hbsTemplateValue(this._convertTokens)
+							)
 						);
 
 						// get all convert errors
@@ -182,6 +185,33 @@ class HandlebarsConverter {
 		this._context = {
 			replaceExpression: {}
 		};
+	}
+
+	hbsTokenValue(token) {
+		if (isStatement(token)) {
+			let closing = token.isClosing ? '/' : '',
+				expression = token.expression
+					? ` ${token.expression.value}`
+					: '',
+				value = `${closing}${token.value}${expression}`;
+
+			return token.name === HTML ? `{{{${value}}}}` : `{{${value}}}`;
+		} else if (isExpression(token)) {
+			return `{{${token.value}}}`;
+		} else if (isUnknown(token)) {
+			return token.value;
+		} else {
+			throw new Error(`Unknown token type ${token.treeType}`);
+		}
+	}
+
+	hbsTemplateValue(tokens) {
+		let value = '';
+		for (let curToken of tokens) {
+			value += this.hbsTokenValue(curToken);
+		}
+
+		return value;
 	}
 }
 
