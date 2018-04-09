@@ -3,16 +3,14 @@ const { tokenPatterns, tokenClosePatterns } = require('../tokens/tokens');
 const Unknown = require('../model/Unknown');
 const Statement = require('../model/Statement');
 const Expression = require('../model/Expression');
-const Parameter = require('../model/Parameter');
 const ValidationError = require('../model/ValidationError');
 const { PARSE_ERROR } = require('../model/error_code');
 const Validator = require('../validator/Validator');
 const NodeTreeMaker = require('../nodes/NodeTreeMaker');
 
-const { isExpression, isStatement, isUnknown } = require('../utils/helpers');
-
 const {
 	newLinesRegex,
+	tabRegex,
 	findAllTokensRegex,
 	findAllExpressionsRegex,
 	findAllStatementsRegex,
@@ -27,20 +25,6 @@ const {
 const findAllStatements = new RegExp(findAllStatementsRegex);
 const findAllExpressions = new RegExp(findAllExpressionsRegex);
 const findAllExpressionsGlobal = new RegExp(findAllExpressionsRegex, 'g');
-
-const jQueryTemplateValue = token => {
-	if (isStatement(token)) {
-		let closing = token.isClosing ? '/' : '',
-			expression = token.expression ? ` ${token.expression.value}` : '';
-		return `{{${closing}${token.value}${expression}}}`;
-	} else if (isExpression(token)) {
-		return `\${${token.value}}`;
-	} else if (isUnknown(token)) {
-		return token.value;
-	} else {
-		// TODO
-	}
-};
 
 class Parser {
 	get tokens() {
@@ -64,7 +48,12 @@ class Parser {
 
 	parse() {
 		// strip all new lines in text
-		let text = this._rawText.replace(newLinesRegex, '').trim(),
+		let text = this._rawText
+				// replace all new lines
+				.replace(newLinesRegex, '')
+				// replace all tabs
+				.replace(tabRegex, '')
+				.trim(),
 			// ekstract all tokens bettween {{}} and ${}
 			tokens = text.match(findAllTokensRegex),
 			tokenModels = [],
@@ -110,7 +99,11 @@ class Parser {
 
 					// handle all parse errors here
 					parseErrors.push(
-						new ValidationError(tokenModel, PARSE_ERROR.code, e)
+						new ValidationError(
+							tokenModel,
+							PARSE_ERROR.code,
+							e.message
+						)
 					);
 				}
 
@@ -266,7 +259,7 @@ class Parser {
 
 			for (let curParam of tokenTree.arguments) {
 				let curParamValue = extractTokenText(curParam);
-				params.push(new Parameter(curParamValue, curParam));
+				params.push(new Expression(curParamValue, curParam));
 			}
 
 			return params;

@@ -16,6 +16,10 @@ class Token {
 		return this._value;
 	}
 
+	set value(value) {
+		this._value = value;
+	}
+
 	get tree() {
 		return this._tree;
 	}

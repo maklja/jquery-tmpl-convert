@@ -42,9 +42,7 @@ module.exports = class Validator {
 				new ValidationError(
 					missingClosingToken,
 					MISSING_CLOSING_TOKEN.code,
-					new Error(
-						MISSING_CLOSING_TOKEN.message(missingClosingToken)
-					)
+					MISSING_CLOSING_TOKEN.message(missingClosingToken)
 				)
 			);
 		}
@@ -73,7 +71,7 @@ module.exports = class Validator {
 				new ValidationError(
 					token,
 					EXPRESSION_MISSING.code,
-					new Error(EXPRESSION_MISSING.message(token))
+					EXPRESSION_MISSING.message(token)
 				)
 			);
 		} else if (
@@ -84,7 +82,7 @@ module.exports = class Validator {
 				new ValidationError(
 					token,
 					UNEXPECTED_EXPRESSION.code,
-					new Error(UNEXPECTED_EXPRESSION.message(token))
+					UNEXPECTED_EXPRESSION.message(token)
 				)
 			);
 		}
@@ -111,13 +109,11 @@ module.exports = class Validator {
 					new ValidationError(
 						token,
 						MISSING_SIBLING_TOKEN.code,
-						new Error(
-							MISSING_SIBLING_TOKEN.message(
-								token,
-								tokenPatternRule.afterTokens
-									.map(token => token.name)
-									.join(', ')
-							)
+						MISSING_SIBLING_TOKEN.message(
+							token,
+							tokenPatternRule.afterTokens
+								.map(token => token.name)
+								.join(', ')
 						)
 					)
 				);
@@ -136,7 +132,7 @@ module.exports = class Validator {
 				new ValidationError(
 					token,
 					MISSING_STARTING_TOKEN.code,
-					new Error(MISSING_STARTING_TOKEN.message(token))
+					MISSING_STARTING_TOKEN.message(token)
 				)
 			);
 			return;
@@ -151,7 +147,7 @@ module.exports = class Validator {
 				new ValidationError(
 					token,
 					MISSING_STARTING_TOKEN.code,
-					new Error(MISSING_STARTING_TOKEN.message(token))
+					MISSING_STARTING_TOKEN.message(token)
 				)
 			);
 		}

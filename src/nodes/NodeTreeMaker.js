@@ -4,6 +4,7 @@ module.exports = class NodeTreeMaker {
 	constructor(tokens) {
 		this._tokens = tokens;
 		this._closeTokenMissing = [];
+		this._lastSibling = null;
 		this._nodes = [];
 	}
 
@@ -33,10 +34,14 @@ module.exports = class NodeTreeMaker {
 		if (lastNodeOnStack != null) {
 			// if this is closing token
 			if (this._closeNode(lastNodeOnStack, node) === false) {
-				if (
-					this._addSiblingNode(lastNodeOnStack, node, rule) === false
-				) {
-					lastNodeOnStack.children.push(node);
+				if (this._addSiblingNode(lastNodeOnStack, node, rule)) {
+					this._lastSibling = node;
+				} else {
+					if (this._lastSibling == null) {
+						lastNodeOnStack.children.push(node);
+					} else {
+						this._lastSibling.children.push(node);
+					}
 				}
 			}
 		} else {
@@ -55,6 +60,8 @@ module.exports = class NodeTreeMaker {
 			nodeToClose.closingToken = closingNode.token;
 			// remove it from the stack of open nodes
 			this._closeTokenMissing.pop();
+			// close sibling node after
+			this._lastSibling = null;
 
 			return true;
 		}

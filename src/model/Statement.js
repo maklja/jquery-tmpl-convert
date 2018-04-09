@@ -5,8 +5,16 @@ module.exports = class Statement extends Token {
 		return this._expression;
 	}
 
+	set expression(expression) {
+		this._expression = expression;
+	}
+
 	get isClosing() {
 		return this._isClosing;
+	}
+
+	set isClosing(isClosing) {
+		this._isClosing = isClosing;
 	}
 
 	get parameters() {
@@ -31,5 +39,28 @@ module.exports = class Statement extends Token {
 		this._isClosing = isClosingToken;
 		this._parameters = params;
 		this._pattern = pattern;
+	}
+
+	clone() {
+		let expression =
+				this._expression != null ? this._expression.clone() : null,
+			params = null;
+
+		if (this._parameters != null) {
+			params = [];
+			for (let curParam of this._parameters) {
+				params.push(curParam.clone());
+			}
+		}
+
+		return new Statement(
+			this._name,
+			this._value,
+			null,
+			expression,
+			this._isClosing,
+			params,
+			Object.assign({}, this._pattern)
+		);
 	}
 };

@@ -1,8 +1,4 @@
-module.exports = class ValidationError {
-	get message() {
-		return this._error.message;
-	}
-
+class ValidationError extends Error {
 	get errorCode() {
 		return this._errorCode;
 	}
@@ -11,13 +7,18 @@ module.exports = class ValidationError {
 		return this._token;
 	}
 
-	get error() {
-		return this._error;
-	}
+	constructor(token, errorCode, message) {
+		super(message);
 
-	constructor(token, errorCode, error) {
+		// Saving class name in the property of our custom error as a shortcut.
+		this.name = this.constructor.name;
+
+		// Capturing stack trace, excluding constructor call from it.
+		Error.captureStackTrace(this, this.constructor);
+
 		this._errorCode = errorCode;
 		this._token = token;
-		this._error = error;
 	}
-};
+}
+
+module.exports = ValidationError;

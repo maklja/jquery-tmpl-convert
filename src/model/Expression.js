@@ -5,4 +5,8 @@ module.exports = class Expression extends Token {
 	constructor(value, tree) {
 		super(VAR, value, tree);
 	}
+
+	clone() {
+		return new Expression(this.value, null);
+	}
 };

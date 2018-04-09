@@ -1,7 +1,6 @@
 const chai = require('chai');
 const Expression = require('../../src/model/Expression');
 const Unknown = require('../../src/model/Unknown');
-const Parameter = require('../../src/model/Parameter');
 const Token = require('../../src/model/Token');
 const ValidationError = require('../../src/model/ValidationError');
 const { UNKNOWN } = require('../../src/tokens/tokens');
@@ -39,7 +38,7 @@ const compareExpressionTokenState = (token, expectedExpressionValue) => {
 
 const compareParameterTokenState = (token, expectedExpressionValue) => {
 	expect(token)
-		.that.is.instanceOf(Parameter)
+		.that.is.instanceOf(Expression)
 		.that.have.property('value')
 		.and.is.equal(expectedExpressionValue);
 };

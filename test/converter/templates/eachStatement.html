@@ -1,0 +1,25 @@
+<script id="simpleEachStatement" type="text/x-jquery-tmpl">
+	{{each collection}}
+		${$index}: <em>${$value}. </em>
+	{{/each}}
+</script>
+
+<script id="complexEachStatement" type="text/x-jquery-tmpl">
+	{{each(myIndex, myValue) collection}}
+		${myIndex}: <em>${myValue}. </em>
+	{{/each}}
+</script>
+
+<script id="complexEachStatementWithNested" type="text/x-jquery-tmpl">
+	{{each(myIndex, myValue) collection}}
+		{{if myValue}}
+			${myIndex}: <em>${myValue}. </em>
+		{{/if}}
+	{{/each}}
+</script>
+
+<script id="functionCallEachStatementWithNested" type="text/x-jquery-tmpl">
+	{{each(myIndex, myValue) $item.getCollection()}}
+		${myIndex}: <em>${myValue}. </em>
+	{{/each}}
+</script>
