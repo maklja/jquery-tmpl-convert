@@ -75,13 +75,18 @@ module.exports = class TemplateParser {
 				type = curTemplate.attribs['type'];
 
 			if (templateId && type === 'text/x-jquery-tmpl') {
+				const $node = cheerio.load(curTemplate),
+					outerHTML = $node.html(),
+					innerHTML = curTemplate.children[0].nodeValue;
+
 				this._templateModels.push(
 					new TemplateModel(
 						templateId,
 						type,
 						path,
 						// get text inside script tag
-						curTemplate.children[0].nodeValue
+						innerHTML,
+						outerHTML
 					)
 				);
 			}

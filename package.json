@@ -5,24 +5,47 @@
   "main": "index.js",
   "scripts": {
     "test:dev": "./node_modules/mocha/bin/mocha ./test/**/*.js --watch",
-    "test:debug": "./node_modules/mocha/bin/mocha ./test/**/*.js --inspect-brk"
+    "test:debug": "./node_modules/mocha/bin/mocha ./test/**/*.js --inspect-brk",
+    "start": "node ./src/app.js",
+    "start:debug": "nodemon --inspect ./src/app.js",
+    "build": "node_modules\\.bin\\webpack -d --config src/public/webpack.config.js",
+    "dev-server": "node_modules\\.bin\\webpack-dev-server -d --config src/public/webpack.config.js --hot --inline"
   },
   "author": "Bojan Makljenovic",
   "license": "ISC",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
     "chai": "^4.1.2",
+    "css-loader": "^0.28.11",
     "eslint": "^4.18.2",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "^7.7.0",
     "jqtpl": "^2.0.16-rc1",
     "mocha": "^5.0.4",
-    "prettier": "^1.11.1"
+    "nodemon": "^1.17.3",
+    "prettier": "^1.11.1",
+    "react-hot-loader": "^3.1.3",
+    "style-loader": "^0.20.3",
+    "webpack": "^3.11.0",
+    "webpack-dev-server": "^2.11.2",
+    "webpack-merge": "^4.1.2"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.3",
     "glob": "^7.1.2",
     "html-beautify": "^1.0.4",
-    "jsep": "^0.3.3"
+    "jsep": "^0.3.3",
+    "prismjs": "^1.14.0",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
+    "whatwg-fetch": "^2.0.4"
   }
 }

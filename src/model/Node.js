@@ -68,4 +68,14 @@ module.exports = class Node {
 		this._token = token;
 		this._siblings = [];
 	}
+
+	toJSON() {
+		let token = this.token.toJSON(),
+			closingToken = this.token.toJSON(),
+			children = this.children.map(curChild => curChild.toJSON()),
+			siblings = this.siblings.map(curSibling => curSibling.toJSON()),
+			{ name } = this;
+
+		return { token, closingToken, children, siblings, name };
+	}
 };

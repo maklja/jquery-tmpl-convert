@@ -57,6 +57,12 @@ class Token {
 		this._value = value;
 		this._tree = tree;
 	}
+
+	toJSON() {
+		let { name, value } = this;
+
+		return { name, value };
+	}
 }
 
 module.exports = Token;

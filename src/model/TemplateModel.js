@@ -31,12 +31,25 @@ module.exports = class TemplateModel {
 		this._errors = errors;
 	}
 
-	constructor(id, type, path, value) {
+	get html() {
+		return this._html;
+	}
+
+	constructor(id, type, path, value, html) {
 		this._id = id;
 		this._type = type;
 		this._path = path;
-		this._tokenNodes = null;
+		this._tokenNodes = [];
 		this._value = value;
+		this._html = html;
 		this._errors = [];
+	}
+
+	toJSON() {
+		let { id, type, path, value, html } = this,
+			tokenNodes = this.tokenNodes.map(curNode => curNode.toJSON()),
+			errors = this.errors.map(curErr => curErr.toJSON());
+
+		return { id, type, path, value, tokenNodes, errors, html };
 	}
 };

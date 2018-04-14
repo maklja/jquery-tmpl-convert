@@ -63,4 +63,13 @@ module.exports = class Statement extends Token {
 			Object.assign({}, this._pattern)
 		);
 	}
+
+	toJSON() {
+		let json = super.toJSON(),
+			expression = this.expression.toJSON(),
+			{ isClosing } = this,
+			parameters = this.parameters.map(curParam => curParam.toJSON());
+
+		return Object.assign(json, { expression, isClosing, parameters });
+	}
 };

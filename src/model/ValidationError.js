@@ -19,6 +19,14 @@ class ValidationError extends Error {
 		this._errorCode = errorCode;
 		this._token = token;
 	}
+
+	toJSON() {
+		let token = this.token.toJSON(),
+			message = this.message,
+			{ errorCode } = this;
+
+		return { token, message, errorCode };
+	}
 }
 
 module.exports = ValidationError;

@@ -1,5 +1,4 @@
 const htmlBeautify = require('html-beautify');
-const TemplateParser = require('../../parser/TemplateParser');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
 const NodeTreeMaker = require('../../nodes/NodeTreeMaker');
@@ -32,57 +31,39 @@ class HandlebarsConverter {
 		];
 	}
 
-	convert(paths) {
+	convert(templates) {
 		this._resetState();
 
-		return new Promise((fulfill, reject) => {
-			// let jquery template parse all file from paths and create template models
-			let templateParser = new TemplateParser(paths);
-			// parse all templates
-			templateParser
-				.parse()
-				.then(() => {
-					// convert each template
-					for (let curTemplateModel of templateParser.templates) {
-						// tokens state for each template
-						this._convertTokens = [];
-						this._convertErrors = [];
-						this._context = {
-							replaceExpression: {}
-						};
+		// convert each template
+		for (let curTemplateModel of templates) {
+			// tokens state for each template
+			this._convertTokens = [];
+			this._convertErrors = [];
+			this._context = {
+				replaceExpression: {}
+			};
 
-						// convert current template
-						this._convertTemplate(curTemplateModel);
+			// convert current template
+			this._convertTemplate(curTemplateModel);
 
-						// after template is converted, create new template model for handlebars
-						let convertedTemplateModel = new TemplateModel(
-							curTemplateModel.id,
-							this.SCRIPT_TYPE,
-							curTemplateModel.path,
-							// try to beautify html output
-							htmlBeautify(
-								this.hbsTemplateValue(this._convertTokens)
-							)
-						);
+			// after template is converted, create new template model for handlebars
+			let convertedTemplateModel = new TemplateModel(
+				curTemplateModel.id,
+				this.SCRIPT_TYPE,
+				curTemplateModel.path,
+				// try to beautify html output
+				htmlBeautify(this._hbsTemplateValue(this._convertTokens))
+			);
 
-						// get all convert errors
-						convertedTemplateModel.errors = this._convertErrors;
+			// get all convert errors
+			convertedTemplateModel.errors = this._convertErrors;
 
-						// convert tokens to nodes
-						let nodeTreeMaker = new NodeTreeMaker(
-							this._convertTokens
-						);
-						convertedTemplateModel.tokenNodes = nodeTreeMaker.createTree();
+			// convert tokens to nodes
+			let nodeTreeMaker = new NodeTreeMaker(this._convertTokens);
+			convertedTemplateModel.tokenNodes = nodeTreeMaker.createTree();
 
-						this._convertTemplates.push(convertedTemplateModel);
-					}
-
-					fulfill();
-				})
-				.catch(e => {
-					reject(e);
-				});
-		});
+			this._convertTemplates.push(convertedTemplateModel);
+		}
 	}
 
 	_convertTemplate(templateModel) {
@@ -187,7 +168,7 @@ class HandlebarsConverter {
 		};
 	}
 
-	hbsTokenValue(token) {
+	_hbsTokenValue(token) {
 		if (isStatement(token)) {
 			let closing = token.isClosing ? '/' : '',
 				expression = token.expression
@@ -205,10 +186,10 @@ class HandlebarsConverter {
 		}
 	}
 
-	hbsTemplateValue(tokens) {
+	_hbsTemplateValue(tokens) {
 		let value = '';
 		for (let curToken of tokens) {
-			value += this.hbsTokenValue(curToken);
+			value += this._hbsTokenValue(curToken);
 		}
 
 		return value;

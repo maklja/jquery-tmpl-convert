@@ -7,11 +7,21 @@ const {
 	compareUnknownTokenState,
 	compareExpressionTokenState
 } = require('../utils/utils');
+const TemplateParser = require('../../src/parser/TemplateParser');
 
 const expect = chai.expect;
 
-const convertTemplate = (templatePath, done) =>
-	this.handlebarsConverter.convert([templatePath]).catch(e => done(e));
+const convertTemplate = (templatePath, done) => {
+	// let jquery template parse all file from paths and create template models
+	let templateParser = new TemplateParser([templatePath]);
+	// parse all templates
+	return templateParser
+		.parse()
+		.then(() => {
+			this.handlebarsConverter.convert(templateParser.templates);
+		})
+		.catch(e => done(e));
+};
 
 describe('Test handlebars IF ELSE converter', () => {
 	beforeEach(() => {

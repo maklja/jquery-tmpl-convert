@@ -36,14 +36,14 @@ describe('Template Parser', () => {
 						.that.have.lengthOf(2);
 
 					checkTemplateModel(
-						templatesModels[0],
+						templatesModels.find(tmpl => tmpl.id === 'varTemplate'),
 						'varTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[1],
+						templatesModels.find(tmpl => tmpl.id === 'ifTemplate'),
 						'ifTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
@@ -79,28 +79,32 @@ describe('Template Parser', () => {
 						.that.have.lengthOf(4);
 
 					checkTemplateModel(
-						templatesModels[0],
+						templatesModels.find(tmpl => tmpl.id === 'varTemplate'),
 						'varTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[1],
+						templatesModels.find(tmpl => tmpl.id === 'ifTemplate'),
 						'ifTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[2],
+						templatesModels.find(
+							tmpl => tmpl.id === 'complexTemplate1'
+						),
 						'complexTemplate1',
 						'text/x-jquery-tmpl',
 						complexTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[3],
+						templatesModels.find(
+							tmpl => tmpl.id === 'complexTemplate2'
+						),
 						'complexTemplate2',
 						'text/x-jquery-tmpl',
 						complexTestTemplatePath
@@ -137,28 +141,32 @@ describe('Template Parser', () => {
 						.that.have.lengthOf(4);
 
 					checkTemplateModel(
-						templatesModels[0],
+						templatesModels.find(
+							tmpl => tmpl.id === 'complexTemplate1'
+						),
 						'complexTemplate1',
 						'text/x-jquery-tmpl',
 						complexTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[1],
+						templatesModels.find(
+							tmpl => tmpl.id === 'complexTemplate2'
+						),
 						'complexTemplate2',
 						'text/x-jquery-tmpl',
 						complexTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[2],
+						templatesModels.find(tmpl => tmpl.id === 'varTemplate'),
 						'varTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
 					);
 
 					checkTemplateModel(
-						templatesModels[3],
+						templatesModels.find(tmpl => tmpl.id === 'ifTemplate'),
 						'ifTemplate',
 						'text/x-jquery-tmpl',
 						simpleTestTemplatePath
@@ -192,14 +200,18 @@ describe('Template Parser', () => {
 							.that.have.lengthOf(2);
 
 						checkTemplateModel(
-							templatesModels[0],
+							templatesModels.find(
+								tmpl => tmpl.id === 'varTemplate'
+							),
 							'varTemplate',
 							'text/x-jquery-tmpl',
 							simpleTestTemplatePath
 						);
 
 						checkTemplateModel(
-							templatesModels[1],
+							templatesModels.find(
+								tmpl => tmpl.id === 'ifTemplate'
+							),
 							'ifTemplate',
 							'text/x-jquery-tmpl',
 							simpleTestTemplatePath

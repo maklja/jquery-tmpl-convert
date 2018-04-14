@@ -8,11 +8,21 @@ const {
 } = require('../utils/utils');
 const ValidationError = require('../../src/model/ValidationError');
 const { CONVERT_ERROR } = require('../../src/model/error_code');
+const TemplateParser = require('../../src/parser/TemplateParser');
 
 const expect = chai.expect;
 
-const convertTemplate = (templatePath, done) =>
-	this.handlebarsConverter.convert([templatePath]).catch(e => done(e));
+const convertTemplate = (templatePath, done) => {
+	// let jquery template parse all file from paths and create template models
+	let templateParser = new TemplateParser([templatePath]);
+	// parse all templates
+	return templateParser
+		.parse()
+		.then(() => {
+			this.handlebarsConverter.convert(templateParser.templates);
+		})
+		.catch(e => done(e));
+};
 
 describe('Test handlebars TMPL converter', () => {
 	beforeEach(done => {
