@@ -1,5 +1,4 @@
 const cheerio = require('cheerio');
-const glob = require('glob');
 const fs = require('fs');
 const TemplateModel = require('../model/TemplateModel');
 const Parser = require('./Parser');
@@ -11,7 +10,10 @@ module.exports = class TemplateParser {
 
 	constructor(paths, options) {
 		this._paths = paths;
-		this._options = Object.assign({ encoding: 'utf8' }, options);
+		this._options = Object.assign(
+			{ encoding: 'utf8', removeTabs: false },
+			options
+		);
 		this._templateModels = null;
 	}
 
@@ -19,32 +21,10 @@ module.exports = class TemplateParser {
 		this._templateModels = [];
 		let pathPromises = [];
 		for (let curPath of this._paths) {
-			pathPromises.push(this._loadTemplate(curPath));
+			pathPromises.push(this._readFile(curPath));
 		}
 
 		return Promise.all(pathPromises);
-	}
-
-	_loadTemplate(path) {
-		return new Promise((fulfill, reject) => {
-			// use glob to support regex in path
-			glob(path, (err, filePaths) => {
-				if (err) {
-					if (err) {
-						reject(err);
-					}
-				}
-
-				let readAllTemplateContent = [];
-				for (let curFilePath of filePaths) {
-					readAllTemplateContent.push(this._readFile(curFilePath));
-				}
-
-				Promise.all(readAllTemplateContent)
-					.then(fulfill)
-					.catch(reject);
-			});
-		});
 	}
 
 	_readFile(path) {
@@ -76,7 +56,7 @@ module.exports = class TemplateParser {
 
 			if (templateId && type === 'text/x-jquery-tmpl') {
 				const $node = cheerio.load(curTemplate),
-					outerHTML = $node.html(),
+					outerHTML = $node.html().trim(),
 					innerHTML = curTemplate.children[0].nodeValue;
 
 				this._templateModels.push(
@@ -113,7 +93,9 @@ module.exports = class TemplateParser {
 
 	_parseTemplates() {
 		for (let curTmplModel of this._templateModels) {
-			const parser = new Parser(curTmplModel.value);
+			const parser = new Parser(curTmplModel.value, true, {
+				removeTabs: this._options.removeTabs
+			});
 			parser.parse();
 
 			curTmplModel.errors = parser.parseErrors;

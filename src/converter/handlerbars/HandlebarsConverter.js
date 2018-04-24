@@ -1,4 +1,3 @@
-const htmlBeautify = require('html-beautify');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
 const NodeTreeMaker = require('../../nodes/NodeTreeMaker');
@@ -52,7 +51,11 @@ class HandlebarsConverter {
 				this.SCRIPT_TYPE,
 				curTemplateModel.path,
 				// try to beautify html output
-				htmlBeautify(this._hbsTemplateValue(this._convertTokens))
+				this._hbsTemplateValue(this._convertTokens),
+				this._addScriptTag(
+					curTemplateModel.id,
+					this._hbsTemplateValue(this._convertTokens)
+				)
 			);
 
 			// get all convert errors
@@ -64,6 +67,10 @@ class HandlebarsConverter {
 
 			this._convertTemplates.push(convertedTemplateModel);
 		}
+	}
+
+	_addScriptTag(id, tmpl) {
+		return `<script id="${id}" type="${this.SCRIPT_TYPE}">${tmpl}</script>`;
 	}
 
 	_convertTemplate(templateModel) {
@@ -111,11 +118,12 @@ class HandlebarsConverter {
 		if (!token.isIdentifier() && !token.isMemberExpression()) {
 			this._convertErrors.push(
 				new ValidationError(
-					expression,
+					expression.id,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
 						`Expression can't be type of ${token.treeType}.`
-					)
+					),
+					expression.lineNumber
 				)
 			);
 		}

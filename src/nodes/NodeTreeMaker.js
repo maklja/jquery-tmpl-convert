@@ -3,85 +3,100 @@ const Node = require('../model/Node');
 module.exports = class NodeTreeMaker {
 	constructor(tokens) {
 		this._tokens = tokens;
-		this._closeTokenMissing = [];
-		this._lastSibling = null;
-		this._nodes = [];
 	}
 
 	createTree() {
-		for (let curToken of this._tokens) {
-			let rule = curToken.pattern || {},
-				node = new Node(curToken);
+		let nextToken = null,
+			results = [],
+			iter = this._makeIterator(this._tokens);
 
-			this._insertTokenToNodeTree(this._nodes, node, rule);
+		while ((nextToken = iter.next()).done === false) {
+			results.push(this._createNode(nextToken.value, null, iter));
+		}
 
-			if (rule.hasClosing === true) {
-				this._closeTokenMissing.push(node);
+		return results;
+	}
+
+	// if unknown else unknown /if
+	_createNode(token, parentNode, iter) {
+		let node = new Node(token),
+			rule = token.pattern || {},
+			haveClosing = rule.hasClosing === true,
+			isSibling = this._isSiblingNode(node, parentNode, rule),
+			haveChildren = haveClosing || isSibling;
+
+		if (token.isClosing) {
+			return node;
+		}
+
+		if (parentNode != null) {
+			if (isSibling) {
+				parentNode.siblings.push(node);
+			} else {
+				parentNode.children.push(node);
 			}
 		}
 
-		return this._nodes;
-	}
+		// process all children tokens
+		if (haveChildren) {
+			let nextNode = null,
+				next = null;
 
-	_insertTokenToNodeTree(nodes, node, rule) {
-		let lastNodeOnStack = this._closeTokenMissing[
-			this._closeTokenMissing.length - 1
-		];
+			while ((next = iter.next()).done === false) {
+				// go to the next token until we reach end token
+				nextNode = this._createNode(next.value, node, iter);
 
-		// if there is unclosed node on stack
-		// then all nodes after him are either
-		// children nodes or closing node
-		if (lastNodeOnStack != null) {
-			// if this is closing token
-			if (this._closeNode(lastNodeOnStack, node) === false) {
-				if (this._addSiblingNode(lastNodeOnStack, node, rule)) {
-					this._lastSibling = node;
-				} else {
-					if (this._lastSibling == null) {
-						lastNodeOnStack.children.push(node);
-					} else {
-						this._lastSibling.children.push(node);
-					}
+				// reach end token
+				if (nextNode.token.isClosing) {
+					break;
 				}
 			}
-		} else {
-			// root nodes
-			nodes.push(node);
-		}
-	}
 
-	_closeNode(nodeToClose, closingNode) {
-		// if closing token match open token
-		if (
-			closingNode.token.isClosing &&
-			nodeToClose.token.name === closingNode.token.name
-		) {
-			// close the token
-			nodeToClose.closingToken = closingNode.token;
-			// remove it from the stack of open nodes
-			this._closeTokenMissing.pop();
-			// close sibling node after
-			this._lastSibling = null;
-
-			return true;
+			// if current node have closing token
+			// close it
+			if (haveClosing) {
+				// opening node name must match closing node name
+				if (node.token.name !== nextNode.token.name) {
+					throw new Error(
+						`Unexpected closing token with name ${
+							nextNode.token.name
+						} !== ${node.token.name}`
+					);
+				}
+				node.closingToken = nextNode.token;
+			} else {
+				// in case of sibling node just return closing node
+				return nextNode;
+			}
 		}
 
-		return false;
+		// return root node at the end
+		return node;
 	}
 
-	_addSiblingNode(sliblingNode, node, rule) {
+	_isSiblingNode(node, sliblingNode, rule) {
 		if (rule.afterTokens != null) {
 			const afterTokenExists =
 				rule.afterTokens.find(
 					token => token === sliblingNode.token.name
 				) != null;
 			if (afterTokenExists) {
-				sliblingNode.siblings.push(node);
-
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	_makeIterator(array) {
+		var nextIndex = 0;
+
+		return {
+			next() {
+				return nextIndex < array.length
+					? { value: array[nextIndex++], done: false }
+					: { done: true };
+			}
+		};
 	}
 };

@@ -1,13 +1,20 @@
+const uuidv1 = require('uuid/v1');
 const {
 	isCompound,
 	isIdentifier,
 	isBinaryExpression,
 	isLiteral,
 	isMemberExpression,
-	isCallExpression
+	isCallExpression,
+	isUnaryExpression,
+	isLogicalExpression
 } = require('../parser/parserUtils');
 
 class Token {
+	get id() {
+		return this._id;
+	}
+
 	get name() {
 		return this._name;
 	}
@@ -26,6 +33,14 @@ class Token {
 
 	get treeType() {
 		return this._tree.type;
+	}
+
+	get lineNumber() {
+		return this._lineNumber;
+	}
+
+	set lineNumber(lineNumber) {
+		this._lineNumber = lineNumber;
 	}
 
 	isCompound() {
@@ -52,16 +67,26 @@ class Token {
 		return isCallExpression(this._tree);
 	}
 
-	constructor(name, value, tree) {
+	isUnaryExpression() {
+		return isUnaryExpression(this._tree);
+	}
+
+	isLogicalExpression() {
+		return isLogicalExpression(this._tree);
+	}
+
+	constructor(name, value, tree, lineNumber = []) {
+		this._id = uuidv1();
 		this._name = name;
 		this._value = value;
 		this._tree = tree;
+		this._lineNumber = lineNumber;
 	}
 
 	toJSON() {
-		let { name, value } = this;
+		let { id, name, value, lineNumber } = this;
 
-		return { name, value };
+		return { id, name, value, lineNumber };
 	}
 }
 

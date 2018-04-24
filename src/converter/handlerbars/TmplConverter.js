@@ -28,11 +28,12 @@ class TmplConverter extends AbstractConverter {
 				tmplToken.expression.value = expressionParams.join(' ');
 				errors.push(
 					new ValidationError(
-						tmplToken,
+						tmplToken.id,
 						CONVERT_ERROR.code,
 						CONVERT_ERROR.message(
 							`Pass valid parameters to partial template.`
-						)
+						),
+						tmplToken.lineNumber
 					)
 				);
 			} else {
@@ -41,21 +42,23 @@ class TmplConverter extends AbstractConverter {
 
 			errors.push(
 				new ValidationError(
-					tmplToken,
+					tmplToken.id,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
 						`Make sure that partial template is register to handlebars.`
-					)
+					),
+					tmplToken.lineNumber
 				)
 			);
 		} else {
 			errors.push(
 				new ValidationError(
-					tmplToken,
+					tmplToken.id,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
 						`Template tag expression must be literal.`
-					)
+					),
+					tmplToken.lineNumber
 				)
 			);
 		}

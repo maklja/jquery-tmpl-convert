@@ -1,0 +1,50 @@
+.template-preview {
+	border: 1px solid #eee;
+	padding: 2px;
+	overflow: auto;
+	height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.template-preview .template-body,
+.template-preview .template-errors {
+	padding: 10px;
+	height: 100%;
+}
+
+.template-preview .file-path {
+	text-align: right;
+	padding: 10px 5px;
+}
+
+.template-preview .template-errors .error-block {
+	font-size: 18px;
+    color: red;
+    /* background: gray; */
+    padding: 4px;
+    border: 1px solid gray;
+	display: flex;
+}
+
+.template-preview .template-errors .title {
+	padding: 10px 0px;
+    font-size: 20px;
+	text-align: center;
+}
+
+.template-preview .error-block .code,
+.template-preview .error-block .message
+.template-preview .error-block .line-number {
+	margin: 0px 4px;
+}
+
+.template-preview .error-block .line-number,
+.template-preview .error-block .code {
+	width: 10%;
+	text-align: center;
+}
+
+.template-preview .error-block .message {
+	width: 80%;
+}

@@ -7,9 +7,10 @@ class AbstractConverter {
 		let expression = node.token.expression,
 			hbsStatement = node.token.clone();
 
-		hbsStatement.expression = this.tmplConverter.convertExpressionToken(
-			expression
-		);
+		hbsStatement.expression =
+			expression != null
+				? this.tmplConverter.convertExpressionToken(expression)
+				: expression;
 		hbsStatement.value = convertedValue;
 
 		return hbsStatement;

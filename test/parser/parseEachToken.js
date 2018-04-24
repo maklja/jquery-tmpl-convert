@@ -40,7 +40,7 @@ describe('parse EACH token', () => {
 			compareExpressionTokenState(eachStartTag.expression, 'collection');
 
 			// we do not have any parameters in statement
-			expect(eachStartTag).that.have.property('parameters').that.is.null;
+			expect(eachStartTag).that.have.property('parameters').that.is.empty;
 		});
 
 		it('check EACH_END token', () => {

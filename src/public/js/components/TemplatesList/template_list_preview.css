@@ -1,0 +1,8 @@
+.templates-preview {
+	display: flex;
+}
+
+.templates-preview .templates-preview-container {
+	width: 100%;
+	max-width: 50%;
+}

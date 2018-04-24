@@ -14,7 +14,9 @@ const expect = chai.expect;
 
 const convertTemplate = (templatePath, done) => {
 	// let jquery template parse all file from paths and create template models
-	let templateParser = new TemplateParser([templatePath]);
+	let templateParser = new TemplateParser([templatePath], {
+		removeTabs: true
+	});
 	// parse all templates
 	return templateParser
 		.parse()
@@ -58,7 +60,7 @@ describe('Test handlebars TMPL converter', () => {
 			let error = this.templateModel.errors[0];
 			expect(error)
 				.to.be.instanceOf(ValidationError)
-				.that.have.property('errorCode')
+				.that.have.property('code')
 				.that.is.equal(CONVERT_ERROR.code);
 		});
 
@@ -107,13 +109,13 @@ describe('Test handlebars TMPL converter', () => {
 			let paramsError = this.templateModel.errors[0];
 			expect(paramsError)
 				.to.be.instanceOf(ValidationError)
-				.that.have.property('errorCode')
+				.that.have.property('code')
 				.that.is.equal(CONVERT_ERROR.code);
 
 			let registerTemplateError = this.templateModel.errors[1];
 			expect(registerTemplateError)
 				.to.be.instanceOf(ValidationError)
-				.that.have.property('errorCode')
+				.that.have.property('code')
 				.that.is.equal(CONVERT_ERROR.code);
 		});
 

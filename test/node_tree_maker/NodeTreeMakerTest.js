@@ -192,7 +192,7 @@ describe('Node Tree Maker', () => {
 			expect(ifNode)
 				.to.have.property('siblings')
 				.to.be.an('array')
-				.that.have.lengthOf(2);
+				.that.have.lengthOf(1);
 
 			// check else node
 			const elseIfNode = ifNode.siblings[0];
@@ -206,10 +206,11 @@ describe('Node Tree Maker', () => {
 				.to.be.an('array').that.is.empty;
 			expect(elseIfNode)
 				.to.have.property('siblings')
-				.to.be.an('array').that.is.empty;
+				.to.be.an('array')
+				.that.have.length(1);
 
 			// check else node
-			const elseNode = ifNode.siblings[1];
+			const elseNode = elseIfNode.siblings[0];
 			expect(elseNode)
 				.to.have.property('token')
 				.that.is.deep.equal(elseToken);
@@ -669,6 +670,7 @@ describe('Node Tree Maker', () => {
 				ifOtherStartToken,
 				ifOtherEndToken
 			];
+
 			const nodeTreeMaker = new NodeTreeMaker(validateTokens);
 			const treeNodes = nodeTreeMaker.createTree();
 

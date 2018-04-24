@@ -64,6 +64,34 @@ describe('parse VAR token', () => {
 		compareExpressionTokenState(token, 'test()');
 	});
 
+	it('alternative variable expression', () => {
+		// eslint-disable-next-line
+		const template = '{{= test.length}}';
+		const parser = new Parser(template);
+		parser.parse();
+
+		expect(parser.tokens)
+			.to.be.an('array')
+			.that.have.lengthOf(1);
+
+		let token = parser.tokens[0];
+		compareExpressionTokenState(token, 'test.length');
+	});
+
+	it('alternative variable expression with function call', () => {
+		// eslint-disable-next-line
+		const template = '{{= test.func()}}';
+		const parser = new Parser(template);
+		parser.parse();
+
+		expect(parser.tokens)
+			.to.be.an('array')
+			.that.have.lengthOf(1);
+
+		let token = parser.tokens[0];
+		compareExpressionTokenState(token, 'test.func()');
+	});
+
 	it('invalid expression, parse failed', () => {
 		// eslint-disable-next-line
 		const template = '${test({)}';
@@ -78,7 +106,7 @@ describe('parse VAR token', () => {
 		compareValidationErrorState(
 			// take the only error from the array
 			parser.parseErrors[0],
-			template,
+			parser.tokens[0].id,
 			PARSE_ERROR.code
 		);
 	});
@@ -97,7 +125,7 @@ describe('parse VAR token', () => {
 		compareValidationErrorState(
 			// take the only error from the array
 			parser.parseErrors[0],
-			template,
+			parser.tokens[0].id,
 			PARSE_ERROR.code
 		);
 	});

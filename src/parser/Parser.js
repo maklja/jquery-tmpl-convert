@@ -9,7 +9,6 @@ const Validator = require('../validator/Validator');
 const NodeTreeMaker = require('../nodes/NodeTreeMaker');
 
 const {
-	newLinesRegex,
 	tabRegex,
 	findAllTokensRegex,
 	findAllExpressionsRegex,
@@ -18,7 +17,8 @@ const {
 	isIdentifier,
 	isClosingToken,
 	extractTokenText,
-	isCallExpression
+	isCallExpression,
+	getLineNumber
 } = require('./parserUtils');
 
 // RegExp remember state so watch it how you use it
@@ -39,22 +39,24 @@ class Parser {
 		return this._validateTokens;
 	}
 
-	constructor(rawText, validateTokens = true) {
+	constructor(
+		rawText,
+		validateTokens = true,
+		options = { removeTabs: false }
+	) {
 		this._rawText = rawText;
 		this._tokens = [];
 		this._parseErrors = [];
 		this._validateTokens = validateTokens;
+		this._options = options;
 	}
 
 	parse() {
-		// strip all new lines in text
-		let text = this._rawText
-				// replace all new lines
-				.replace(newLinesRegex, '')
-				// replace all tabs
-				.replace(tabRegex, '')
-				.trim(),
-			// ekstract all tokens bettween {{}} and ${}
+		// TODO this will replace tabs in literal token too!
+		let text = this._options.removeTabs
+				? this._rawText.replace(tabRegex, '').trim()
+				: this._rawText,
+			// ekstract all tokens bettween {{}}, ${} and {{= }}
 			tokens = text.match(findAllTokensRegex),
 			tokenModels = [],
 			// position in text that is used like begin index for search
@@ -68,16 +70,16 @@ class Parser {
 				// check if current token
 				let isExpression = curToken.match(findAllExpressionsGlobal),
 					tokenModel = null,
-					tokenPosition = this._getTokenPositionInText(
-						curToken,
+					lineNumbersData = getLineNumber(
 						text,
+						curToken,
 						positionInText
 					),
 					// extract unknown token in front of current token, if there is any
 					unknownTokenBefore = this._extractUnknownToken(
 						text,
 						positionInText,
-						tokenPosition.begin
+						lineNumbersData.tokenBegin
 					);
 
 				try {
@@ -100,15 +102,20 @@ class Parser {
 					// handle all parse errors here
 					parseErrors.push(
 						new ValidationError(
-							tokenModel,
+							tokenModel.id,
 							PARSE_ERROR.code,
-							e.message
+							e.message,
+							lineNumbersData.lineNumbers
 						)
 					);
 				}
 
 				// even is token is not valid position behind it
-				positionInText = tokenPosition.end;
+				positionInText =
+					lineNumbersData.tokenEnd !== -1
+						? lineNumbersData.tokenEnd
+						: positionInText;
+				tokenModel.lineNumber = lineNumbersData.lineNumbers;
 				tokenModels.push(tokenModel);
 			}
 		}
@@ -145,7 +152,11 @@ class Parser {
 	}
 
 	_parseExpressionToken(token) {
-		let tokenValue = token.match(findAllExpressions).pop();
+		let tokenMatches = token.match(findAllExpressions),
+			n = tokenMatches.length,
+			tokenValue = null;
+
+		while ((tokenValue = tokenMatches.pop()) == null && --n >= 0);
 
 		if (tokenValue.trim().length === 0) {
 			throw new Error(
@@ -238,34 +249,20 @@ class Parser {
 		return new Unknown(value);
 	}
 
-	_getTokenPositionInText(tokenValue, text, fromPosition, offset = 0) {
-		// search begin of the token inside text
-		let tokenPositionBegin = text.indexOf(tokenValue, fromPosition),
-			// move new postion behind the current token
-			// to prevent double search in prevous text
-			tokenPositionEnd = tokenPositionBegin + tokenValue.length;
-
-		return {
-			begin: offset + tokenPositionBegin,
-			end: offset + tokenPositionEnd
-		};
-	}
-
 	_getParams(tokenTree, tokenText) {
+		let params = [];
+
 		// only call expressions have parameters
 		if (isCallExpression(tokenTree)) {
 			// all parameters model
-			let params = [];
 
 			for (let curParam of tokenTree.arguments) {
 				let curParamValue = extractTokenText(curParam);
 				params.push(new Expression(curParamValue, curParam));
 			}
-
-			return params;
 		}
 
-		return null;
+		return params;
 	}
 
 	extractStatementAndExpression(tokenTree) {
@@ -276,7 +273,7 @@ class Parser {
 				statementTree: bodyTokens[0],
 				expressionTree: bodyTokens[1]
 			};
-		} else if (isIdentifier(tokenTree)) {
+		} else if (isIdentifier(tokenTree) || isCallExpression(tokenTree)) {
 			return {
 				statementTree: tokenTree,
 				expressionTree: null

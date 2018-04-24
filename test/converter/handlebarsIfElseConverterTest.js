@@ -13,7 +13,9 @@ const expect = chai.expect;
 
 const convertTemplate = (templatePath, done) => {
 	// let jquery template parse all file from paths and create template models
-	let templateParser = new TemplateParser([templatePath]);
+	let templateParser = new TemplateParser([templatePath], {
+		removeTabs: true
+	});
 	// parse all templates
 	return templateParser
 		.parse()
@@ -71,26 +73,32 @@ describe('Test handlebars IF ELSE converter', () => {
 				.that.have.lengthOf(1);
 
 			let unknownToken = children[0].token;
-			compareUnknownTokenState(unknownToken, '<span>Test</span>');
+			compareUnknownTokenState(unknownToken, '\n<span>Test</span>\n');
 		});
 
 		it('check IF statement siblings', () => {
 			// check if children nodes are converted
-			let siblings = this.tokenNodes[0].siblings;
-			expect(siblings)
-				.to.be.an('array')
-				.that.have.lengthOf(2);
+			let ifNode = this.tokenNodes[0];
 
-			let elseIfToken = siblings[0].token;
+			expect(ifNode.siblings)
+				.to.be.an('array')
+				.that.have.lengthOf(1);
+
+			let elseIfNode = ifNode.siblings[0];
 			compareStatementTokenState(
-				elseIfToken,
+				elseIfNode.token,
 				tokens.ELSE,
 				'else if',
 				false
 			);
 
-			let elseToken = siblings[1].token;
-			compareStatementTokenState(elseToken, tokens.ELSE, 'else', false);
+			let elseNode = elseIfNode.siblings[0];
+			compareStatementTokenState(
+				elseNode.token,
+				tokens.ELSE,
+				'else',
+				false
+			);
 		});
 
 		it('check ELSE IF statement children and siblings', () => {
@@ -104,22 +112,25 @@ describe('Test handlebars IF ELSE converter', () => {
 				.to.be.an('array')
 				.that.have.lengthOf(3);
 
-			expect(siblings).to.be.an('array').that.is.empty;
+			expect(siblings)
+				.to.be.an('array')
+				.that.have.length(1);
 
 			let unknownToken = children[0].token;
-			compareUnknownTokenState(unknownToken, '<span>');
+			compareUnknownTokenState(unknownToken, '\n<span>');
 
 			let expressionToken = children[1].token;
 			compareExpressionTokenState(expressionToken, 'array.length');
 
 			let unknownTokenSec = children[2].token;
-			compareUnknownTokenState(unknownTokenSec, '</span>');
+			compareUnknownTokenState(unknownTokenSec, '</span>\n');
 		});
 
 		it('check ELSE statement children and siblings', () => {
 			// check if children nodes are converted
 			let ifNode = this.tokenNodes[0],
-				elseNode = ifNode.siblings[1],
+				elseIfNode = ifNode.siblings[0],
+				elseNode = elseIfNode.siblings[0],
 				children = elseNode.children,
 				siblings = elseNode.siblings;
 			expect(children)
@@ -129,7 +140,10 @@ describe('Test handlebars IF ELSE converter', () => {
 			expect(siblings).to.be.an('array').that.is.empty;
 
 			let unknownToken = children[0].token;
-			compareUnknownTokenState(unknownToken, '<span>OtherTest</span>');
+			compareUnknownTokenState(
+				unknownToken,
+				'\n<span>OtherTest</span>\n'
+			);
 		});
 	});
 });

@@ -2,11 +2,11 @@ const Token = require('./Token');
 const { VAR } = require('../tokens/tokens');
 
 module.exports = class Expression extends Token {
-	constructor(value, tree) {
-		super(VAR, value, tree);
+	constructor(value, tree, lineNumber) {
+		super(VAR, value, tree, lineNumber);
 	}
 
 	clone() {
-		return new Expression(this.value, null);
+		return new Expression(this.value, null, this._lineNumber.slice());
 	}
 };

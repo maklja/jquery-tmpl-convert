@@ -58,7 +58,7 @@ const compareUnknownTokenState = (unknownToken, expectedTokenValue) => {
 
 const compareValidationErrorState = (
 	validationError,
-	expectedTokenValue,
+	expectedTokenId,
 	expectedErrorCodeValue
 ) => {
 	// error must be instance of ValidationError
@@ -68,15 +68,14 @@ const compareValidationErrorState = (
 
 	// token that could not be parsed
 	parseValidatonError.that.have
-		.property('token')
+		.property('tokenId')
 		// this can be any token that is child of class Token
-		.that.is.an.instanceOf(Token)
-		.that.have.property('value')
-		.that.is.equal(expectedTokenValue);
+		.that.is.an('string')
+		.that.is.equal(expectedTokenId);
 
 	// check if error code is expected one
 	parseValidatonError.and.to.have
-		.property('errorCode')
+		.property('code')
 		.that.is.equal(expectedErrorCodeValue);
 };
 

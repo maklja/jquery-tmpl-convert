@@ -9,27 +9,22 @@ class ConvertPreviewApp {
 	}
 
 	start() {
-		this._fetchTemplates().then(tmpls => {
+		return this._convertTemplates().then(convertTemplates => {
 			ReactDOM.render(
-				<HomePage templates={tmpls} />,
+				<HomePage templates={convertTemplates} />,
 				this._mainContainer
 			);
 		});
 	}
 
-	_fetchTemplates() {
+	_convertTemplates() {
 		return new Promise((fulfill, reject) => {
 			window
-				.fetch('/loadTemplates', {
+				.fetch('/convert', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						paths: [
-							'/home/maklja/test/node_test/test/converter/**/*.html'
-						]
-					})
+					}
 				})
 				.then(response => {
 					return response.json();

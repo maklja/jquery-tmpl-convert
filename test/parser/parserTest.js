@@ -78,7 +78,7 @@ describe('Parser', () => {
 
 		compareValidationErrorState(
 			parser.parseErrors[0],
-			'{{html(test, test) testShow}}',
+			unknownToken.id,
 			PARSE_ERROR.code
 		);
 	});

@@ -25,6 +25,15 @@ module.exports = class Statement extends Token {
 		return this._pattern;
 	}
 
+	// override line number to set line number to expression
+	set lineNumber(lineNumber) {
+		this._lineNumber = lineNumber;
+
+		if (this._expression) {
+			this._expression.lineNumber = lineNumber;
+		}
+	}
+
 	constructor(
 		name,
 		value,
@@ -32,9 +41,10 @@ module.exports = class Statement extends Token {
 		expression,
 		isClosingToken,
 		params,
-		pattern
+		pattern,
+		lineNumber
 	) {
-		super(name, value, tree);
+		super(name, value, tree, lineNumber);
 		this._expression = expression;
 		this._isClosing = isClosingToken;
 		this._parameters = params;
@@ -60,13 +70,15 @@ module.exports = class Statement extends Token {
 			expression,
 			this._isClosing,
 			params,
-			Object.assign({}, this._pattern)
+			Object.assign({}, this._pattern),
+			this._lineNumber.slice()
 		);
 	}
 
 	toJSON() {
 		let json = super.toJSON(),
-			expression = this.expression.toJSON(),
+			expression =
+				this.expression != null ? this.expression.toJSON() : null,
 			{ isClosing } = this,
 			parameters = this.parameters.map(curParam => curParam.toJSON());
 

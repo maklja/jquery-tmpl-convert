@@ -1,13 +1,17 @@
 class ValidationError extends Error {
-	get errorCode() {
-		return this._errorCode;
+	get code() {
+		return this._code;
 	}
 
-	get token() {
-		return this._token;
+	get tokenId() {
+		return this._tokenId;
 	}
 
-	constructor(token, errorCode, message) {
+	get lineNumber() {
+		return this._lineNumber;
+	}
+
+	constructor(tokenId, code, message, lineNumber = []) {
 		super(message);
 
 		// Saving class name in the property of our custom error as a shortcut.
@@ -16,16 +20,16 @@ class ValidationError extends Error {
 		// Capturing stack trace, excluding constructor call from it.
 		Error.captureStackTrace(this, this.constructor);
 
-		this._errorCode = errorCode;
-		this._token = token;
+		this._code = code;
+		this._tokenId = tokenId;
+		this._lineNumber = lineNumber;
 	}
 
 	toJSON() {
-		let token = this.token.toJSON(),
-			message = this.message,
-			{ errorCode } = this;
+		let message = this.message,
+			{ tokenId, code, lineNumber } = this;
 
-		return { token, message, errorCode };
+		return { tokenId, message, code, lineNumber };
 	}
 }
 

@@ -40,9 +40,10 @@ module.exports = class Validator {
 			let missingClosingToken = this._closeTokenMissing.pop();
 			this._validationErrors.push(
 				new ValidationError(
-					missingClosingToken,
+					missingClosingToken.id,
 					MISSING_CLOSING_TOKEN.code,
-					MISSING_CLOSING_TOKEN.message(missingClosingToken)
+					MISSING_CLOSING_TOKEN.message(missingClosingToken),
+					missingClosingToken.lineNumber
 				)
 			);
 		}
@@ -69,9 +70,10 @@ module.exports = class Validator {
 		) {
 			validationErrors.push(
 				new ValidationError(
-					token,
+					token.id,
 					EXPRESSION_MISSING.code,
-					EXPRESSION_MISSING.message(token)
+					EXPRESSION_MISSING.message(token),
+					token.lineNumber
 				)
 			);
 		} else if (
@@ -80,9 +82,10 @@ module.exports = class Validator {
 		) {
 			validationErrors.push(
 				new ValidationError(
-					token,
+					token.id,
 					UNEXPECTED_EXPRESSION.code,
-					UNEXPECTED_EXPRESSION.message(token)
+					UNEXPECTED_EXPRESSION.message(token),
+					token.lineNumber
 				)
 			);
 		}
@@ -107,14 +110,15 @@ module.exports = class Validator {
 			) {
 				validationErrors.push(
 					new ValidationError(
-						token,
+						token.id,
 						MISSING_SIBLING_TOKEN.code,
 						MISSING_SIBLING_TOKEN.message(
 							token,
 							tokenPatternRule.afterTokens
 								.map(token => token.name)
 								.join(', ')
-						)
+						),
+						token.lineNumber
 					)
 				);
 			}
@@ -130,9 +134,10 @@ module.exports = class Validator {
 		if (this._closeTokenMissing.length === 0) {
 			validationErrors.push(
 				new ValidationError(
-					token,
+					token.id,
 					MISSING_STARTING_TOKEN.code,
-					MISSING_STARTING_TOKEN.message(token)
+					MISSING_STARTING_TOKEN.message(token),
+					token.lineNumber
 				)
 			);
 			return;
@@ -145,9 +150,10 @@ module.exports = class Validator {
 		} else {
 			validationErrors.push(
 				new ValidationError(
-					token,
+					token.id,
 					MISSING_STARTING_TOKEN.code,
-					MISSING_STARTING_TOKEN.message(token)
+					MISSING_STARTING_TOKEN.message(token),
+					token.lineNumber
 				)
 			);
 		}

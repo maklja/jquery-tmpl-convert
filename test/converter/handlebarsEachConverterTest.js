@@ -15,7 +15,9 @@ const expect = chai.expect;
 
 const convertTemplate = (templatePath, done) => {
 	// let jquery template parse all file from paths and create template models
-	let templateParser = new TemplateParser([templatePath]);
+	let templateParser = new TemplateParser([templatePath], {
+		removeTabs: true
+	});
 	// parse all templates
 	return templateParser
 		.parse()
@@ -65,34 +67,34 @@ describe('Test handlebars EACH converter', () => {
 			// we have 2 expression tokens and 2 unknown tokens in template
 			expect(eachNode.children)
 				.to.be.an('array')
-				.that.have.lengthOf(4);
+				.that.have.lengthOf(5);
 
 			expect(eachNode.siblings).to.be.an('array').that.is.empty;
 
 			// check if index expression is converted
-			let indexExpression = eachNode.children[0].token;
+			let indexExpression = eachNode.children[1].token;
 			compareExpressionTokenState(indexExpression, '@index');
 
 			// check if value expression is converted
-			let valueExpression = eachNode.children[2].token;
+			let valueExpression = eachNode.children[3].token;
 			compareExpressionTokenState(valueExpression, 'this');
 		});
 
 		it('Check EACH statement unknown tokens', () => {
 			let eachNode = this.tokenNodes[0];
 
-			// we have 2 expression tokens and 2 unknown tokens in template
+			// we have 2 expression tokens and 3 unknown tokens in template
 			expect(eachNode.children)
 				.to.be.an('array')
-				.that.have.lengthOf(4);
+				.that.have.lengthOf(5);
 
 			expect(eachNode.siblings).to.be.an('array').that.is.empty;
 
-			let firstUnknownToken = eachNode.children[1].token;
+			let firstUnknownToken = eachNode.children[2].token;
 			compareUnknownTokenState(firstUnknownToken, ': <em>');
 
-			let secondUnknownToken = eachNode.children[3].token;
-			compareUnknownTokenState(secondUnknownToken, '. </em>');
+			let secondUnknownToken = eachNode.children[4].token;
+			compareUnknownTokenState(secondUnknownToken, '. </em>\n');
 		});
 
 		it('Check complex each nodes', () => {});
@@ -119,34 +121,34 @@ describe('Test handlebars EACH converter', () => {
 			// we have 2 expression tokens and 2 unknown tokens in template
 			expect(eachNode.children)
 				.to.be.an('array')
-				.that.have.lengthOf(4);
+				.that.have.lengthOf(5);
 
 			expect(eachNode.siblings).to.be.an('array').that.is.empty;
 
 			// check if index expression is converted
-			let indexExpression = eachNode.children[0].token;
+			let indexExpression = eachNode.children[1].token;
 			compareExpressionTokenState(indexExpression, '@index');
 
 			// check if value expression is converted
-			let valueExpression = eachNode.children[2].token;
+			let valueExpression = eachNode.children[3].token;
 			compareExpressionTokenState(valueExpression, 'this');
 		});
 
 		it('Check EACH statement unknown tokens', () => {
 			let eachNode = this.tokenNodes[0];
 
-			// we have 2 expression tokens and 2 unknown tokens in template
+			// we have 2 expression tokens and 3 unknown tokens in template
 			expect(eachNode.children)
 				.to.be.an('array')
-				.that.have.lengthOf(4);
+				.that.have.lengthOf(5);
 
 			expect(eachNode.siblings).to.be.an('array').that.is.empty;
 
-			let firstUnknownToken = eachNode.children[1].token;
+			let firstUnknownToken = eachNode.children[2].token;
 			compareUnknownTokenState(firstUnknownToken, ': <em>');
 
-			let secondUnknownToken = eachNode.children[3].token;
-			compareUnknownTokenState(secondUnknownToken, '. </em>');
+			let secondUnknownToken = eachNode.children[4].token;
+			compareUnknownTokenState(secondUnknownToken, '. </em>\n');
 		});
 
 		it('Check complex each nodes', () => {});
@@ -170,12 +172,12 @@ describe('Test handlebars EACH converter', () => {
 		it('Check IF statement inside ELSE statement', () => {
 			let eachNode = this.tokenNodes[0];
 
-			// we have 2 expression tokens and 2 unknown tokens in template
+			// we have 2 unknown tokens that are only new line
 			expect(eachNode.children)
 				.to.be.an('array')
-				.that.have.lengthOf(1);
+				.that.have.lengthOf(3);
 
-			let ifToken = eachNode.children[0].token;
+			let ifToken = eachNode.children[1].token;
 			compareStatementTokenState(ifToken, tokens.IF, '#if', false);
 			compareExpressionTokenState(ifToken.expression, 'this');
 		});
@@ -195,7 +197,7 @@ describe('Test handlebars EACH converter', () => {
 			let paramsError = this.templateModel.errors[0];
 			expect(paramsError)
 				.to.be.instanceOf(ValidationError)
-				.that.have.property('errorCode')
+				.that.have.property('code')
 				.that.is.equal(CONVERT_ERROR.code);
 		});
 

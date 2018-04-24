@@ -12,7 +12,9 @@ const expect = chai.expect;
 
 const convertTemplate = (templatePath, done) => {
 	// let jquery template parse all file from paths and create template models
-	let templateParser = new TemplateParser([templatePath]);
+	let templateParser = new TemplateParser([templatePath], {
+		removeTabs: true
+	});
 	// parse all templates
 	return templateParser
 		.parse()
@@ -52,10 +54,10 @@ describe('Test handlebars HTML converter', () => {
 				.that.have.lengthOf(3);
 
 			let firstUnknownToken = this.tokenNodes[0].token;
-			compareUnknownTokenState(firstUnknownToken, '<div>');
+			compareUnknownTokenState(firstUnknownToken, '<div>\n');
 
 			let secondUnknownToken = this.tokenNodes[2].token;
-			compareUnknownTokenState(secondUnknownToken, '</div>');
+			compareUnknownTokenState(secondUnknownToken, '\n</div>');
 		});
 
 		it('Check HTML nodes', () => {
