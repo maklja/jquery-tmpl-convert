@@ -1,15 +1,30 @@
-const AbstractConverter = require('./AbstractConverter');
+const IfElseConverter = require('./IfElseConverter');
 const { ELSE } = require('../../tokens/tokens');
 
-class ElseConverter extends AbstractConverter {
-	constructor(templateConverter) {
-		super(templateConverter);
-	}
-
-	convert(node) {
-		if (node.token.expression != null) {
-			return this._convertDefaultStatement(node, 'else if');
+class ElseConverter extends IfElseConverter {
+	convert(node, context, errors) {
+		const expression = node.token.expression;
+		// if expression is not null then this is else if statement
+		if (expression != null) {
+			// check if we have unary negation operator in expression
+			// if we have then convert if to unless
+			if (this._isUnless(expression)) {
+				return this._convertDefaultStatement(
+					node,
+					'else unless',
+					context,
+					errors
+				);
+			} else {
+				return this._convertDefaultStatement(
+					node,
+					'else if',
+					context,
+					errors
+				);
+			}
 		} else {
+			// else withou expresion
 			return this._convertElseStatement(node);
 		}
 	}

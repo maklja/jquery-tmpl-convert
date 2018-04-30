@@ -18,36 +18,40 @@ class ConvertService {
 				(allPaths, curPaths) => allPaths.concat(curPaths),
 				[]
 			);
-			this.parserTemplate = new TemplateParser(this.resolvedPaths);
 		});
 	}
 
-	_loadTemplates() {
+	convertTemplates(pathIndex, limits) {
 		return new Promise((fulfill, reject) => {
-			this.parserTemplate
-				.parse()
-				.then(() => fulfill(this.parserTemplate.templates))
-				.catch(e => reject(e));
-		});
-	}
+			this._loadTemplates(pathIndex, limits)
+				.then(tmplsData => {
+					// prepair converter
+					let handlebarsConverter = new HandlebarsConverter();
+					handlebarsConverter.convert(tmplsData.tmpls);
 
-	convertTemplates() {
-		return new Promise((fulfill, reject) => {
-			this._loadTemplates()
-				.then(tmpls => {
-					let handlebarsConverter = new HandlebarsConverter(),
-						templatesPair = {
-							originalTemplates: tmpls,
-							convertedTemplates: null
-						};
-					handlebarsConverter.convert(tmpls);
-
-					templatesPair.convertedTemplates =
-						handlebarsConverter.convertTemplates;
-
-					fulfill(templatesPair);
+					// send response to the client
+					fulfill({
+						originalTemplates: tmplsData.tmpls,
+						convertedTemplates:
+							handlebarsConverter.convertTemplates,
+						pathIndex: tmplsData.paths.length,
+						countPaths: this.resolvedPaths.length
+					});
 				})
 				.catch(reject);
+		});
+	}
+
+	_loadTemplates(pathIndex, limits) {
+		const toPathIndex = pathIndex + limits;
+		const paths = this.resolvedPaths.slice(pathIndex, toPathIndex);
+
+		return new Promise((fulfill, reject) => {
+			const parserTemplate = new TemplateParser(paths);
+			parserTemplate
+				.parse()
+				.then(() => fulfill({ tmpls: parserTemplate.templates, paths }))
+				.catch(e => reject(e));
 		});
 	}
 

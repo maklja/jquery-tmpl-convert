@@ -1,5 +1,5 @@
 .template-preview {
-	border: 1px solid #eee;
+	border-top: 1px solid #eee;
 	padding: 2px;
 	overflow: auto;
 	height: 100%;
@@ -20,11 +20,24 @@
 
 .template-preview .template-errors .error-block {
 	font-size: 18px;
-    color: red;
-    /* background: gray; */
     padding: 4px;
     border: 1px solid gray;
 	display: flex;
+}
+
+.template-preview .template-errors .error-block.info {
+	background: #BDE5F8;
+	color: #00529B;
+}
+
+.template-preview .template-errors .error-block.warning {
+	background: #FEEFB3;
+	color: #9F6000;
+}
+
+.template-preview .template-errors .error-block.error {
+	background: #FFBABA;
+	color: #D8000C;
 }
 
 .template-preview .template-errors .title {
@@ -47,4 +60,8 @@
 
 .template-preview .error-block .message {
 	width: 80%;
+}
+
+.line-highlight {
+	background: linear-gradient(to right, hsla(0,100%, 50%,.1) 70%, hsla(0,100%, 50%,.1));
 }

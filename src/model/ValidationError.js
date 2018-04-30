@@ -1,3 +1,5 @@
+const ErrorTypes = require('./ErrorTypes.js');
+
 class ValidationError extends Error {
 	get code() {
 		return this._code;
@@ -11,7 +13,17 @@ class ValidationError extends Error {
 		return this._lineNumber;
 	}
 
-	constructor(tokenId, code, message, lineNumber = []) {
+	get type() {
+		return this._type;
+	}
+
+	constructor(
+		tokenId,
+		code,
+		message,
+		lineNumber = [],
+		type = ErrorTypes.Error
+	) {
 		super(message);
 
 		// Saving class name in the property of our custom error as a shortcut.
@@ -23,13 +35,14 @@ class ValidationError extends Error {
 		this._code = code;
 		this._tokenId = tokenId;
 		this._lineNumber = lineNumber;
+		this._type = type;
 	}
 
 	toJSON() {
 		let message = this.message,
-			{ tokenId, code, lineNumber } = this;
+			{ tokenId, code, lineNumber, type } = this;
 
-		return { tokenId, message, code, lineNumber };
+		return { tokenId, message, code, lineNumber, type };
 	}
 }
 

@@ -10,8 +10,23 @@ app.get('/', (req, res) =>
 	res.sendFile(path.join(__dirname, './public/index.html'))
 );
 
-app.post('/convert', function(req, res) {
-	let promise = convertService.convertTemplates();
+const isNumeric = n => {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
+app.get('/convert', function(req, res) {
+	const { pathIndex, limit } = req.query,
+		pathIndexNum = parseInt(pathIndex),
+		limitNum = parseInt(limit);
+
+	if (!isNumeric(pathIndexNum) || !isNumeric(limitNum)) {
+		res.status(400);
+		res.send('Invalid request parameters.');
+
+		return;
+	}
+
+	const promise = convertService.convertTemplates(pathIndexNum, limitNum);
 
 	promise.then(templates => {
 		res.end(JSON.stringify(templates));

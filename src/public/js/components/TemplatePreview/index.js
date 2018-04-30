@@ -42,7 +42,10 @@ class TemplatePreview extends React.Component {
 					<div className="template-errors">
 						<div className="title">Parser messages</div>
 						{template.errors.map((curError, i) => (
-							<div key={i} className="error-block">
+							<div
+								key={i}
+								className={`error-block ${curError.type}`}
+							>
 								<div className="code">{curError.code}</div>
 								<div className="message">
 									{curError.message}

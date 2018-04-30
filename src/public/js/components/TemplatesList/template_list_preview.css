@@ -6,3 +6,12 @@
 	width: 100%;
 	max-width: 50%;
 }
+
+.templates-loading {
+	padding: 10px;
+    text-align: center;
+    font-size: 24px;
+    vertical-align: middle;
+    background: darkgray;
+    margin: 5px 0px;
+}

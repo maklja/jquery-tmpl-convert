@@ -112,7 +112,10 @@ describe('Test handlebars EACH converter', () => {
 
 			let eachToken = this.tokenNodes[0].token;
 			compareStatementTokenState(eachToken, tokens.EACH, '#each', false);
-			compareExpressionTokenState(eachToken.expression, 'collection');
+			compareExpressionTokenState(
+				eachToken.expression,
+				'collection as |myValue myIndex|'
+			);
 		});
 
 		it('Check EACH statement index and value', () => {
@@ -127,11 +130,11 @@ describe('Test handlebars EACH converter', () => {
 
 			// check if index expression is converted
 			let indexExpression = eachNode.children[1].token;
-			compareExpressionTokenState(indexExpression, '@index');
+			compareExpressionTokenState(indexExpression, 'myIndex');
 
 			// check if value expression is converted
 			let valueExpression = eachNode.children[3].token;
-			compareExpressionTokenState(valueExpression, 'this');
+			compareExpressionTokenState(valueExpression, 'myValue');
 		});
 
 		it('Check EACH statement unknown tokens', () => {
@@ -166,7 +169,10 @@ describe('Test handlebars EACH converter', () => {
 
 			let eachToken = this.tokenNodes[0].token;
 			compareStatementTokenState(eachToken, tokens.EACH, '#each', false);
-			compareExpressionTokenState(eachToken.expression, 'collection');
+			compareExpressionTokenState(
+				eachToken.expression,
+				'collection as |myValue myIndex|'
+			);
 		});
 
 		it('Check IF statement inside ELSE statement', () => {
@@ -179,7 +185,7 @@ describe('Test handlebars EACH converter', () => {
 
 			let ifToken = eachNode.children[1].token;
 			compareStatementTokenState(ifToken, tokens.IF, '#if', false);
-			compareExpressionTokenState(ifToken.expression, 'this');
+			compareExpressionTokenState(ifToken.expression, 'myValue');
 		});
 	});
 
@@ -192,13 +198,18 @@ describe('Test handlebars EACH converter', () => {
 		it('Check convert errors', () => {
 			expect(this.templateModel.errors)
 				.to.be.an('array')
-				.that.have.lengthOf(1);
+				.that.have.lengthOf(3);
 
-			let paramsError = this.templateModel.errors[0];
-			expect(paramsError)
-				.to.be.instanceOf(ValidationError)
-				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+			for (let curError of this.templateModel.errors) {
+				// 3 errors
+				// for convert from $item to this
+				// named parameters check warning
+				// error for function call in expression
+				expect(curError)
+					.to.be.instanceOf(ValidationError)
+					.that.have.property('code')
+					.that.is.equal(CONVERT_ERROR.code);
+			}
 		});
 
 		it('Check EACH nodes', () => {
@@ -210,7 +221,7 @@ describe('Test handlebars EACH converter', () => {
 			compareStatementTokenState(eachToken, tokens.EACH, '#each', false);
 			compareExpressionTokenState(
 				eachToken.expression,
-				'$item.getCollection()'
+				'this.getCollection() as |myValue myIndex|'
 			);
 		});
 	});

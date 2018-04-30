@@ -2,14 +2,12 @@ const AbstractConverter = require('./AbstractConverter');
 const { HTML } = require('../../tokens/tokens');
 
 class HTMLConverter extends AbstractConverter {
-	constructor(templateConverter) {
-		super(templateConverter);
-	}
-
-	convert(node) {
+	convert(node, context, errors) {
 		let token = this._convertDefaultStatement(
 			node,
-			`${node.token.expression.value}`
+			`${node.token.expression.value}`,
+			context,
+			errors
 		);
 		token.expression = null;
 

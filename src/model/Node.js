@@ -63,6 +63,10 @@ module.exports = class Node {
 		return this._token.isCallExpression();
 	}
 
+	isUnaryExpression() {
+		return this._token.isUnaryExpression();
+	}
+
 	constructor(token) {
 		this._children = [];
 		this._token = token;

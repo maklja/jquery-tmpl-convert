@@ -1,19 +1,87 @@
-class AbstractConverter {
-	constructor(templateConverter) {
-		this.tmplConverter = templateConverter;
-	}
+const { CONVERT_ERROR } = require('../../model/error_code');
+const { extractTokenText } = require('../../parser/parserUtils');
+const ValidationError = require('../../model/ValidationError');
+const { Warning } = require('../../model/ErrorTypes');
 
-	_convertDefaultStatement(node, convertedValue) {
+class AbstractConverter {
+	_convertDefaultStatement(node, convertedValue, context, errors) {
 		let expression = node.token.expression,
 			hbsStatement = node.token.clone();
 
-		hbsStatement.expression =
-			expression != null
-				? this.tmplConverter.convertExpressionToken(expression)
-				: expression;
+		hbsStatement.expression = this._convertExpressionToken(
+			expression,
+			context,
+			errors
+		);
 		hbsStatement.value = convertedValue;
 
 		return hbsStatement;
+	}
+
+	_replaceTokenName(tokenName, expression, context, errors) {
+		const { replaceExpression } = context;
+		const newTokenName =
+			replaceExpression[tokenName] != null
+				? replaceExpression[tokenName]
+				: tokenName;
+		if (tokenName === '$item') {
+			errors.push(
+				new ValidationError(
+					expression.id,
+					CONVERT_ERROR.code,
+					CONVERT_ERROR.message(
+						`Replacing $item with ${newTokenName}, check that scope and value are correct.`
+					),
+					expression.lineNumber,
+					Warning
+				)
+			);
+		}
+
+		return newTokenName;
+	}
+
+	_convertExpressionToken(
+		token,
+		context = { replaceExpression: {} },
+		errors
+	) {
+		// if expression is null, just return null
+		if (token === null) {
+			return null;
+		}
+
+		// clone expression
+		let expression = token.clone();
+		// extract expression value using token tree and replace all jquery template key words
+		// with handlebars one
+		expression.value = extractTokenText(token.tree, {
+			// we need to replace $item, $index, $value properties with
+			// handlebars one
+			replaceFn: tokenName => {
+				return this._replaceTokenName(
+					tokenName,
+					expression,
+					context,
+					errors
+				);
+			}
+		});
+
+		if (!token.isIdentifier() && !token.isMemberExpression()) {
+			errors.push(
+				new ValidationError(
+					expression.id,
+					CONVERT_ERROR.code,
+					CONVERT_ERROR.message(
+						`Expression can't be type of ${token.treeType}.`
+					),
+					expression.lineNumber
+				)
+			);
+		}
+
+		return expression;
 	}
 
 	canConvert(node) {

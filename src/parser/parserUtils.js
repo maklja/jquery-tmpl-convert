@@ -14,23 +14,23 @@ const isCallExpression = tokenTree => tokenTree.type === 'CallExpression';
 const isUnaryExpression = tokenTree => tokenTree.type === 'UnaryExpression';
 const isLogicalExpression = tokenTree => tokenTree.type === 'LogicalExpression';
 
-const replaceTokenName = (tokenName, replaceObj = {}) =>
-	replaceObj[tokenName] != null ? replaceObj[tokenName] : tokenName;
-
 // function uses recursion to construct full token name from tree
 // options are used to replace name of the tree node with target name
 const extractTokenText = (tree, options = {}) => {
 	if (isIdentifier(tree)) {
+		const { replaceFn } = options;
 		// identifier node have name that can be replace with other name
-		return replaceTokenName(tree.name, options.replace);
+		return replaceFn ? replaceFn(tree.name) : tree.name;
 	} else if (isLiteral(tree)) {
 		// literal is constant so we can't change it, just return raw value
 		return tree.raw;
 	} else if (isMemberExpression(tree)) {
-		return `${extractTokenText(tree.object, options)}.${extractTokenText(
-			tree.property,
-			options
-		)}`;
+		const firstPart = `${extractTokenText(tree.object, options)}`;
+		const secPart = `${extractTokenText(tree.property, options)}`;
+		return (
+			firstPart +
+			(isLiteral(tree.property) ? `[${secPart}]` : `.${secPart}`)
+		);
 	} else if (isCallExpression(tree)) {
 		let argumentsText = tree.arguments
 			.map(curParam => extractTokenText(curParam, options))
@@ -141,6 +141,7 @@ module.exports = {
 	isMemberExpression,
 	isCallExpression,
 	isClosingToken,
+	isUnaryExpression,
 	extractTokenText,
 	getLineNumber
 };

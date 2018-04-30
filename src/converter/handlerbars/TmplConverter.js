@@ -1,13 +1,11 @@
 const AbstractConverter = require('./AbstractConverter');
+const { Info } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
 const { CONVERT_ERROR } = require('../../model/error_code');
 const { TMPL } = require('../../tokens/tokens');
+const Unknown = require('../../model/Unknown');
 
 class TmplConverter extends AbstractConverter {
-	constructor(templateConverter) {
-		super(templateConverter);
-	}
-
 	convert(node, context, errors) {
 		let tmplToken = node.token.clone();
 		// TODO create new rule??
@@ -47,7 +45,8 @@ class TmplConverter extends AbstractConverter {
 					CONVERT_ERROR.message(
 						`Make sure that partial template is register to handlebars.`
 					),
-					tmplToken.lineNumber
+					tmplToken.lineNumber,
+					Info
 				)
 			);
 		} else {
@@ -91,6 +90,13 @@ class TmplConverter extends AbstractConverter {
 
 		return expValue[0] === '#' ? expValue.substring(1) : expValue;
 	}
+
+// 	convertComplited(node) {
+// 		debugger;
+// 		node.siblings.push(
+// 			new Unknown(`<script type="text/javascript">\n</script>`)
+// 		);
+// 	}
 }
 
 module.exports = TmplConverter;
