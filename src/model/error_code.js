@@ -42,7 +42,7 @@ const PARSE_ERROR = {
 
 const CONVERT_ERROR = {
 	message(msg) {
-		return `Convert failed: ${msg}`;
+		return `Convert: ${msg}`;
 	},
 	code: 107
 };

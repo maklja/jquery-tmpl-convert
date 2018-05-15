@@ -3,6 +3,8 @@ const fs = require('fs');
 const TemplateModel = require('../model/TemplateModel');
 const Parser = require('./Parser');
 
+const SUPPORTED_SCRIPT_TYPE = 'text/x-jquery-tmpl';
+
 module.exports = class TemplateParser {
 	get templates() {
 		return this._templateModels;
@@ -54,7 +56,7 @@ module.exports = class TemplateParser {
 			let templateId = curTemplate.attribs['id'],
 				type = curTemplate.attribs['type'];
 
-			if (templateId && type === 'text/x-jquery-tmpl') {
+			if (templateId && type === SUPPORTED_SCRIPT_TYPE) {
 				const $node = cheerio.load(curTemplate),
 					outerHTML = $node.html().trim(),
 					innerHTML = curTemplate.children[0].nodeValue;
@@ -70,6 +72,44 @@ module.exports = class TemplateParser {
 					)
 				);
 			}
+		});
+	}
+
+	static extractTemplateHTML(templateData) {
+		// parse template html
+		let $ = cheerio.load(templateData),
+			// one html file can contain multiple template script tags
+			// so extract them all
+			templates = $('script');
+
+		// create template model for each template
+		return templates.toArray().map(curTemplate => {
+			let templateId = curTemplate.attribs['id'],
+				type = curTemplate.attribs['type'];
+
+			if (templateId == null) {
+				throw new Error('Template id is missing.');
+			}
+
+			if (type == null) {
+				throw new Error('Template type is missing.');
+			}
+
+			const $node = cheerio.load(curTemplate),
+				outerHTML = $node.html().trim(),
+				innerHTML = curTemplate.children.reduce(
+					(childrenValues, curChild) =>
+						(childrenValues += curChild.nodeValue),
+					''
+				);
+
+			return {
+				templateId,
+				type,
+				// get text inside script tag
+				innerHTML,
+				outerHTML
+			};
 		});
 	}
 

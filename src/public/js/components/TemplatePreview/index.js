@@ -20,8 +20,12 @@ class TemplatePreview extends React.Component {
 		Prism.highlightElement(this.templateCode.current);
 	}
 
+	componentDidUpdate() {
+		Prism.highlightElement(this.templateCode.current);
+	}
+
 	render() {
-		const { template } = this.props,
+		const { template, onOpenModal } = this.props,
 			linesWithError = template.errors
 				.map(curErr => curErr.lineNumber.join(','))
 				.join(',');
@@ -30,6 +34,7 @@ class TemplatePreview extends React.Component {
 			<div className="template-preview">
 				<div className="template-body">
 					<pre
+						onClick={() => onOpenModal(template)}
 						data-line={linesWithError}
 						className="line-numbers language-html"
 					>
@@ -67,7 +72,12 @@ class TemplatePreview extends React.Component {
 }
 
 TemplatePreview.propTypes = {
-	template: PropTypes.object.isRequired
+	template: PropTypes.object.isRequired,
+	onOpenModal: PropTypes.func
+};
+
+TemplatePreview.defaultProps = {
+	onOpenModal: () => {}
 };
 
 export default TemplatePreview;

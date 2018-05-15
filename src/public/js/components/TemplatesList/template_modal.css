@@ -1,0 +1,60 @@
+.template-modal {
+	top: 30%;
+    left: 50%;
+    bottom: 20%;
+    width: 90%;
+    max-width: 800px;
+    transform: translate(-50%, -50%);
+    background: black;
+    position: absolute;
+	padding: 10px;
+}
+
+.template-modal .template-header {
+	margin: 0px 0px 8px;
+}
+
+.template-modal .template-header .template-name {
+	font-size: 22px;
+}
+
+.template-modal .template-header .close-button {
+	font-size: 26px;
+    position: absolute;
+    right: 5px;
+    top: 2px;
+}
+
+.template-modal .template-header .close-button:hover {
+	cursor: pointer;
+	color: red;
+}
+
+.template-modal .template-body {
+	overflow: hidden;
+}
+
+.template-modal .template-body .textarea-markup {
+	width: 100%;
+	height: 350px;
+	resize: none;
+}
+
+.template-modal .template-body .button-controls {
+	margin: 5px 0px;
+}
+
+.template-modal .template-body .button-controls button {
+	margin-right: 5px;
+	font-size: 16px;
+	height: 26px;
+	min-width: 80px
+}
+
+.template-modal .template-body .error-msg {
+	font-size: 18px;
+}
+
+.template-modal .template-body .error-msg .text {
+	color: red;
+}

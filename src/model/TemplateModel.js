@@ -15,6 +15,10 @@ module.exports = class TemplateModel {
 		return this._value;
 	}
 
+	set value(val) {
+		this._value = val;
+	}
+
 	get tokenNodes() {
 		return this._tokenNodes;
 	}
@@ -33,6 +37,10 @@ module.exports = class TemplateModel {
 
 	get html() {
 		return this._html;
+	}
+
+	set html(html) {
+		this._html = html;
 	}
 
 	constructor(id, type, path, value, html) {

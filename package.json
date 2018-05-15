@@ -7,7 +7,7 @@
     "test:dev": "./node_modules/mocha/bin/mocha ./test/**/*.js --watch",
     "test:debug": "./node_modules/mocha/bin/mocha ./test/**/*.js --inspect-brk",
     "start": "node ./src/app.js",
-    "start:debug": "nodemon --inspect ./src/app.js",
+    "start:debug": "nodemon --inspect ./src/app.js -- --config ./src/default.json",
     "build": "node_modules\\.bin\\webpack -d --config src/public/webpack.config.js",
     "dev-server": "node_modules\\.bin\\webpack-dev-server -d --config src/public/webpack.config.js --hot --inline"
   },
@@ -41,11 +41,11 @@
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.3",
     "glob": "^7.1.2",
-    "html-beautify": "^1.0.4",
     "jsep": "^0.3.3",
     "prismjs": "^1.14.0",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
+    "react-modal": "^3.4.4",
     "uuid": "^3.2.1",
     "whatwg-fetch": "^2.0.4"
   }

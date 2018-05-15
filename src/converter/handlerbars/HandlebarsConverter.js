@@ -1,3 +1,4 @@
+const fs = require('fs');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
 const NodeTreeMaker = require('../../nodes/NodeTreeMaker');
@@ -17,7 +18,9 @@ class HandlebarsConverter {
 		return this._convertTemplates;
 	}
 
-	constructor() {
+	constructor(cfg) {
+		this._outputDir = cfg.outputDir;
+		this._clearOutputDir = cfg.clearOutputDir;
 		this._resetState();
 		this.SCRIPT_TYPE = 'text/x-handlebars-template';
 
@@ -55,7 +58,10 @@ class HandlebarsConverter {
 			let convertedTemplateModel = new TemplateModel(
 				curTemplateModel.id,
 				this.SCRIPT_TYPE,
-				curTemplateModel.path,
+				// set template output file
+				`${this._outputDir}/${this._getTemplateName(
+					curTemplateModel.path
+				)}`,
 				// try to beautify html output
 				this._hbsTemplateValue(this._convertTokens),
 				this._addScriptTag(
@@ -73,10 +79,67 @@ class HandlebarsConverter {
 
 			this._convertTemplates.push(convertedTemplateModel);
 		}
+
+		return this._saveTemplatesToFiles();
+	}
+
+	_saveTemplatesToFiles() {
+		return new Promise((fulfill, reject) => {
+			// we can have multiple templates in single file so we need to group
+			// files by path
+			const filePathGroup = this._convertTemplates.reduce(
+				(group, curTmpl) => {
+					if (!group[curTmpl.path]) {
+						group[curTmpl.path] = [];
+					}
+
+					group[curTmpl.path].push(curTmpl);
+
+					return group;
+				},
+				{}
+			);
+
+			const tmplFilePromise = [];
+			const fileSaveOptions = {
+				flag: this._clearOutputDir ? 'w' : 'wx'
+			};
+			// save all templates from each group
+			for (let curPath in filePathGroup) {
+				// join all templates from single group
+				let joinedTmpl = filePathGroup[curPath]
+					.map(curTmpl => curTmpl.html)
+					.join('\n'.repeat(2));
+
+				// manage async in file save
+				tmplFilePromise.push(
+					this._saveTemplateFile(curPath, joinedTmpl, fileSaveOptions)
+				);
+			}
+
+			// wait all templates to be saved before resolving promise
+			Promise.all(tmplFilePromise)
+				.then(fulfill)
+				.catch(reject);
+		});
+	}
+
+	_saveTemplateFile(path, value, options) {
+		return new Promise((fulfill, reject) => {
+			fs.writeFile(path, value, options, err => {
+				if (err) {
+					if (options.flag !== 'ws' && err.code !== 'EEXIST') {
+						reject(err);
+					}
+				}
+
+				fulfill();
+			});
+		});
 	}
 
 	_addScriptTag(id, tmpl) {
-		return `<script type="${this.SCRIPT_TYPE}" id="${id}">${tmpl}</script>`;
+		return `<script id="${id}" type="${this.SCRIPT_TYPE}">${tmpl}</script>`;
 	}
 
 	_convertTemplate(templateModel) {
@@ -168,6 +231,15 @@ class HandlebarsConverter {
 		}
 
 		return value;
+	}
+
+	_getTemplateName(tmplPath) {
+		// replace path backslash with forward slash
+		// and take last part that is name of the template
+		return tmplPath
+			.replace('\\', '/')
+			.split('/')
+			.pop();
 	}
 }
 

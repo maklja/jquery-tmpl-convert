@@ -25,6 +25,10 @@ module.exports = class Statement extends Token {
 		return this._pattern;
 	}
 
+	get lineNumber() {
+		return super.lineNumber;
+	}
+
 	// override line number to set line number to expression
 	set lineNumber(lineNumber) {
 		this._lineNumber = lineNumber;

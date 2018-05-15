@@ -1,56 +1,114 @@
+const fs = require('fs');
 const glob = require('glob');
 const TemplateParser = require('../parser/TemplateParser');
 const HandlebarsConverter = require('../converter/handlerbars/HandlebarsConverter');
 
 class ConvertService {
-	constructor() {
-		this.templates = null;
-		this.paths = [
-			'/home/maklja/test/node_test/test/converter/**/*.html',
-			'/home/maklja/www/*.htm'
-		];
-		this.resolvedPaths = [];
+	constructor(config) {
+		this._paths = config.paths;
+		this._outputDir = config.outputDir;
+		this._clearOutputDir = config.clearOutputDir;
+		this._originalTmpl = [];
+		this._convertedTmpl = [];
 	}
 
 	initialize() {
-		return this._loadPaths(this.paths).then(paths => {
-			this.resolvedPaths = paths.reduce(
-				(allPaths, curPaths) => allPaths.concat(curPaths),
-				[]
-			);
-		});
+		return this._loadPaths(this._paths)
+			.then(paths => this._loadTemplates(paths))
+			.then(tmpls => (this._originalTmpl = tmpls));
 	}
 
-	convertTemplates(pathIndex, limits) {
+	convertTemplates(index, limits) {
 		return new Promise((fulfill, reject) => {
-			this._loadTemplates(pathIndex, limits)
-				.then(tmplsData => {
-					// prepair converter
-					let handlebarsConverter = new HandlebarsConverter();
-					handlebarsConverter.convert(tmplsData.tmpls);
+			// prepair converter
+			let hbsConverter = new HandlebarsConverter({
+					outputDir: this._outputDir,
+					clearOutputDir: this._clearOutputDir
+				}),
+				toIndex = index + limits,
+				originalTmplData = this._originalTmpl.slice(index, toIndex);
 
-					// send response to the client
-					fulfill({
-						originalTemplates: tmplsData.tmpls,
-						convertedTemplates:
-							handlebarsConverter.convertTemplates,
-						pathIndex: tmplsData.paths.length,
-						countPaths: this.resolvedPaths.length
-					});
-				})
-				.catch(reject);
+			if (this._convertedTmpl.length >= toIndex) {
+				// send response to the client
+				fulfill({
+					originalTemplates: originalTmplData,
+					convertedTemplates: this._convertedTmpl.slice(
+						index,
+						toIndex
+					),
+					index:
+						toIndex < this._originalTmpl.length
+							? toIndex
+							: this._originalTmpl.length,
+					maxTmpls: this._originalTmpl.length
+				});
+			} else {
+				hbsConverter
+					.convert(originalTmplData)
+					.then(() => {
+						const convTmpls = hbsConverter.convertTemplates;
+						this._convertedTmpl = this._convertedTmpl.concat(
+							convTmpls
+						);
+
+						// send response to the client
+						fulfill({
+							originalTemplates: originalTmplData,
+							convertedTemplates: convTmpls,
+							index:
+								toIndex < this._originalTmpl.length
+									? toIndex
+									: this._originalTmpl.length,
+							maxTmpls: this._originalTmpl.length
+						});
+					})
+					.catch(reject);
+			}
 		});
 	}
 
-	_loadTemplates(pathIndex, limits) {
-		const toPathIndex = pathIndex + limits;
-		const paths = this.resolvedPaths.slice(pathIndex, toPathIndex);
+	updateTemplate(tmplId, tmplHTML) {
+		const updatedTmplData = TemplateParser.extractTemplateHTML(tmplHTML);
 
+		if (updatedTmplData.length === 0) {
+			return Promise.reject(new Error('Script tag is not found.'));
+		}
+
+		if (updatedTmplData.length > 1) {
+			return Promise.reject(new Error('Multiple script tags found.'));
+		}
+
+		const tmplModel = this._convertedTmpl.find(
+			curTmpl => curTmpl.id === tmplId
+		);
+
+		if (tmplModel == null) {
+			return Promise.reject(
+				new Error(`Template with id ${tmplId} is not found.`)
+			);
+		}
+		const tmplDelta = updatedTmplData[0];
+		return new Promise((fulfill, reject) => {
+			fs.writeFile(tmplModel.path, tmplDelta.outerHTML, err => {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				tmplModel.value = tmplDelta.innerHTML;
+				tmplModel.html = tmplDelta.outerHTML;
+
+				fulfill(tmplModel.toJSON());
+			});
+		});
+	}
+
+	_loadTemplates(paths) {
 		return new Promise((fulfill, reject) => {
 			const parserTemplate = new TemplateParser(paths);
 			parserTemplate
 				.parse()
-				.then(() => fulfill({ tmpls: parserTemplate.templates, paths }))
+				.then(() => fulfill([...parserTemplate.templates]))
 				.catch(e => reject(e));
 		});
 	}
@@ -61,7 +119,9 @@ class ConvertService {
 			promises.push(this._loadPath(curPath));
 		}
 
-		return Promise.all(promises);
+		return Promise.all(promises).then(paths =>
+			paths.reduce((allPaths, curPaths) => allPaths.concat(curPaths), [])
+		);
 	}
 
 	_loadPath(path) {
@@ -80,4 +140,4 @@ class ConvertService {
 	}
 }
 
-module.exports = new ConvertService();
+module.exports = ConvertService;

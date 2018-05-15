@@ -3,7 +3,6 @@ const { Info } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
 const { CONVERT_ERROR } = require('../../model/error_code');
 const { TMPL } = require('../../tokens/tokens');
-const Unknown = require('../../model/Unknown');
 
 class TmplConverter extends AbstractConverter {
 	convert(node, context, errors) {
@@ -90,13 +89,6 @@ class TmplConverter extends AbstractConverter {
 
 		return expValue[0] === '#' ? expValue.substring(1) : expValue;
 	}
-
-// 	convertComplited(node) {
-// 		debugger;
-// 		node.siblings.push(
-// 			new Unknown(`<script type="text/javascript">\n</script>`)
-// 		);
-// 	}
 }
 
 module.exports = TmplConverter;

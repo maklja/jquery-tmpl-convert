@@ -2,9 +2,21 @@
 	display: flex;
 }
 
+.templates-title {
+	font-size: 20px;
+	padding: 10px;
+	text-align: right;
+}
+
 .templates-preview .templates-preview-container {
 	width: 100%;
 	max-width: 50%;
+}
+
+.template-convert-error {
+	font-size: 18px;
+	color: red;
+	text-align: center;
 }
 
 .templates-loading {

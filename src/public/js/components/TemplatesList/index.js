@@ -1,6 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import TemplatePreview from 'app-js/components/TemplatePreview';
 import './template_list_preview.css';
+import ModalDialog from './ModalDialog';
 
 class TemplatesList extends React.Component {
 	constructor(props) {
@@ -11,13 +13,18 @@ class TemplatesList extends React.Component {
 				originalTemplates: [],
 				convertedTemplates: []
 			},
-			pathIndex: 0,
+			index: 0,
 			// set init count paths to be null to force init fetch
-			countPaths: null,
-			isLoading: false
+			maxTmpls: null,
+			isLoading: false,
+			modalIsOpen: false,
+			modalTmplModel: null,
+			error: null
 		};
 
 		this._onScroll = this._onScroll.bind(this);
+		this._openModal = this._openModal.bind(this);
+		this._onModelChange = this._onModelChange.bind(this);
 	}
 
 	componentWillMount() {
@@ -31,7 +38,15 @@ class TemplatesList extends React.Component {
 	}
 
 	render() {
-		const { templates, isLoading } = this.state;
+		const {
+			templates,
+			isLoading,
+			maxTmpls,
+			modalIsOpen,
+			modalTmplModel,
+			error
+		} = this.state;
+
 		const originalTemplates = templates.originalTemplates.map(
 			curTemplate => (
 				<TemplatePreview
@@ -45,67 +60,108 @@ class TemplatesList extends React.Component {
 				<TemplatePreview
 					key={`${curTemplate.path}_${curTemplate.id}`}
 					template={curTemplate}
+					onOpenModal={this._openModal}
 				/>
 			)
 		);
 
 		return (
 			<div>
-				{originalTemplates.map((curTmpl, i) => (
-					<div key={i} className="templates-preview">
-						<div className="templates-preview-container">
-							{curTmpl}
+				<div className="templates-title">
+					Templates count: {maxTmpls || 0}
+				</div>
+				{error == null ? (
+					originalTemplates.map((curTmpl, i) => (
+						<div key={i} className="templates-preview">
+							<div className="templates-preview-container">
+								{curTmpl}
+							</div>
+							<div className="templates-preview-container">
+								{convertedTemplates[i]}
+							</div>
 						</div>
-						<div className="templates-preview-container">
-							{convertedTemplates[i]}
-						</div>
-					</div>
-				))}
-				{isLoading ? (
+					))
+				) : (
+					<div className="template-convert-error">{error}</div>
+				)}
+				{isLoading && error == null ? (
 					<div className="templates-loading">Loading...</div>
 				) : (
 					''
 				)}
+
+				<ModalDialog
+					isOpen={modalIsOpen}
+					tmplModel={modalTmplModel}
+					onModelChange={this._onModelChange}
+				/>
 			</div>
 		);
 	}
 
-	_loadNextTemplates() {
-		const { isLoading, pathIndex, countPaths } = this.state;
+	_onModelChange(changedModel) {
+		this.setState(prevState => {
+			const { templates, modalTmplModel } = prevState;
 
-		if (isLoading || pathIndex === countPaths) {
+			return Object.assign({}, prevState, {
+				templates: {
+					originalTemplates: [...templates.originalTemplates],
+					// replace changed model in collection
+					convertedTemplates: templates.convertedTemplates.map(
+						curTmplModel =>
+							curTmplModel.id === changedModel.id
+								? changedModel
+								: curTmplModel
+					)
+				},
+				// if currently open template model is changed, change it in the state
+				modalTmplModel:
+					modalTmplModel.id === changedModel.id
+						? changedModel
+						: modalTmplModel
+			});
+		});
+	}
+
+	_loadNextTemplates() {
+		const { isLoading, index, maxTmpls } = this.state;
+		const { tmplsToFetch } = this.props;
+
+		if (isLoading || index === maxTmpls) {
 			return;
 		}
 
 		this.setState({
 			isLoading: true
 		});
-		this._convertTemplates(pathIndex, 10).then(convTmpl => {
-			this.setState(prevState => {
-				const {
-					originalTemplates,
-					convertedTemplates
-				} = prevState.templates;
+		this._convertTemplates(index, tmplsToFetch)
+			.then(convTmpl => {
+				this.setState(prevState => {
+					const {
+						originalTemplates,
+						convertedTemplates
+					} = prevState.templates;
 
-				return {
-					templates: {
-						originalTemplates: originalTemplates.concat(
-							convTmpl.originalTemplates
-						),
-						convertedTemplates: convertedTemplates.concat(
-							convTmpl.convertedTemplates
-						)
-					},
-					pathIndex: prevState.pathIndex + convTmpl.pathIndex,
-					countPaths: convTmpl.countPaths,
-					isLoading: false
-				};
-			});
-		});
+					return {
+						templates: {
+							originalTemplates: originalTemplates.concat(
+								convTmpl.originalTemplates
+							),
+							convertedTemplates: convertedTemplates.concat(
+								convTmpl.convertedTemplates
+							)
+						},
+						index: convTmpl.index,
+						maxTmpls: convTmpl.maxTmpls,
+						isLoading: false
+					};
+				});
+			})
+			.catch(err => this.setState({ error: err }));
 	}
 
-	_convertTemplates(pathIndex, limit) {
-		const url = `/convert?pathIndex=${pathIndex}&limit=${limit}`;
+	_convertTemplates(index, limit) {
+		const url = `/convert?index=${index}&limit=${limit}`;
 		return new Promise((fulfill, reject) => {
 			window
 				.fetch(url, {
@@ -115,14 +171,16 @@ class TemplatesList extends React.Component {
 					}
 				})
 				.then(response => {
+					if (response.ok === false) {
+						throw response;
+					}
+
 					return response.json();
 				})
-				.then(json => {
-					fulfill(json);
-				})
-				.catch(ex => {
-					reject(ex);
-				});
+				.then(json => fulfill(json))
+				.catch(errResp =>
+					errResp.json().then(errObj => reject(errObj.err))
+				);
 		});
 	}
 
@@ -140,6 +198,21 @@ class TemplatesList extends React.Component {
 			this._loadNextTemplates();
 		}
 	}
+
+	_openModal(tmplModel) {
+		this.setState({
+			modalIsOpen: true,
+			modalTmplModel: tmplModel
+		});
+	}
 }
+
+TemplatesList.propTypes = {
+	tmplsToFetch: PropTypes.number
+};
+
+TemplatesList.defaultProps = {
+	tmplsToFetch: 20
+};
 
 export default TemplatesList;
