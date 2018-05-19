@@ -27,7 +27,9 @@ const convertTemplate = (templatePath, done) => {
 
 describe('Test handlebars IF ELSE converter', () => {
 	beforeEach(() => {
-		this.handlebarsConverter = new HandlebarsConverter();
+		this.handlebarsConverter = new HandlebarsConverter({
+			outputDir: '/'
+		});
 	});
 
 	describe('Test convert simple IF - ELSE IF - ELSE statement', () => {

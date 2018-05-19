@@ -25,6 +25,7 @@ class TemplatesList extends React.Component {
 		this._onScroll = this._onScroll.bind(this);
 		this._openModal = this._openModal.bind(this);
 		this._onModelChange = this._onModelChange.bind(this);
+		this._onModalClose = this._onModalClose.bind(this);
 	}
 
 	componentWillMount() {
@@ -68,30 +69,34 @@ class TemplatesList extends React.Component {
 		return (
 			<div>
 				<div className="templates-title">
-					Templates count: {maxTmpls || 0}
+					<div className="templates-number">
+						Templates count: {maxTmpls || 0}
+					</div>
 				</div>
-				{error == null ? (
-					originalTemplates.map((curTmpl, i) => (
-						<div key={i} className="templates-preview">
-							<div className="templates-preview-container">
-								{curTmpl}
+				<div className="templates-body">
+					{error == null ? (
+						originalTemplates.map((curTmpl, i) => (
+							<div key={i} className="templates-preview">
+								<div className="templates-preview-container">
+									{curTmpl}
+								</div>
+								<div className="templates-preview-container">
+									{convertedTemplates[i]}
+								</div>
 							</div>
-							<div className="templates-preview-container">
-								{convertedTemplates[i]}
-							</div>
-						</div>
-					))
-				) : (
-					<div className="template-convert-error">{error}</div>
-				)}
-				{isLoading && error == null ? (
-					<div className="templates-loading">Loading...</div>
-				) : (
-					''
-				)}
-
+						))
+					) : (
+						<div className="template-convert-error">{error}</div>
+					)}
+					{isLoading && error == null ? (
+						<div className="templates-loading">Loading...</div>
+					) : (
+						''
+					)}
+				</div>
 				<ModalDialog
 					isOpen={modalIsOpen}
+					onModalClose={this._onModalClose}
 					tmplModel={modalTmplModel}
 					onModelChange={this._onModelChange}
 				/>
@@ -142,7 +147,7 @@ class TemplatesList extends React.Component {
 						convertedTemplates
 					} = prevState.templates;
 
-					return {
+					return Object.assign({}, prevState, {
 						templates: {
 							originalTemplates: originalTemplates.concat(
 								convTmpl.originalTemplates
@@ -154,7 +159,7 @@ class TemplatesList extends React.Component {
 						index: convTmpl.index,
 						maxTmpls: convTmpl.maxTmpls,
 						isLoading: false
-					};
+					});
 				});
 			})
 			.catch(err => this.setState({ error: err }));
@@ -186,15 +191,16 @@ class TemplatesList extends React.Component {
 
 	_onScroll() {
 		const { isLoading } = this.state;
-		const html = document.documentElement;
-		const body = document.body;
-		const maxHeight = body.offsetHeight * 0.9;
 
 		if (isLoading) {
 			return;
 		}
 
-		if (body.scrollTop > maxHeight || html.scrollTop > maxHeight) {
+		const html = document.documentElement;
+		const MIN_OFFSET_BEFORE_LOADING = 200; // px
+		const maxHeight = html.scrollHeight - html.scrollTop;
+
+		if (html.clientHeight + MIN_OFFSET_BEFORE_LOADING > maxHeight) {
 			this._loadNextTemplates();
 		}
 	}
@@ -203,6 +209,13 @@ class TemplatesList extends React.Component {
 		this.setState({
 			modalIsOpen: true,
 			modalTmplModel: tmplModel
+		});
+	}
+
+	_onModalClose() {
+		this.setState({
+			modalIsOpen: false,
+			modalTmplModel: null
 		});
 	}
 }

@@ -17,8 +17,6 @@ class ModalDialog extends React.Component {
 
 		this._closeModal = this._closeModal.bind(this);
 		this._onHTMLChange = this._onHTMLChange.bind(this);
-		this._onRefreshClick = this._onRefreshClick.bind(this);
-		this._onSaveClick = this._onSaveClick.bind(this);
 
 		Modal.setAppElement(document.getElementById('modal-container'));
 	}
@@ -35,7 +33,6 @@ class ModalDialog extends React.Component {
 
 	render() {
 		const { isOpen, tmplModel, htmlText, error } = this.state;
-		const disabled = tmplModel ? htmlText === tmplModel.html : true;
 
 		return tmplModel ? (
 			<Modal
@@ -53,17 +50,7 @@ class ModalDialog extends React.Component {
 				</div>
 				<div className="template-body">
 					<form>
-						<div className="button-controls">
-							<button
-								onClick={this._onSaveClick}
-								disabled={disabled}
-							>
-								Save
-							</button>
-							<button onClick={this._onRefreshClick}>
-								Refresh
-							</button>
-						</div>
+						<div className="button-controls" />
 						<textarea
 							className="textarea-markup"
 							value={htmlText}
@@ -91,79 +78,30 @@ class ModalDialog extends React.Component {
 		});
 	}
 
-	_onRefreshClick(e) {
-		e.preventDefault();
-
-		this.setState(state => {
-			return Object.assign({}, state, {
-				htmlText: state.tmplModel ? state.tmplModel.html : '',
-				error: null
-			});
-		});
-	}
-
-	_onSaveClick(e) {
-		e.preventDefault();
-
-		const url = `/updateTemplate`;
-		const { tmplModel, htmlText } = this.state;
-		const { onModelChange } = this.props;
-
-		window
-			.fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					templateUpdate: {
-						id: tmplModel.id,
-						html: htmlText
-					}
-				})
-			})
-			.then(response => {
-				if (response.ok === false) {
-					throw response;
-				}
-
-				return response.json();
-			})
-			.then(newTmplModel => {
-				this.setState({
-					tmplModel: newTmplModel,
-					htmlText: newTmplModel.html,
-					error: null
-				});
-				onModelChange(newTmplModel);
-			})
-			.catch(errResp => {
-				errResp.json().then(errObj =>
-					this.setState({
-						error: errObj.err
-					})
-				);
-			});
-	}
-
 	_closeModal() {
-		this.setState({
-			isOpen: false,
-			tmplModel: null
-		});
+		const { onModalClose } = this.props;
+		this.setState(
+			{
+				isOpen: false,
+				tmplModel: null
+			},
+			() => onModalClose()
+		);
 	}
 }
 
 ModalDialog.propTypes = {
 	isOpen: PropTypes.bool,
 	tmplModel: PropTypes.object,
-	onModelChange: PropTypes.func
+	onModelChange: PropTypes.func,
+	onModalClose: PropTypes.func
 };
 
 ModalDialog.defaultProps = {
 	isOpen: false,
 	tmplModel: {},
-	onModelChange: () => {}
+	onModelChange: () => {},
+	onModalClose: () => {}
 };
 
 export default ModalDialog;

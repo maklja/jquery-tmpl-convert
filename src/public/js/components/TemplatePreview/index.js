@@ -20,7 +20,24 @@ class TemplatePreview extends React.Component {
 		Prism.highlightElement(this.templateCode.current);
 	}
 
+	shouldComponentUpdate(nextProps) {
+		// only update component if html is changed
+		// in order to optimize performance
+		return this.props.template.html !== nextProps.template.html;
+	}
+
 	componentDidUpdate() {
+		// ugly way to remove line highlight from element that is added by
+		// prisim highlight library, because it doesn't contain API for removing
+		// line highlights
+		const parentNode = this.templateCode.current.parentNode;
+		// convert HTML collection to array
+		for (let curChildNode of Array.from(parentNode.children)) {
+			if (curChildNode.classList.contains('line-highlight')) {
+				parentNode.removeChild(curChildNode);
+			}
+		}
+
 		Prism.highlightElement(this.templateCode.current);
 	}
 

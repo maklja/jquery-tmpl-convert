@@ -1,4 +1,3 @@
-const fs = require('fs');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
 const NodeTreeMaker = require('../../nodes/NodeTreeMaker');
@@ -10,7 +9,12 @@ const EachConverter = require('./EachConverter');
 const TmplConverter = require('./TmplConverter');
 const UnknownConverter = require('./UnknownConverter');
 const ExpressionConverter = require('./ExpressionConverter');
-const { isExpression, isStatement, isUnknown } = require('../../utils/helpers');
+const {
+	isExpression,
+	isStatement,
+	isUnknown,
+	getTemplateName
+} = require('../../utils/helpers');
 const { HTML } = require('../../tokens/tokens');
 
 class HandlebarsConverter {
@@ -20,7 +24,6 @@ class HandlebarsConverter {
 
 	constructor(cfg) {
 		this._outputDir = cfg.outputDir;
-		this._clearOutputDir = cfg.clearOutputDir;
 		this._resetState();
 		this.SCRIPT_TYPE = 'text/x-handlebars-template';
 
@@ -51,113 +54,63 @@ class HandlebarsConverter {
 				}
 			};
 
-			// convert current template
-			this._convertTemplate(curTemplateModel);
-
-			// after template is converted, create new template model for handlebars
-			let convertedTemplateModel = new TemplateModel(
-				curTemplateModel.id,
-				this.SCRIPT_TYPE,
-				// set template output file
-				`${this._outputDir}/${this._getTemplateName(
-					curTemplateModel.path
-				)}`,
-				// try to beautify html output
-				this._hbsTemplateValue(this._convertTokens),
-				this._addScriptTag(
-					curTemplateModel.id,
-					this._hbsTemplateValue(this._convertTokens)
-				)
+			// convert jQuery template to handlebars template
+			this._convertTemplates.push(
+				this._convertTemplate(curTemplateModel)
 			);
-
-			// get all convert errors
-			convertedTemplateModel.errors = this._convertErrors;
-
-			// convert tokens to nodes
-			let nodeTreeMaker = new NodeTreeMaker(this._convertTokens);
-			convertedTemplateModel.tokenNodes = nodeTreeMaker.createTree();
-
-			this._convertTemplates.push(convertedTemplateModel);
 		}
 
-		return this._saveTemplatesToFiles();
+		return this._convertTemplates;
 	}
 
-	_saveTemplatesToFiles() {
-		return new Promise((fulfill, reject) => {
-			// we can have multiple templates in single file so we need to group
-			// files by path
-			const filePathGroup = this._convertTemplates.reduce(
-				(group, curTmpl) => {
-					if (!group[curTmpl.path]) {
-						group[curTmpl.path] = [];
-					}
-
-					group[curTmpl.path].push(curTmpl);
-
-					return group;
-				},
-				{}
-			);
-
-			const tmplFilePromise = [];
-			const fileSaveOptions = {
-				flag: this._clearOutputDir ? 'w' : 'wx'
-			};
-			// save all templates from each group
-			for (let curPath in filePathGroup) {
-				// join all templates from single group
-				let joinedTmpl = filePathGroup[curPath]
-					.map(curTmpl => curTmpl.html)
-					.join('\n'.repeat(2));
-
-				// manage async in file save
-				tmplFilePromise.push(
-					this._saveTemplateFile(curPath, joinedTmpl, fileSaveOptions)
-				);
-			}
-
-			// wait all templates to be saved before resolving promise
-			Promise.all(tmplFilePromise)
-				.then(fulfill)
-				.catch(reject);
-		});
-	}
-
-	_saveTemplateFile(path, value, options) {
-		return new Promise((fulfill, reject) => {
-			fs.writeFile(path, value, options, err => {
-				if (err) {
-					if (options.flag !== 'ws' && err.code !== 'EEXIST') {
-						reject(err);
-					}
-				}
-
-				fulfill();
-			});
-		});
-	}
-
-	_addScriptTag(id, tmpl) {
-		return `<script id="${id}" type="${this.SCRIPT_TYPE}">${tmpl}</script>`;
-	}
-
-	_convertTemplate(templateModel) {
-		if (templateModel.errors.length > 0) {
+	_convertTemplate(tmplModel) {
+		// check if template has parse errors
+		if (tmplModel.errors.length > 0) {
 			this._convertErrors.push(
 				new ValidationError(
 					null,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
-						`Template ${templateModel.id} has parsing errors.`
+						`Template ${tmplModel.id} has parsing errors.`
 					)
 				)
 			);
 		} else {
-			for (let curNode of templateModel.tokenNodes) {
+			for (let curNode of tmplModel.tokenNodes) {
 				this._convertNode(curNode);
 			}
 		}
+
+		const convTmplPath = `${this._outputDir}/${getTemplateName(
+			tmplModel.path
+		)}`;
+
+		// after template is converted, create new template model for handlebars
+		let convertedTemplateModel = new TemplateModel(
+			tmplModel.id,
+			this.SCRIPT_TYPE,
+			// set template output file
+			convTmplPath,
+			// try to beautify html output
+			this._hbsTemplateValue(this._convertTokens),
+			this._addScriptTag(
+				tmplModel.id,
+				this._hbsTemplateValue(this._convertTokens)
+			)
+		);
+
+		// get all convert errors
+		convertedTemplateModel.errors = this._convertErrors;
+
+		// convert tokens to nodes
+		let nodeTreeMaker = new NodeTreeMaker(this._convertTokens);
+		convertedTemplateModel.tokenNodes = nodeTreeMaker.createTree();
+
+		return convertedTemplateModel;
+	}
+
+	_addScriptTag(id, tmpl) {
+		return `<script id="${id}" type="${this.SCRIPT_TYPE}">${tmpl}</script>`;
 	}
 
 	_convertNode(node) {
@@ -231,15 +184,6 @@ class HandlebarsConverter {
 		}
 
 		return value;
-	}
-
-	_getTemplateName(tmplPath) {
-		// replace path backslash with forward slash
-		// and take last part that is name of the template
-		return tmplPath
-			.replace('\\', '/')
-			.split('/')
-			.pop();
 	}
 }
 

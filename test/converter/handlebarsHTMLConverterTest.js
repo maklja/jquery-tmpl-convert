@@ -26,7 +26,9 @@ const convertTemplate = (templatePath, done) => {
 
 describe('Test handlebars HTML converter', () => {
 	beforeEach(() => {
-		this.handlebarsConverter = new HandlebarsConverter();
+		this.handlebarsConverter = new HandlebarsConverter({
+			outputDir: '/'
+		});
 	});
 
 	describe('Test convert HTML statement', () => {

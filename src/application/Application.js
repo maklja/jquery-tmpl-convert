@@ -26,7 +26,11 @@ class Application {
 				)
 			)
 			.catch(err => {
-				throw err;
+				console.error(
+					`Unable to load configuration from path ${
+						this._configPath
+					}, wtih message: ${err}`
+				);
 			});
 	}
 
@@ -36,6 +40,7 @@ class Application {
 			fs.readFile(path.resolve(this._configPath), 'utf8', (err, data) => {
 				if (err) {
 					reject(err);
+					return;
 				}
 
 				fulfill(JSON.parse(data));
@@ -68,20 +73,6 @@ class Application {
 				.convertTemplates(indexNum, limitNum)
 				.then(templates => {
 					res.send(templates);
-				})
-				.catch(e => {
-					res.status(400);
-					res.send({ err: e.message });
-				});
-		});
-
-		app.post('/updateTemplate', (req, res) => {
-			const { templateUpdate } = req.body;
-
-			this.convertService
-				.updateTemplate(templateUpdate.id, templateUpdate.html)
-				.then(tmpl => {
-					res.send(tmpl);
 				})
 				.catch(e => {
 					res.status(400);

@@ -4,8 +4,23 @@
 
 .templates-title {
 	font-size: 20px;
-	padding: 10px;
 	text-align: right;
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 40px;
+	width: 100%;
+	background: black;
+	z-index: 1;
+	border-bottom: 1px solid #eee;
+}
+
+.templates-title .templates-number {
+	margin: 10px;
+}
+
+.templates-body {
+	margin-top: 40px;
 }
 
 .templates-preview .templates-preview-container {

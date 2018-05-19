@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const glob = require('glob');
 const TemplateParser = require('../parser/TemplateParser');
 const HandlebarsConverter = require('../converter/handlerbars/HandlebarsConverter');
@@ -13,9 +14,13 @@ class ConvertService {
 	}
 
 	initialize() {
-		return this._loadPaths(this._paths)
+		return this._clearOutputDirectory()
+			.then(() => this._loadPaths(this._paths))
 			.then(paths => this._loadTemplates(paths))
-			.then(tmpls => (this._originalTmpl = tmpls));
+			.then(tmpls => (this._originalTmpl = tmpls))
+			.catch(e => {
+				throw e;
+			});
 	}
 
 	convertTemplates(index, limits) {
@@ -43,14 +48,12 @@ class ConvertService {
 					maxTmpls: this._originalTmpl.length
 				});
 			} else {
-				hbsConverter
-					.convert(originalTmplData)
-					.then(() => {
-						const convTmpls = hbsConverter.convertTemplates;
-						this._convertedTmpl = this._convertedTmpl.concat(
-							convTmpls
-						);
+				// then convert jquery templates
+				const convTmpls = hbsConverter.convert(originalTmplData);
+				this._convertedTmpl = this._convertedTmpl.concat(convTmpls);
 
+				this._saveTemplatesToFiles(this._convertedTmpl)
+					.then(() => {
 						// send response to the client
 						fulfill({
 							originalTemplates: originalTmplData,
@@ -64,42 +67,6 @@ class ConvertService {
 					})
 					.catch(reject);
 			}
-		});
-	}
-
-	updateTemplate(tmplId, tmplHTML) {
-		const updatedTmplData = TemplateParser.extractTemplateHTML(tmplHTML);
-
-		if (updatedTmplData.length === 0) {
-			return Promise.reject(new Error('Script tag is not found.'));
-		}
-
-		if (updatedTmplData.length > 1) {
-			return Promise.reject(new Error('Multiple script tags found.'));
-		}
-
-		const tmplModel = this._convertedTmpl.find(
-			curTmpl => curTmpl.id === tmplId
-		);
-
-		if (tmplModel == null) {
-			return Promise.reject(
-				new Error(`Template with id ${tmplId} is not found.`)
-			);
-		}
-		const tmplDelta = updatedTmplData[0];
-		return new Promise((fulfill, reject) => {
-			fs.writeFile(tmplModel.path, tmplDelta.outerHTML, err => {
-				if (err) {
-					reject(err);
-					return;
-				}
-
-				tmplModel.value = tmplDelta.innerHTML;
-				tmplModel.html = tmplDelta.outerHTML;
-
-				fulfill(tmplModel.toJSON());
-			});
 		});
 	}
 
@@ -135,6 +102,76 @@ class ConvertService {
 				}
 
 				fulfill(filePaths);
+			});
+		});
+	}
+
+	_clearOutputDirectory() {
+		return new Promise((fulfill, reject) => {
+			if (this._clearOutputDir === false) {
+				fulfill();
+				return;
+			}
+
+			fs.readdir(this._outputDir, (err, files) => {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				for (let file of files) {
+					fs.unlinkSync(path.join(this._outputDir, file));
+				}
+
+				fulfill();
+			});
+		});
+	}
+
+	_saveTemplatesToFiles(convertTemplates) {
+		return new Promise((fulfill, reject) => {
+			// we can have multiple templates in single file so we need to group
+			// files by path
+			const filePathGroup = convertTemplates.reduce((group, curTmpl) => {
+				if (!group[curTmpl.path]) {
+					group[curTmpl.path] = [];
+				}
+
+				group[curTmpl.path].push(curTmpl);
+
+				return group;
+			}, {});
+
+			const tmplFilePromise = [];
+			// save all templates from each group
+			for (let curPath in filePathGroup) {
+				// join all templates from single group
+				let joinedTmpl = filePathGroup[curPath]
+					.map(curTmpl => curTmpl.html)
+					.join('\n'.repeat(2));
+
+				// manage async in file save
+				tmplFilePromise.push(
+					this._saveTemplateFile(curPath, joinedTmpl)
+				);
+			}
+
+			// wait all templates to be saved before resolving promise
+			Promise.all(tmplFilePromise)
+				.then(fulfill)
+				.catch(reject);
+		});
+	}
+
+	_saveTemplateFile(path, value) {
+		return new Promise((fulfill, reject) => {
+			fs.writeFile(path, value, err => {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				fulfill();
 			});
 		});
 	}

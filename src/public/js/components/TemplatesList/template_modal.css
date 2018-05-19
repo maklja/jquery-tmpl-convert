@@ -37,7 +37,7 @@
 .template-modal .template-body .textarea-markup {
 	width: 100%;
 	height: 350px;
-	resize: none;
+	resize: none; /* vertical */
 }
 
 .template-modal .template-body .button-controls {
