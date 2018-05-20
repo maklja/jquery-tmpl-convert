@@ -19,6 +19,8 @@ class TemplatesList extends React.Component {
 			isLoading: false,
 			modalIsOpen: false,
 			modalTmplModel: null,
+			converters: [],
+			selectedConverterId: '',
 			error: null
 		};
 
@@ -26,10 +28,14 @@ class TemplatesList extends React.Component {
 		this._openModal = this._openModal.bind(this);
 		this._onModelChange = this._onModelChange.bind(this);
 		this._onModalClose = this._onModalClose.bind(this);
+		this._onCoverterChange = this._onCoverterChange.bind(this);
 	}
 
 	componentWillMount() {
-		this._loadNextTemplates();
+		// first load supported converters
+		this._loadConverters()
+			.then(() => this._loadNextTemplates())
+			.catch(err => this.setState({ error: err }));
 
 		document.addEventListener('scroll', this._onScroll);
 	}
@@ -45,6 +51,8 @@ class TemplatesList extends React.Component {
 			maxTmpls,
 			modalIsOpen,
 			modalTmplModel,
+			converters,
+			selectedConverterId,
 			error
 		} = this.state;
 
@@ -69,8 +77,18 @@ class TemplatesList extends React.Component {
 		return (
 			<div>
 				<div className="templates-title">
-					<div className="templates-number">
-						Templates count: {maxTmpls || 0}
+					<div className="templates-header">
+						<select
+							value={selectedConverterId}
+							onChange={this._onCoverterChange}
+						>
+							{converters.map(curConv => (
+								<option key={curConv.id} value={curConv.id}>
+									{curConv.name}
+								</option>
+							))}
+						</select>
+						<span>Templates count: {maxTmpls || 0}</span>
 					</div>
 				</div>
 				<div className="templates-body">
@@ -165,8 +183,41 @@ class TemplatesList extends React.Component {
 			.catch(err => this.setState({ error: err }));
 	}
 
+	_loadConverters() {
+		const url = '/converters';
+		return new Promise((fulfill, reject) => {
+			window
+				.fetch(url, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				})
+				.then(response => {
+					if (response.ok === false) {
+						throw response;
+					}
+
+					return response.json();
+				})
+				.then(converters =>
+					this.setState(
+						{
+							converters: converters,
+							selectedConverterId: converters[0].id
+						},
+						() => fulfill()
+					)
+				)
+				.catch(errResp =>
+					errResp.json().then(errObj => reject(errObj.err))
+				);
+		});
+	}
+
 	_convertTemplates(index, limit) {
-		const url = `/convert?index=${index}&limit=${limit}`;
+		const { selectedConverterId } = this.state;
+		const url = `/convert?conv=${selectedConverterId}&index=${index}&limit=${limit}`;
 		return new Promise((fulfill, reject) => {
 			window
 				.fetch(url, {
@@ -203,6 +254,13 @@ class TemplatesList extends React.Component {
 		if (html.clientHeight + MIN_OFFSET_BEFORE_LOADING > maxHeight) {
 			this._loadNextTemplates();
 		}
+	}
+
+	_onCoverterChange(e) {
+		this.setState({
+			selectedConverterId: e.currentTarget.value,
+			index: 0
+		});
 	}
 
 	_openModal(tmplModel) {

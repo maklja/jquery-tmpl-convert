@@ -1,4 +1,5 @@
 const Application = require('./application/Application');
+const HandlebarsConverter = require('./converter/handlerbars/HandlebarsConverter');
 
 const args = process.argv;
 
@@ -8,11 +9,13 @@ if (args.indexOf('--config') === -1) {
 }
 
 const configPath = args[args.indexOf('--config') + 1];
+const useServer = args.indexOf('--noServer') === -1;
 
 // --config parameter is mandatory
 if (!configPath) {
 	throw new Error('Invalid --config parameter with configuration path.');
 }
 
-const app = new Application(configPath);
-app.start();
+const converters = [HandlebarsConverter];
+const app = new Application(configPath, useServer);
+app.start(converters);

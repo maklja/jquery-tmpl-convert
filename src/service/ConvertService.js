@@ -2,15 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const TemplateParser = require('../parser/TemplateParser');
-const HandlebarsConverter = require('../converter/handlerbars/HandlebarsConverter');
 
 class ConvertService {
-	constructor(config) {
+	get converters() {
+		return this._converters;
+	}
+
+	constructor(converters, config) {
 		this._paths = config.paths;
 		this._outputDir = config.outputDir;
 		this._clearOutputDir = config.clearOutputDir;
 		this._originalTmpl = [];
 		this._convertedTmpl = [];
+		this._converters = new Map(
+			converters.map(curConv => [curConv.id, curConv])
+		);
 	}
 
 	initialize() {
@@ -23,14 +29,19 @@ class ConvertService {
 			});
 	}
 
-	convertTemplates(index, limits) {
+	addConverter(converter) {
+		this._converters.add(converter.id, converter);
+	}
+
+	convertTemplates(convId, index = 0, limits = 0) {
 		return new Promise((fulfill, reject) => {
+			const converter = this._converters.get(convId);
+			if (!converter) {
+				throw new Error(`Converter with id ${convId} is not found.`);
+			}
 			// prepair converter
-			let hbsConverter = new HandlebarsConverter({
-					outputDir: this._outputDir,
-					clearOutputDir: this._clearOutputDir
-				}),
-				toIndex = index + limits,
+			let toIndex =
+					limits === 0 ? this._originalTmpl.length : index + limits,
 				originalTmplData = this._originalTmpl.slice(index, toIndex);
 
 			if (this._convertedTmpl.length >= toIndex) {
@@ -49,7 +60,7 @@ class ConvertService {
 				});
 			} else {
 				// then convert jquery templates
-				const convTmpls = hbsConverter.convert(originalTmplData);
+				const convTmpls = converter.convert(originalTmplData);
 				this._convertedTmpl = this._convertedTmpl.concat(convTmpls);
 
 				this._saveTemplatesToFiles(this._convertedTmpl)

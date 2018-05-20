@@ -1,3 +1,4 @@
+const Converter = require('../Converter');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
 const NodeTreeMaker = require('../../nodes/NodeTreeMaker');
@@ -17,14 +18,18 @@ const {
 } = require('../../utils/helpers');
 const { HTML } = require('../../tokens/tokens');
 
-class HandlebarsConverter {
-	get convertTemplates() {
-		return this._convertTemplates;
+class HandlebarsConverter extends Converter {
+	get id() {
+		return 'hbs';
+	}
+
+	get name() {
+		return 'Handlebars';
 	}
 
 	constructor(cfg) {
+		super(cfg);
 		this._outputDir = cfg.outputDir;
-		this._resetState();
 		this.SCRIPT_TYPE = 'text/x-handlebars-template';
 
 		// register converter for statement
@@ -40,20 +45,10 @@ class HandlebarsConverter {
 	}
 
 	convert(templates) {
-		this._resetState();
+		this._convertTemplates = [];
 
 		// convert each template
 		for (let curTemplateModel of templates) {
-			// tokens state for each template
-			this._convertTokens = [];
-			this._convertErrors = [];
-			this._context = {
-				replaceExpression: {
-					// every $item, replace with this
-					$item: 'this'
-				}
-			};
-
 			// convert jQuery template to handlebars template
 			this._convertTemplates.push(
 				this._convertTemplate(curTemplateModel)
@@ -64,9 +59,21 @@ class HandlebarsConverter {
 	}
 
 	_convertTemplate(tmplModel) {
+		// tokens state for each template
+		const convertParams = {
+			convertTokens: [],
+			convertErrors: [],
+			context: {
+				replaceExpression: {
+					// every $item, replace with this
+					$item: 'this'
+				}
+			}
+		};
+
 		// check if template has parse errors
 		if (tmplModel.errors.length > 0) {
-			this._convertErrors.push(
+			convertParams.convertErrors.push(
 				new ValidationError(
 					null,
 					CONVERT_ERROR.code,
@@ -77,33 +84,29 @@ class HandlebarsConverter {
 			);
 		} else {
 			for (let curNode of tmplModel.tokenNodes) {
-				this._convertNode(curNode);
+				this._convertNode(curNode, convertParams);
 			}
 		}
-
-		const convTmplPath = `${this._outputDir}/${getTemplateName(
-			tmplModel.path
-		)}`;
 
 		// after template is converted, create new template model for handlebars
 		let convertedTemplateModel = new TemplateModel(
 			tmplModel.id,
 			this.SCRIPT_TYPE,
 			// set template output file
-			convTmplPath,
+			`${this._outputDir}/${getTemplateName(tmplModel.path)}`,
 			// try to beautify html output
-			this._hbsTemplateValue(this._convertTokens),
+			this._hbsTemplateValue(convertParams.convertTokens),
 			this._addScriptTag(
 				tmplModel.id,
-				this._hbsTemplateValue(this._convertTokens)
+				this._hbsTemplateValue(convertParams.convertTokens)
 			)
 		);
 
 		// get all convert errors
-		convertedTemplateModel.errors = this._convertErrors;
+		convertedTemplateModel.errors = convertParams.convertErrors;
 
 		// convert tokens to nodes
-		let nodeTreeMaker = new NodeTreeMaker(this._convertTokens);
+		let nodeTreeMaker = new NodeTreeMaker(convertParams.convertTokens);
 		convertedTemplateModel.tokenNodes = nodeTreeMaker.createTree();
 
 		return convertedTemplateModel;
@@ -113,7 +116,7 @@ class HandlebarsConverter {
 		return `<script id="${id}" type="${this.SCRIPT_TYPE}">${tmpl}</script>`;
 	}
 
-	_convertNode(node) {
+	_convertNode(node, convertParams) {
 		if (!node.isExpression() && !node.isStatement() && !node.isUnknown()) {
 			throw new Error('Unknown node type.');
 		}
@@ -128,35 +131,36 @@ class HandlebarsConverter {
 		if (converter) {
 			let errors = [];
 			// convert node
-			converterdToken = converter.convert(node, this._context, errors);
-			this._convertTokens.push(converterdToken);
-			this._convertErrors = this._convertErrors.concat(errors);
+			converterdToken = converter.convert(
+				node,
+				convertParams.context,
+				errors
+			);
+			convertParams.convertTokens.push(converterdToken);
+			convertParams.convertErrors = convertParams.convertErrors.concat(
+				errors
+			);
 		}
 
 		// convert all node children
 		for (let curChildNode of node.children) {
-			this._convertNode(curChildNode);
+			this._convertNode(curChildNode, convertParams);
 		}
 
 		// convert all node siblings
 		for (let curSiblingNode of node.siblings) {
-			this._convertNode(curSiblingNode);
+			this._convertNode(curSiblingNode, convertParams);
 		}
 
 		if (converter) {
 			// at the end add closing token, if exists
 			let closingToken = converter.getClosingToken(node, converterdToken);
 			if (closingToken != null) {
-				this._convertTokens.push(closingToken);
+				convertParams.convertTokens.push(closingToken);
 			}
 
-			converter.convertComplited(node, this._context);
+			converter.convertComplited(node, convertParams.context);
 		}
-	}
-
-	_resetState() {
-		this._convertTokens = null;
-		this._convertTemplates = [];
 	}
 
 	_hbsTokenValue(token) {

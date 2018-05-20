@@ -3,28 +3,29 @@ const path = require('path');
 const fs = require('fs');
 const ConvertService = require('../service/ConvertService');
 
-const app = express();
-app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
-
 class Application {
-	constructor(configPath) {
+	constructor(configPath, useServer) {
 		this._configPath = configPath;
-
-		this._setRoutes();
+		this._useServer = useServer;
 	}
 
-	start() {
+	start(converters) {
 		this._loadConfiguration()
 			.then(config => {
-				this.convertService = new ConvertService(config);
+				const convInstances = converters.map(
+					Converter => new Converter(config)
+				);
+
+				this.convertService = new ConvertService(convInstances, config);
 				return this.convertService.initialize();
 			})
-			.then(() =>
-				app.listen(3000, () =>
-					console.log('Example app listening on port 3000!')
-				)
-			)
+			.then(() => {
+				if (this._useServer) {
+					this._startServer();
+				} else {
+					this._convertTemplates();
+				}
+			})
 			.catch(err => {
 				console.error(
 					`Unable to load configuration from path ${
@@ -32,6 +33,26 @@ class Application {
 					}, wtih message: ${err}`
 				);
 			});
+	}
+
+	_startServer() {
+		const app = express();
+		this._setRoutes(app);
+		app.use(express.json());
+		app.use(express.static(path.join(__dirname, '../public')));
+
+		app.listen(3000, () =>
+			console.log('Example app listening on port 3000!')
+		);
+	}
+
+	_convertTemplates() {
+		this.convertService
+			.convertTemplates()
+			.then(report =>
+				console.log(`Converted ${report.convertedTemplates.length}`)
+			)
+			.catch(err => console.error(err));
 	}
 
 	_loadConfiguration() {
@@ -48,7 +69,7 @@ class Application {
 		});
 	}
 
-	_setRoutes() {
+	_setRoutes(app) {
 		app.get('/', (req, res) =>
 			res.sendFile(path.join(__dirname, '../public/index.html'))
 		);
@@ -58,7 +79,7 @@ class Application {
 		};
 
 		app.get('/convert', (req, res) => {
-			const { index, limit } = req.query,
+			const { conv, index, limit } = req.query,
 				indexNum = parseInt(index),
 				limitNum = parseInt(limit);
 
@@ -69,8 +90,18 @@ class Application {
 				return;
 			}
 
+			if (limitNum <= 0) {
+				res.status(400);
+				res.send({
+					err:
+						'Invalid request parameter limit must be greater then 0..'
+				});
+
+				return;
+			}
+
 			this.convertService
-				.convertTemplates(indexNum, limitNum)
+				.convertTemplates(conv, indexNum, limitNum)
 				.then(templates => {
 					res.send(templates);
 				})
@@ -78,6 +109,17 @@ class Application {
 					res.status(400);
 					res.send({ err: e.message });
 				});
+		});
+
+		app.get('/converters', (req, res) => {
+			const converters = Array.from(
+				this.convertService.converters.values()
+			).map(curConv => ({
+				id: curConv.id,
+				name: curConv.name
+			}));
+
+			res.send(converters);
 		});
 	}
 }
