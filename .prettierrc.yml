@@ -2,5 +2,3 @@
 useTabs: true
 tabWidth: 4
 singleQuote: true
-eslintIntegration: true
-stylelintIntegration": true

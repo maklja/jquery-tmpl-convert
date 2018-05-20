@@ -27,6 +27,7 @@ class Application {
 				}
 			})
 			.catch(err => {
+				// eslint-disable-next-line no-console
 				console.error(
 					`Unable to load configuration from path ${
 						this._configPath
@@ -42,6 +43,7 @@ class Application {
 		app.use(express.static(path.join(__dirname, '../public')));
 
 		app.listen(3000, () =>
+			// eslint-disable-next-line no-console
 			console.log('Example app listening on port 3000!')
 		);
 	}
@@ -50,9 +52,13 @@ class Application {
 		this.convertService
 			.convertTemplates()
 			.then(report =>
+				// eslint-disable-next-line no-console
 				console.log(`Converted ${report.convertedTemplates.length}`)
 			)
-			.catch(err => console.error(err));
+			.catch(err =>
+				// eslint-disable-next-line no-console
+				console.error(err)
+			);
 	}
 
 	_loadConfiguration() {
