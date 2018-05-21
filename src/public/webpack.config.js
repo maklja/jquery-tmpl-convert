@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const merge = require('webpack-merge');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const StyleLintPlugin = require('stylelint-webpack-plugin');
 
 const PATHS = {
 	root: path.join(__dirname, './'),
@@ -191,7 +192,18 @@ const prodConfig = merge([
 					}
 				}
 			]
-		}
+		},
+
+		plugins: [
+			new StyleLintPlugin({
+				context: PATHS.root,
+				files: [
+					path.join('./js', '**/*.css'),
+					path.join('./resources', '**/*.css')
+				],
+				failOnError: true
+			})
+		]
 	},
 
 	// in case you need inline css uncomment lines bellow and comment extractCSS function

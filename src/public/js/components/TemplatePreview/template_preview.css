@@ -3,8 +3,8 @@
 	padding: 2px;
 	overflow: auto;
 	height: 100%;
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .template-preview .template-body,
@@ -20,36 +20,36 @@
 
 .template-preview .template-errors .error-block {
 	font-size: 18px;
-    padding: 4px;
-    border: 1px solid gray;
+	padding: 4px;
+	border: 1px solid gray;
 	display: flex;
 }
 
 .template-preview .template-errors .error-block.info {
-	background: #BDE5F8;
-	color: #00529B;
+	background: #bde5f8;
+	color: #00529b;
 }
 
 .template-preview .template-errors .error-block.warning {
-	background: #FEEFB3;
-	color: #9F6000;
+	background: #feefb3;
+	color: #9f6000;
 }
 
 .template-preview .template-errors .error-block.error {
-	background: #FFBABA;
-	color: #D8000C;
+	background: #ffbaba;
+	color: #d8000c;
 }
 
 .template-preview .template-errors .title {
-	padding: 10px 0px;
-    font-size: 20px;
+	padding: 10px 0;
+	font-size: 20px;
 	text-align: center;
 }
 
 .template-preview .error-block .code,
-.template-preview .error-block .message
+.template-preview .error-block .message,
 .template-preview .error-block .line-number {
-	margin: 0px 4px;
+	margin: 0 4px;
 }
 
 .template-preview .error-block .line-number,
@@ -63,5 +63,9 @@
 }
 
 .line-highlight {
-	background: linear-gradient(to right, hsla(0,100%, 50%,.1) 70%, hsla(0,100%, 50%,.1));
+	background: linear-gradient(
+		to right,
+		hsla(0, 100%, 50%, 0.1) 70%,
+		hsla(0, 100%, 50%, 0.1)
+	);
 }
