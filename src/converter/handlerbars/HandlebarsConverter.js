@@ -29,7 +29,7 @@ class HandlebarsConverter extends Converter {
 
 	constructor(cfg) {
 		super(cfg);
-		this._outputDir = cfg.outputDir;
+		this._outputDir = cfg.output;
 		this.SCRIPT_TYPE = 'text/x-handlebars-template';
 
 		// register converter for statement

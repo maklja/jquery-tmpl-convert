@@ -7,10 +7,11 @@
     "test:dev": "./node_modules/mocha/bin/mocha ./test/**/*.js --watch",
     "test:debug": "./node_modules/mocha/bin/mocha ./test/**/*.js --inspect-brk",
     "start": "node ./src/app.js",
-    "start:debug": "nodemon --inspect ./src/app.js -- --config ./src/default.json",
+    "start:debug": "nodemon --inspect ./src/app.js -- --files /home/maklja/test/node_test/test/converter/**/*.html,/home/maklja/www/*.htm --server",
+    "start:debug:no-server": "nodemon --inspect ./src/app.js --files /home/maklja/test/node_test/test/converter/**/*.html,/home/maklja/www/*.htm --output ./results --converter hbs",
     "build": "node_modules\\.bin\\webpack -p --optimize-minimize --config src/public/webpack.config.js --env prod",
     "build-dev": "node_modules\\.bin\\webpack -d --config src/public/webpack.config.js --env dev",
-    "dev-server": "node_modules\\.bin\\webpack-dev-server -d --config src/public/webpack.config.js --hot --inline",
+    "dev-server": "node_modules\\.bin\\webpack-dev-server -d --config src/public/webpack.config.js --hot --inline --env dev",
     "lint:css": "node_modules\\.bin\\stylelint ./src/public/resources/**/*.css ./src/public/js/**/*.css"
   },
   "author": "Bojan Makljenovic",
@@ -49,6 +50,7 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "cheerio": "^1.0.0-rc.2",
+    "commander": "^2.15.1",
     "express": "^4.16.3",
     "glob": "^7.1.2",
     "jsep": "^0.3.3",

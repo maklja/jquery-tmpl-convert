@@ -1,8 +1,0 @@
-{
-	"paths": [
-		"/home/maklja/test/node_test/test/converter/**/*.html",
-		"/home/maklja/www/*.htm"
-	],
-	"outputDir": "/home/maklja/test/output",
-	"clearOutputDir": false
-}

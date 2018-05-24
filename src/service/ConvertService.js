@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const glob = require('glob');
 const TemplateParser = require('../parser/TemplateParser');
 
@@ -8,25 +6,19 @@ class ConvertService {
 		return this._converters;
 	}
 
-	constructor(converters, config) {
-		this._paths = config.paths;
-		this._outputDir = config.outputDir;
-		this._clearOutputDir = config.clearOutputDir;
+	constructor(converters, paths) {
+		this._paths = paths;
 		this._originalTmpl = [];
-		this._convertedTmpl = [];
+		this._convertedTmpl = new Map();
 		this._converters = new Map(
 			converters.map(curConv => [curConv.id, curConv])
 		);
 	}
 
 	initialize() {
-		return this._clearOutputDirectory()
-			.then(() => this._loadPaths(this._paths))
+		return this._loadPaths(this._paths)
 			.then(paths => this._loadTemplates(paths))
-			.then(tmpls => (this._originalTmpl = tmpls))
-			.catch(e => {
-				throw e;
-			});
+			.then(tmpls => (this._originalTmpl = tmpls));
 	}
 
 	addConverter(converter) {
@@ -34,51 +26,47 @@ class ConvertService {
 	}
 
 	convertTemplates(convId, index = 0, limits = 0) {
-		return new Promise((fulfill, reject) => {
-			const converter = this._converters.get(convId);
-			if (!converter) {
-				throw new Error(`Converter with id ${convId} is not found.`);
-			}
-			// prepair converter
-			let toIndex =
-					limits === 0 ? this._originalTmpl.length : index + limits,
-				originalTmplData = this._originalTmpl.slice(index, toIndex);
+		const converter = this._converters.get(convId);
+		if (!converter) {
+			throw new Error(`Converter with id ${convId} is not found.`);
+		}
+		// prepair converter
+		let toIndex = limits === 0 ? this._originalTmpl.length : index + limits,
+			originalTmplData = this._originalTmpl.slice(index, toIndex);
 
-			if (this._convertedTmpl.length >= toIndex) {
-				// send response to the client
-				fulfill({
-					originalTemplates: originalTmplData,
-					convertedTemplates: this._convertedTmpl.slice(
-						index,
-						toIndex
-					),
-					index:
-						toIndex < this._originalTmpl.length
-							? toIndex
-							: this._originalTmpl.length,
-					maxTmpls: this._originalTmpl.length
-				});
-			} else {
-				// then convert jquery templates
-				const convTmpls = converter.convert(originalTmplData);
-				this._convertedTmpl = this._convertedTmpl.concat(convTmpls);
+		if (this._convertedTmpl.length >= toIndex) {
+			// send response to the client
+			return {
+				originalTemplates: originalTmplData,
+				convertedTemplates: this._convertedTmpl.slice(index, toIndex),
+				index:
+					toIndex < this._originalTmpl.length
+						? toIndex
+						: this._originalTmpl.length,
+				maxTmpls: this._originalTmpl.length
+			};
+		} else {
+			// then convert jquery templates
+			const convTmpls = converter.convert(originalTmplData);
+			let cachedConvTmpls = this._convertedTmpl.get(convId);
 
-				this._saveTemplatesToFiles(this._convertedTmpl)
-					.then(() => {
-						// send response to the client
-						fulfill({
-							originalTemplates: originalTmplData,
-							convertedTemplates: convTmpls,
-							index:
-								toIndex < this._originalTmpl.length
-									? toIndex
-									: this._originalTmpl.length,
-							maxTmpls: this._originalTmpl.length
-						});
-					})
-					.catch(reject);
+			if (cachedConvTmpls == null) {
+				cachedConvTmpls = [];
+				this._convertedTmpl.set(convId, cachedConvTmpls);
 			}
-		});
+
+			cachedConvTmpls = cachedConvTmpls.concat(convTmpls);
+
+			return {
+				originalTemplates: originalTmplData,
+				convertedTemplates: convTmpls,
+				index:
+					toIndex < this._originalTmpl.length
+						? toIndex
+						: this._originalTmpl.length,
+				maxTmpls: this._originalTmpl.length
+			};
+		}
 	}
 
 	_loadTemplates(paths) {
@@ -113,76 +101,6 @@ class ConvertService {
 				}
 
 				fulfill(filePaths);
-			});
-		});
-	}
-
-	_clearOutputDirectory() {
-		return new Promise((fulfill, reject) => {
-			if (this._clearOutputDir === false) {
-				fulfill();
-				return;
-			}
-
-			fs.readdir(this._outputDir, (err, files) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-
-				for (let file of files) {
-					fs.unlinkSync(path.join(this._outputDir, file));
-				}
-
-				fulfill();
-			});
-		});
-	}
-
-	_saveTemplatesToFiles(convertTemplates) {
-		return new Promise((fulfill, reject) => {
-			// we can have multiple templates in single file so we need to group
-			// files by path
-			const filePathGroup = convertTemplates.reduce((group, curTmpl) => {
-				if (!group[curTmpl.path]) {
-					group[curTmpl.path] = [];
-				}
-
-				group[curTmpl.path].push(curTmpl);
-
-				return group;
-			}, {});
-
-			const tmplFilePromise = [];
-			// save all templates from each group
-			for (let curPath in filePathGroup) {
-				// join all templates from single group
-				let joinedTmpl = filePathGroup[curPath]
-					.map(curTmpl => curTmpl.html)
-					.join('\n'.repeat(2));
-
-				// manage async in file save
-				tmplFilePromise.push(
-					this._saveTemplateFile(curPath, joinedTmpl)
-				);
-			}
-
-			// wait all templates to be saved before resolving promise
-			Promise.all(tmplFilePromise)
-				.then(fulfill)
-				.catch(reject);
-		});
-	}
-
-	_saveTemplateFile(path, value) {
-		return new Promise((fulfill, reject) => {
-			fs.writeFile(path, value, err => {
-				if (err) {
-					reject(err);
-					return;
-				}
-
-				fulfill();
 			});
 		});
 	}
