@@ -21,6 +21,16 @@
 	justify-content: space-between;
 }
 
+.templates-title .templates-header .controlls {
+	width: 50%;
+	display: flex;
+}
+
+.templates-title .templates-header .controlls .controll {
+	height: 28px;
+	margin: 0px 4px;
+}
+
 .templates-body {
 	margin-top: 40px;
 }

@@ -45,13 +45,20 @@ const extractTemplateHTML = templateData => {
 	});
 };
 
-const getTemplateName = tmplPath => {
+const getTemplateName = (tmplPath, newExtension) => {
 	// replace path backslash with forward slash
 	// and take last part that is name of the template
-	return tmplPath
+	let templateName = tmplPath
 		.replace('\\', '/')
 		.split('/')
 		.pop();
+
+	if (newExtension) {
+		const tmplExtension = templateName.split('.').pop();
+		templateName = templateName.replace(tmplExtension, newExtension);
+	}
+
+	return templateName;
 };
 
 module.exports = {

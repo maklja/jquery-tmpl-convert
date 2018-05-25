@@ -15,6 +15,12 @@ class Converter {
 		);
 	}
 
+	get fileExtension() {
+		throw new Error(
+			'Override this method with specific converter implementation.'
+		);
+	}
+
 	constructor(cfg) {
 		this._convertTemplates = [];
 	}

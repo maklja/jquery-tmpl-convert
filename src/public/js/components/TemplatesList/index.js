@@ -4,6 +4,56 @@ import TemplatePreview from 'app-js/components/TemplatePreview';
 import './template_list_preview.css';
 import ModalDialog from './ModalDialog';
 
+const TemplatesListHeader = ({
+	converters,
+	selectedConverter,
+	count,
+	onCoverterChange
+}) => {
+	return (
+		<div className="templates-header">
+			<div className="controlls">
+				<select
+					className="controll"
+					value={selectedConverter}
+					onChange={onCoverterChange}
+				>
+					{converters.map(curConv => (
+						<option key={curConv.id} value={curConv.id}>
+							{curConv.name}
+						</option>
+					))}
+				</select>
+				<form method="GET" action="downloadConverted">
+					<input
+						type="hidden"
+						name="conv"
+						value={selectedConverter}
+					/>
+					<button className="controll" type="submit">
+						Download
+					</button>
+				</form>
+			</div>
+			<div>
+				<span>Templates count: {count}</span>
+			</div>
+		</div>
+	);
+};
+
+TemplatesListHeader.propTypes = {
+	converters: PropTypes.array.isRequired,
+	selectedConverter: PropTypes.string.isRequired,
+	count: PropTypes.number,
+	onCoverterChange: PropTypes.func
+};
+
+TemplatesListHeader.defaultProps = {
+	count: 0,
+	onCoverterChange: () => {}
+};
+
 class TemplatesList extends React.Component {
 	constructor(props) {
 		super(props);
@@ -77,19 +127,12 @@ class TemplatesList extends React.Component {
 		return (
 			<div>
 				<div className="templates-title">
-					<div className="templates-header">
-						<select
-							value={selectedConverterId}
-							onChange={this._onCoverterChange}
-						>
-							{converters.map(curConv => (
-								<option key={curConv.id} value={curConv.id}>
-									{curConv.name}
-								</option>
-							))}
-						</select>
-						<span>Templates count: {maxTmpls || 0}</span>
-					</div>
+					<TemplatesListHeader
+						converters={converters}
+						selectedConverter={selectedConverterId}
+						count={maxTmpls}
+						onCoverterChange={this._onCoverterChange}
+					/>
 				</div>
 				<div className="templates-body">
 					{error == null ? (

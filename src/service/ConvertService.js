@@ -25,11 +25,18 @@ class ConvertService {
 		this._converters.add(converter.id, converter);
 	}
 
-	convertTemplates(convId, index = 0, limits = 0) {
+	getConverter(convId) {
 		const converter = this._converters.get(convId);
 		if (!converter) {
 			throw new Error(`Converter with id ${convId} is not found.`);
 		}
+
+		return converter;
+	}
+
+	convertTemplates(convId, index = 0, limits = 0) {
+		const converter = this.getConverter(convId);
+
 		// prepair converter
 		let toIndex = limits === 0 ? this._originalTmpl.length : index + limits,
 			originalTmplData = this._originalTmpl.slice(index, toIndex);

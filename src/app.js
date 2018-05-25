@@ -21,14 +21,19 @@ program
 		['./*.(htm|html)']
 	)
 	.option('-c, --converter <id>', 'Id of the target converter')
+	.option(
+		'-e, --extension <extension>',
+		'File extension of converted templates'
+	)
 	.parse(process.argv);
 
 const config = {
 	server: program.server,
 	files: program.files,
-	output: program.output,
+	output: program.server ? '' : program.output,
 	port: program.port,
-	converter: program.converter
+	converter: program.converter,
+	extension: program.extension
 };
 
 const converters = [HandlebarsConverter];

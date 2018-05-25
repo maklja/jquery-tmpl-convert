@@ -1,4 +1,3 @@
-const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const ConvertService = require('../service/ConvertService');
@@ -22,7 +21,10 @@ class Application {
 			.initialize()
 			.then(() => {
 				if (this._config.server) {
-					this._startServer();
+					require('./createServer')(
+						this.convertService,
+						this._config
+					);
 				} else {
 					return this._convertTemplates();
 				}
@@ -31,18 +33,6 @@ class Application {
 				// eslint-disable-next-line no-console
 				console.error(err);
 			});
-	}
-
-	_startServer() {
-		const app = express();
-		this._setRoutes(app);
-		app.use(express.json());
-		app.use(express.static(path.join(__dirname, '../public')));
-
-		app.listen(3000, () =>
-			// eslint-disable-next-line no-console
-			console.log('Example app listening on port 3000!')
-		);
 	}
 
 	_convertTemplates() {
@@ -166,63 +156,6 @@ class Application {
 
 				fulfill();
 			});
-		});
-	}
-
-	_setRoutes(app) {
-		app.get('/', (req, res) =>
-			res.sendFile(path.join(__dirname, '../public/index.html'))
-		);
-
-		const isNumeric = n => {
-			return !isNaN(parseFloat(n)) && isFinite(n);
-		};
-
-		app.get('/convert', (req, res) => {
-			const { conv, index, limit } = req.query,
-				indexNum = parseInt(index),
-				limitNum = parseInt(limit);
-
-			if (!isNumeric(indexNum) || !isNumeric(limitNum)) {
-				res.status(400);
-				res.send({ err: 'Invalid request parameters.' });
-
-				return;
-			}
-
-			if (limitNum <= 0) {
-				res.status(400);
-				res.send({
-					err:
-						'Invalid request parameter limit must be greater then 0..'
-				});
-
-				return;
-			}
-
-			try {
-				const templates = this.convertService.convertTemplates(
-					conv,
-					indexNum,
-					limitNum
-				);
-
-				res.send(templates);
-			} catch (e) {
-				res.status(400);
-				res.send({ err: e.message });
-			}
-		});
-
-		app.get('/converters', (req, res) => {
-			const converters = Array.from(
-				this.convertService.converters.values()
-			).map(curConv => ({
-				id: curConv.id,
-				name: curConv.name
-			}));
-
-			res.send(converters);
 		});
 	}
 }

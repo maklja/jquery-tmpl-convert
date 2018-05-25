@@ -1,3 +1,4 @@
+const path = require('path');
 const Converter = require('../Converter');
 const ValidationError = require('../../model/ValidationError');
 const TemplateModel = require('../../model/TemplateModel');
@@ -27,9 +28,14 @@ class HandlebarsConverter extends Converter {
 		return 'Handlebars';
 	}
 
+	get fileExtension() {
+		return this._extension;
+	}
+
 	constructor(cfg) {
 		super(cfg);
 		this._outputDir = cfg.output;
+		this._extension = cfg.extension || 'hbs';
 		this.SCRIPT_TYPE = 'text/x-handlebars-template';
 
 		// register converter for statement
@@ -93,7 +99,10 @@ class HandlebarsConverter extends Converter {
 			tmplModel.id,
 			this.SCRIPT_TYPE,
 			// set template output file
-			`${this._outputDir}/${getTemplateName(tmplModel.path)}`,
+			path.join(
+				this._outputDir,
+				getTemplateName(tmplModel.path, this.fileExtension)
+			),
 			// try to beautify html output
 			this._hbsTemplateValue(convertParams.convertTokens),
 			this._addScriptTag(
