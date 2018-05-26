@@ -2,70 +2,81 @@ const AbstractConverter = require('./AbstractConverter');
 const { Info } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
 const { CONVERT_ERROR } = require('../../model/error_code');
-const { TMPL } = require('../../tokens/tokens');
+const { WRAP } = require('../../tokens/tokens');
 
-class TmplConverter extends AbstractConverter {
+class WrapConverter extends AbstractConverter {
 	convert(node, context, errors) {
-		let tmplToken = node.token.clone();
+		let wrapToken = node.token.clone();
 		// TODO create new rule??
-		tmplToken.pattern.hasClosing = true;
+		wrapToken.pattern.hasClosing = true;
+
+		errors.push(
+			new ValidationError(
+				wrapToken.id,
+				CONVERT_ERROR.code,
+				CONVERT_ERROR.message(
+					'Converting WRAP node is not supported. Create partial template with @partial-block, see http://handlebarsjs.com/partials.html.'
+				),
+				wrapToken.lineNumber
+			)
+		);
 
 		if (node.token.expression.isLiteral()) {
-			let tmplId = this._getPartialTemplateName(tmplToken);
+			let tmplId = this._getPartialTemplateName(wrapToken);
 
-			tmplToken.value = `#> ${tmplId}`;
+			wrapToken.value = `#> ${tmplId}`;
 			if (node.isCallExpression()) {
 				let expressionParams = [];
-				for (let i = 0; i < tmplToken.parameters.length; i++) {
+				for (let i = 0; i < wrapToken.parameters.length; i++) {
 					expressionParams.push(
-						`param${i + 1}=${tmplToken.parameters[i].value}`
+						`param${i + 1}=${wrapToken.parameters[i].value}`
 					);
 				}
 
-				tmplToken.expression.value = expressionParams.join(' ');
+				wrapToken.expression.value = expressionParams.join(' ');
 				errors.push(
 					new ValidationError(
-						tmplToken.id,
+						wrapToken.id,
 						CONVERT_ERROR.code,
 						CONVERT_ERROR.message(
 							'Pass valid parameters to partial template.'
 						),
-						tmplToken.lineNumber
+						wrapToken.lineNumber
 					)
 				);
 			} else {
-				tmplToken.expression = null;
+				wrapToken.expression = null;
 			}
 
 			errors.push(
 				new ValidationError(
-					tmplToken.id,
+					wrapToken.id,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
 						'Make sure that partial template is register to handlebars. See http://handlebarsjs.com/partials.html'
 					),
-					tmplToken.lineNumber,
+					wrapToken.lineNumber,
 					Info
 				)
 			);
 		} else {
 			errors.push(
 				new ValidationError(
-					tmplToken.id,
+					wrapToken.id,
 					CONVERT_ERROR.code,
 					CONVERT_ERROR.message(
-						'Template tag expression must be literal.'
+						'Template wrap expression must be literal.'
 					),
-					tmplToken.lineNumber
+					wrapToken.lineNumber
 				)
 			);
 		}
 
-		return tmplToken;
+		return wrapToken;
 	}
 
 	canConvert(node) {
-		return node.name === TMPL;
+		return node.name === WRAP;
 	}
 
 	getClosingToken(node) {
@@ -91,4 +102,4 @@ class TmplConverter extends AbstractConverter {
 	}
 }
 
-module.exports = TmplConverter;
+module.exports = WrapConverter;

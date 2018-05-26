@@ -1,0 +1,20 @@
+<script id="simpleTmpl" type="text/x-jquery-tmpl">
+    {{wrap "#previewTemplate"}}
+		<div>Test1</div>
+		<div>Test2</div>
+	{{/wrap}}
+</script>
+
+<script id="complexTmpl" type="text/x-jquery-tmpl">
+    {{wrap(data, helpFunc) "#previewTemplate"}}
+		<div>Test1</div>
+		<div>Test2</div>
+	{{/wrap}}
+</script>
+
+<script id="previewTemplate" type="text/x-jquery-tmpl">
+    <em>${Name}</em>
+	{{each $item.html()}}
+		<div>{{html $value}}</div>
+	{{/each}}
+</script>

@@ -20,6 +20,9 @@ class ModalDialog extends React.Component {
 		this._onHTMLChange = this._onHTMLChange.bind(this);
 		this._onRefreshClick = this._onRefreshClick.bind(this);
 		this._onSaveClick = this._onSaveClick.bind(this);
+		this._onCopy = this._onCopy.bind(this);
+
+		this.taTmpl = React.createRef();
 
 		Modal.setAppElement(document.getElementById('modal-container'));
 	}
@@ -70,8 +73,12 @@ class ModalDialog extends React.Component {
 							<button onClick={this._onRefreshClick}>
 								Refresh
 							</button>
+							<button onClick={this._onCopy}>
+								Copy to clipboard
+							</button>
 						</div>
 						<textarea
+							ref={this.taTmpl}
 							className="textarea-markup"
 							value={htmlText}
 							onChange={this._onHTMLChange}
@@ -96,6 +103,14 @@ class ModalDialog extends React.Component {
 		this.setState({
 			htmlText: e.currentTarget.value
 		});
+	}
+
+	_onCopy(e) {
+		e.preventDefault();
+
+		this.taTmpl.current.select();
+
+		document.execCommand('copy');
 	}
 
 	_onRefreshClick(e) {

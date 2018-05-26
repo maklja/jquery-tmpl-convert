@@ -9,6 +9,7 @@ const ElseConverter = require('./ElseConverter');
 const HTMLConverter = require('./HTMLConverter');
 const EachConverter = require('./EachConverter');
 const TmplConverter = require('./TmplConverter');
+const WrapConverter = require('./WrapConverter');
 const UnknownConverter = require('./UnknownConverter');
 const ExpressionConverter = require('./ExpressionConverter');
 const {
@@ -45,6 +46,7 @@ class HandlebarsConverter extends Converter {
 			new HTMLConverter(),
 			new EachConverter(),
 			new TmplConverter(),
+			new WrapConverter(),
 			new UnknownConverter(),
 			new ExpressionConverter()
 		];
