@@ -1,5 +1,5 @@
 {
-	"name": "jquery-tmpl-converter",
+	"name": "jquery-tmpl-convert",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -23,7 +23,7 @@
 			"node_modules\\.bin\\stylelint ./src/public/resources/**/*.css ./src/public/js/**/*.css"
 	},
 	"author": "Bojan Makljenovic",
-	"license": "ISC",
+	"license": "MIT",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
 		"babel-loader": "^7.1.4",
