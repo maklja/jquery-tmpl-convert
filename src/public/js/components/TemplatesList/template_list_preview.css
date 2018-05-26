@@ -14,6 +14,23 @@
 	border-bottom: 1px solid #eee;
 }
 
+.templates-footer {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	height: 24px;
+	width: 100%;
+	background: black;
+	z-index: 1;
+	border-top: 1px solid #eee;
+	display: flex;
+	align-items: center;
+}
+
+.templates-footer a {
+	margin: 0 10px;
+}
+
 .templates-title .templates-header {
 	margin: 10px;
 	display: flex;
