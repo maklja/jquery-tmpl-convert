@@ -7,32 +7,42 @@ class ModalDialog extends React.Component {
 	constructor(props) {
 		super(props);
 
-		const { isOpen, tmplModel } = props;
+		const { isOpen, tmplModel, converterId } = props;
 
 		this.state = {
 			isOpen: isOpen,
 			tmplModel: tmplModel,
-			htmlText: tmplModel ? tmplModel.html : ''
+			htmlText: tmplModel ? tmplModel.html : '',
+			converterId
 		};
 
 		this._closeModal = this._closeModal.bind(this);
 		this._onHTMLChange = this._onHTMLChange.bind(this);
+		this._onRefreshClick = this._onRefreshClick.bind(this);
+		this._onSaveClick = this._onSaveClick.bind(this);
 
 		Modal.setAppElement(document.getElementById('modal-container'));
 	}
 
 	componentWillReceiveProps(newProps) {
-		const { isOpen, tmplModel } = newProps;
+		const { isOpen, tmplModel, converterId } = newProps;
 
 		this.setState({
 			isOpen: isOpen,
 			tmplModel: tmplModel,
-			htmlText: tmplModel ? tmplModel.html : ''
+			htmlText: tmplModel ? tmplModel.html : '',
+			converterId
 		});
 	}
 
 	render() {
 		const { isOpen, tmplModel, htmlText, error } = this.state;
+		const disabled = tmplModel ? htmlText === tmplModel.html : true;
+
+		if (isOpen) {
+			// if modal document is opened hide scroolbars on body element
+			document.body.style.overflow = 'hidden';
+		}
 
 		return tmplModel ? (
 			<Modal
@@ -50,7 +60,17 @@ class ModalDialog extends React.Component {
 				</div>
 				<div className="template-body">
 					<form>
-						<div className="button-controls" />
+						<div className="button-controls">
+							<button
+								onClick={this._onSaveClick}
+								disabled={disabled}
+							>
+								Save
+							</button>
+							<button onClick={this._onRefreshClick}>
+								Refresh
+							</button>
+						</div>
 						<textarea
 							className="textarea-markup"
 							value={htmlText}
@@ -78,8 +98,66 @@ class ModalDialog extends React.Component {
 		});
 	}
 
+	_onRefreshClick(e) {
+		e.preventDefault();
+
+		this.setState(state => {
+			return Object.assign({}, state, {
+				htmlText: state.tmplModel ? state.tmplModel.html : '',
+				error: null
+			});
+		});
+	}
+
+	_onSaveClick(e) {
+		e.preventDefault();
+
+		const url = `/updateTemplate`;
+		const { tmplModel, htmlText, converterId } = this.state;
+		const { onModelChange } = this.props;
+
+		window
+			.fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					templateUpdate: {
+						converterId,
+						id: tmplModel.id,
+						html: htmlText
+					}
+				})
+			})
+			.then(response => {
+				if (response.ok === false) {
+					throw response;
+				}
+
+				return response.json();
+			})
+			.then(newTmplModel => {
+				this.setState({
+					tmplModel: newTmplModel,
+					htmlText: newTmplModel.html,
+					error: null
+				});
+				onModelChange(newTmplModel);
+			})
+			.catch(errResp => {
+				errResp.json().then(errObj =>
+					this.setState({
+						error: errObj.err
+					})
+				);
+			});
+	}
+
 	_closeModal() {
 		const { onModalClose } = this.props;
+
+		document.body.style.overflow = null;
 		this.setState(
 			{
 				isOpen: false,
@@ -93,6 +171,7 @@ class ModalDialog extends React.Component {
 ModalDialog.propTypes = {
 	isOpen: PropTypes.bool,
 	tmplModel: PropTypes.object,
+	converterId: PropTypes.string.isRequired,
 	onModelChange: PropTypes.func,
 	onModalClose: PropTypes.func
 };

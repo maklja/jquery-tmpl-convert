@@ -29,7 +29,7 @@ const convertTemplate = (templatePath, done) => {
 describe('Test handlebars TMPL converter', () => {
 	beforeEach(done => {
 		this.handlebarsConverter = new HandlebarsConverter({
-			outputDir: '/'
+			output: '/'
 		});
 
 		const templatePath = path.resolve(

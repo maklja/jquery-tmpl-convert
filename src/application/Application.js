@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const ConvertService = require('../service/ConvertService');
-const REPORT_FILE_NAME = 'report.txt';
+const { createReport, defaultReportName } = require('./report.js');
 
 class Application {
 	constructor(config) {
@@ -59,32 +59,11 @@ class Application {
 			);
 	}
 
-	_createReport(convTemplates) {
-		const report = convTemplates
-			// create error messages for output report
-			.map(curTmpl => {
-				if (curTmpl.errors.length > 0) {
-					let errorMsg = curTmpl.path;
-					curTmpl.errors.forEach(curErr => {
-						errorMsg += `\n\t ${curErr.code} - ${curErr.type}: ${
-							curErr.message
-						} - line number ${curErr.lineNumber}`;
-					});
-
-					return errorMsg;
-				}
-
-				return null;
-			})
-			// remove all messaged that doesn't have any message type
-			.filter(curMsg => curMsg != null)
-			// merge all messages into one file
-			.join('\n'.repeat(2));
-
+	_createReport(templates) {
 		// save report in output directory
 		return this._saveFile(
-			path.join(this._config.output, REPORT_FILE_NAME),
-			report
+			path.join(this._config.output, defaultReportName),
+			createReport(templates)
 		);
 	}
 

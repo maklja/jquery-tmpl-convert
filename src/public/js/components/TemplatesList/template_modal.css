@@ -1,17 +1,14 @@
 .template-modal {
-	top: 30%;
-	left: 50%;
-	bottom: 20%;
 	width: 90%;
-	max-width: 800px;
-	transform: translate(-50%, -50%);
+	max-width: 1000px;
 	background: black;
-	position: absolute;
 	padding: 10px;
+	margin: 60px auto 0;
 }
 
 .template-modal .template-header {
 	margin: 0 0 8px;
+	position: relative;
 }
 
 .template-modal .template-header .template-name {
@@ -37,7 +34,7 @@
 .template-modal .template-body .textarea-markup {
 	width: 100%;
 	height: 350px;
-	resize: none; /* vertical */
+	resize: vertical;
 }
 
 .template-modal .template-body .button-controls {

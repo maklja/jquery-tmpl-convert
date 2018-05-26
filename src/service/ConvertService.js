@@ -36,44 +36,65 @@ class ConvertService {
 
 	convertTemplates(convId, index = 0, limits = 0) {
 		const converter = this.getConverter(convId);
+		let cachedConvTmpls = this._convertedTmpl.get(convId);
 
-		// prepair converter
-		let toIndex = limits === 0 ? this._originalTmpl.length : index + limits,
+		if (cachedConvTmpls == null) {
+			cachedConvTmpls = [];
+			this._convertedTmpl.set(convId, cachedConvTmpls);
+		}
+
+		// include already converted templates to prevent double conversion
+		let fromIndex = index === 0 ? cachedConvTmpls.length : index,
+			// max templates to convert
+			toIndex = limits === 0 ? this._originalTmpl.length : index + limits,
+			// original templates that will be converteds
 			originalTmplData = this._originalTmpl.slice(index, toIndex);
 
-		if (this._convertedTmpl.length >= toIndex) {
-			// send response to the client
-			return {
-				originalTemplates: originalTmplData,
-				convertedTemplates: this._convertedTmpl.slice(index, toIndex),
-				index:
-					toIndex < this._originalTmpl.length
-						? toIndex
-						: this._originalTmpl.length,
-				maxTmpls: this._originalTmpl.length
-			};
-		} else {
+		if (cachedConvTmpls.length < toIndex) {
 			// then convert jquery templates
-			const convTmpls = converter.convert(originalTmplData);
-			let cachedConvTmpls = this._convertedTmpl.get(convId);
+			const convTmpls = converter.convert(
+				// take just templates that are not converted already
+				this._originalTmpl.slice(fromIndex, toIndex)
+			);
 
-			if (cachedConvTmpls == null) {
-				cachedConvTmpls = [];
-				this._convertedTmpl.set(convId, cachedConvTmpls);
-			}
-
-			cachedConvTmpls = cachedConvTmpls.concat(convTmpls);
-
-			return {
-				originalTemplates: originalTmplData,
-				convertedTemplates: convTmpls,
-				index:
-					toIndex < this._originalTmpl.length
-						? toIndex
-						: this._originalTmpl.length,
-				maxTmpls: this._originalTmpl.length
-			};
+			cachedConvTmpls.push(...convTmpls);
 		}
+
+		return {
+			originalTemplates: originalTmplData,
+			convertedTemplates: cachedConvTmpls.slice(index, toIndex),
+			index:
+				toIndex < this._originalTmpl.length
+					? toIndex
+					: this._originalTmpl.length,
+			maxTmpls: this._originalTmpl.length
+		};
+	}
+
+	updateTemplate(convId, tmplId, tmplHTML) {
+		const updatedTmplData = TemplateParser.extractTemplateHTML(tmplHTML);
+
+		if (updatedTmplData.length === 0) {
+			throw new Error('Script tag is not found.');
+		}
+
+		if (updatedTmplData.length > 1) {
+			throw new Error('Multiple script tags found.');
+		}
+
+		const convTemplates = this._convertedTmpl.get(convId);
+		const tmplModel = convTemplates.find(curTmpl => curTmpl.id === tmplId);
+
+		if (tmplModel == null) {
+			throw new Error(`Template with id ${tmplId} is not found.`);
+		}
+
+		// update template
+		const tmplDelta = updatedTmplData[0];
+		tmplModel.value = tmplDelta.innerHTML;
+		tmplModel.html = tmplDelta.outerHTML;
+
+		return tmplModel.toJSON();
 	}
 
 	_loadTemplates(paths) {

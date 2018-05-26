@@ -30,7 +30,7 @@ const convertTemplate = (templatePath, done) => {
 describe('Test handlebars EACH converter', () => {
 	beforeEach(done => {
 		this.handlebarsConverter = new HandlebarsConverter({
-			outputDir: '/'
+			output: '/'
 		});
 		const templatePath = path.resolve(
 			__dirname,

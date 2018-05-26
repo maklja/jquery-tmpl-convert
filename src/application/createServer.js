@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const Zip = require('node-zip');
+const { createReport, defaultReportName } = require('./report.js');
 const DOWNLOAD_ZIP_NAME = 'templates';
 
 const setRoutes = (app, convertService) => {
@@ -11,6 +12,22 @@ const setRoutes = (app, convertService) => {
 	app.get('/', (req, res) =>
 		res.sendFile(path.join(__dirname, '../public/index.html'))
 	);
+
+	app.post('/updateTemplate', (req, res) => {
+		const { templateUpdate } = req.body;
+
+		try {
+			const tmpl = convertService.updateTemplate(
+				templateUpdate.converterId,
+				templateUpdate.id,
+				templateUpdate.html
+			);
+			res.send(tmpl);
+		} catch (e) {
+			res.status(400);
+			res.send({ err: e.message });
+		}
+	});
 
 	app.get('/convert', (req, res) => {
 		const { conv, index, limit } = req.query,
@@ -62,11 +79,23 @@ const setRoutes = (app, convertService) => {
 		const { conv } = req.query;
 		const { convertedTemplates } = convertService.convertTemplates(conv);
 
-		const zip = new Zip();
+		// group all templates from the same file
+		const tmplsGroupByPath = convertedTemplates.reduce((group, curTmpl) => {
+			if (group[curTmpl.path] == null) {
+				group[curTmpl.path] = [];
+			}
 
-		convertedTemplates.forEach(curTmpl =>
-			zip.file(curTmpl.path, curTmpl.html)
-		);
+			group[curTmpl.path].push(curTmpl.html);
+			return group;
+		}, {});
+
+		const zip = new Zip();
+		for (let curPath in tmplsGroupByPath) {
+			zip.file(curPath, tmplsGroupByPath[curPath].join('\n'.repeat(2)));
+		}
+
+		zip.file(defaultReportName, createReport(convertedTemplates));
+
 		const zipData = zip.generate({
 			base64: false,
 			compression: 'DEFLATE'
@@ -84,9 +113,9 @@ const setRoutes = (app, convertService) => {
 
 module.exports = (convertService, config) => {
 	const app = express();
-	setRoutes(app, convertService);
 	app.use(express.json());
 	app.use(express.static(path.join(__dirname, '../public')));
+	setRoutes(app, convertService);
 
 	app.listen(config.port, () =>
 		// eslint-disable-next-line no-console

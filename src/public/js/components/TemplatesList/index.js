@@ -156,6 +156,7 @@ class TemplatesList extends React.Component {
 					)}
 				</div>
 				<ModalDialog
+					converterId={selectedConverterId}
 					isOpen={modalIsOpen}
 					onModalClose={this._onModalClose}
 					tmplModel={modalTmplModel}
