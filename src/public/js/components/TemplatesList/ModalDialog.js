@@ -27,15 +27,15 @@ class ModalDialog extends React.Component {
 		Modal.setAppElement(document.getElementById('modal-container'));
 	}
 
-	componentWillReceiveProps(newProps) {
+	static getDerivedStateFromProps(newProps) {
 		const { isOpen, tmplModel, converterId } = newProps;
 
-		this.setState({
+		return {
 			isOpen: isOpen,
 			tmplModel: tmplModel,
 			htmlText: tmplModel ? tmplModel.html : '',
 			converterId
-		});
+		};
 	}
 
 	render() {

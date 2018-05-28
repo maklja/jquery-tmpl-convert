@@ -1,6 +1,7 @@
+#!/usr/bin/env node
+
 const program = require('commander');
 const Application = require('./application/Application');
-const HandlebarsConverter = require('./converter/handlerbars/HandlebarsConverter');
 
 program
 	.version('1.0.0')
@@ -20,7 +21,7 @@ program
 		val => val.split(',').map(pattern => pattern.trim()),
 		['./*.(htm|html)']
 	)
-	.option('-c, --converter <id>', 'Id of the target converter')
+	.option('-c, --converter <id>', 'Id of the target converter', 'hbs')
 	.option(
 		'-e, --extension <extension>',
 		'File extension of converted templates'
@@ -36,6 +37,5 @@ const config = {
 	extension: program.extension
 };
 
-const converters = [HandlebarsConverter];
 const app = new Application(config);
-app.start(converters);
+app.start();

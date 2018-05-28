@@ -1,10 +1,7 @@
-const fs = require('fs');
-const Parser = require('./parser/Parser');
+const Application = require('./application/Application');
+const Converter = require('./converter/Converter');
 
-fs.readFile('src/examples/variable.html', { encoding: 'utf8' }, (err, data) => {
-	if (err) {
-		// TODO
-	}
-	var parser = new Parser(data);
-	parser.parse();
-});
+module.exports = {
+	Application,
+	Converter
+};

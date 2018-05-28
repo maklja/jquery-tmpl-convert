@@ -81,7 +81,7 @@ class TemplatesList extends React.Component {
 		this._onCoverterChange = this._onCoverterChange.bind(this);
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		// first load supported converters
 		this._loadConverters()
 			.then(() => this._loadNextTemplates())

@@ -1,20 +1,20 @@
 const path = require('path');
 const fs = require('fs');
 const ConvertService = require('../service/ConvertService');
+const HandlebarsConverter = require('../converter/handlerbars/HandlebarsConverter');
 const { createReport, defaultReportName } = require('./report.js');
 
 class Application {
 	constructor(config) {
 		this._config = config;
+		this._converters = [new HandlebarsConverter(config)];
 	}
 
-	start(converters) {
-		const convInstances = converters.map(
-			Converter => new Converter(this._config)
-		);
+	start(converters = []) {
+		this._converters = this._converters.concat(converters);
 
 		this.convertService = new ConvertService(
-			convInstances,
+			this._converters,
 			this._config.files
 		);
 		this.convertService

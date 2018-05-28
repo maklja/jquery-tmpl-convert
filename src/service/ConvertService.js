@@ -123,9 +123,8 @@ class ConvertService {
 			// use glob to support regex in path
 			glob(path, (err, filePaths) => {
 				if (err) {
-					if (err) {
-						reject(err);
-					}
+					reject(err);
+					return;
 				}
 
 				fulfill(filePaths);

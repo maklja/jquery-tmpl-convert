@@ -35,6 +35,7 @@ module.exports = class TemplateParser {
 			fs.readFile(path, this._options.encoding, (err, templateData) => {
 				if (err) {
 					reject(err);
+					return;
 				}
 
 				this._extractTemplates(templateData, path);
