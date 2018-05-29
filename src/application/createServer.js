@@ -29,6 +29,21 @@ const setRoutes = (app, convertService) => {
 		}
 	});
 
+	app.post('/convertTemplate', (req, res) => {
+		const { convertTemplate } = req.body;
+
+		try {
+			const tmpl = convertService.convertTemplate(
+				convertTemplate.converterId,
+				convertTemplate.id
+			);
+			res.send(tmpl);
+		} catch (e) {
+			res.status(400);
+			res.send({ err: e.message });
+		}
+	});
+
 	app.get('/convert', (req, res) => {
 		const { conv, index, limit } = req.query,
 			indexNum = parseInt(index),

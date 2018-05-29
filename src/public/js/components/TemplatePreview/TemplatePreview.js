@@ -17,7 +17,8 @@ class TemplatePreview extends React.Component {
 	}
 
 	componentDidMount() {
-		Prism.highlightElement(this.templateCode.current);
+		// expensive operation do it async
+		setTimeout(() => Prism.highlightElement(this.templateCode.current), 0);
 	}
 
 	shouldComponentUpdate(nextProps) {
@@ -51,7 +52,7 @@ class TemplatePreview extends React.Component {
 			<div className="template-preview">
 				<div className="template-body">
 					<pre
-						onClick={() => onOpenModal(template)}
+						onDoubleClick={() => onOpenModal(template)}
 						data-line={linesWithError}
 						className="line-numbers language-html"
 					>

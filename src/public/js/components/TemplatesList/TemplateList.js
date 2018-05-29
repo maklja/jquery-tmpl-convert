@@ -137,12 +137,15 @@ class TemplatesList extends React.Component {
 				<div className="templates-body">
 					{error == null ? (
 						originalTemplates.map((curTmpl, i) => (
-							<div key={i} className="templates-preview">
-								<div className="templates-preview-container">
-									{curTmpl}
-								</div>
-								<div className="templates-preview-container">
-									{convertedTemplates[i]}
+							<div key={i} className="templates">
+								<div className="templates-index">{i + 1}</div>
+								<div className="templates-preview">
+									<div className="templates-preview-container">
+										{curTmpl}
+									</div>
+									<div className="templates-preview-container">
+										{convertedTemplates[i]}
+									</div>
 								</div>
 							</div>
 						))

@@ -18,7 +18,7 @@ class ModalDialog extends React.Component {
 
 		this._closeModal = this._closeModal.bind(this);
 		this._onHTMLChange = this._onHTMLChange.bind(this);
-		this._onRefreshClick = this._onRefreshClick.bind(this);
+		this._onResetClick = this._onResetClick.bind(this);
 		this._onSaveClick = this._onSaveClick.bind(this);
 		this._onCopy = this._onCopy.bind(this);
 
@@ -27,15 +27,19 @@ class ModalDialog extends React.Component {
 		Modal.setAppElement(document.getElementById('modal-container'));
 	}
 
-	static getDerivedStateFromProps(newProps) {
+	static getDerivedStateFromProps(newProps, state) {
 		const { isOpen, tmplModel, converterId } = newProps;
 
-		return {
-			isOpen: isOpen,
-			tmplModel: tmplModel,
-			htmlText: tmplModel ? tmplModel.html : '',
-			converterId
-		};
+		if (tmplModel !== state.tmplModel) {
+			return {
+				isOpen: isOpen,
+				tmplModel: tmplModel,
+				htmlText: tmplModel ? tmplModel.html : '',
+				converterId
+			};
+		} else {
+			return null;
+		}
 	}
 
 	render() {
@@ -70,9 +74,7 @@ class ModalDialog extends React.Component {
 							>
 								Save
 							</button>
-							<button onClick={this._onRefreshClick}>
-								Refresh
-							</button>
+							<button onClick={this._onResetClick}>Reset</button>
 							<button onClick={this._onCopy}>
 								Copy to clipboard
 							</button>
@@ -113,15 +115,48 @@ class ModalDialog extends React.Component {
 		document.execCommand('copy');
 	}
 
-	_onRefreshClick(e) {
+	_onResetClick(e) {
 		e.preventDefault();
 
-		this.setState(state => {
-			return Object.assign({}, state, {
-				htmlText: state.tmplModel ? state.tmplModel.html : '',
-				error: null
+		const url = `/convertTemplate`;
+		const { tmplModel, converterId } = this.state;
+		const { onModelChange } = this.props;
+
+		window
+			.fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					convertTemplate: {
+						converterId,
+						id: tmplModel.id
+					}
+				})
+			})
+			.then(response => {
+				if (response.ok === false) {
+					throw response;
+				}
+
+				return response.json();
+			})
+			.then(newTmplModel => {
+				this.setState({
+					tmplModel: newTmplModel,
+					htmlText: newTmplModel.html,
+					error: null
+				});
+				onModelChange(newTmplModel);
+			})
+			.catch(errResp => {
+				errResp.json().then(errObj =>
+					this.setState({
+						error: errObj.err
+					})
+				);
 			});
-		});
 	}
 
 	_onSaveClick(e) {

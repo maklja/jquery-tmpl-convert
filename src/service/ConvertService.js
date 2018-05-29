@@ -34,6 +34,30 @@ class ConvertService {
 		return converter;
 	}
 
+	convertTemplate(convId, tmplId) {
+		const tmplToConvert = this._originalTmpl.find(
+				curTmpl => curTmpl.id === tmplId
+			),
+			i = this._originalTmpl.indexOf(tmplToConvert);
+
+		if (tmplToConvert == null) {
+			throw new Error(`Template with id ${tmplId} is not found.`);
+		}
+
+		const converter = this.getConverter(convId);
+
+		// then convert jquery templates
+		const convTmpls = converter.convert([tmplToConvert]);
+		// there will be only one element
+		const convTmpl = convTmpls.pop();
+
+		// replace template inside the cache
+		const cachedConvTmpls = this._convertedTmpl.get(convId);
+		cachedConvTmpls[i] = convTmpl;
+
+		return convTmpl.toJSON();
+	}
+
 	convertTemplates(convId, index = 0, limits = 0) {
 		const converter = this.getConverter(convId);
 		let cachedConvTmpls = this._convertedTmpl.get(convId);

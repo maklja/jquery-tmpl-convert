@@ -1,5 +1,19 @@
-.templates-preview {
+.templates {
+	border-top: 1px solid #eee;
+}
+
+.templates .templates-index {
+	padding: 3px 5px;
+	text-align: right;
+}
+
+.templates .templates-preview {
 	display: flex;
+}
+
+.templates .templates-preview .templates-preview-container {
+	width: 100%;
+	max-width: 50%;
 }
 
 .templates-title {
@@ -50,12 +64,7 @@
 }
 
 .templates-body {
-	margin-top: 40px;
-}
-
-.templates-preview .templates-preview-container {
-	width: 100%;
-	max-width: 50%;
+	margin: 55px 0;
 }
 
 .template-convert-error {
