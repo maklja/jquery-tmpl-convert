@@ -49,6 +49,8 @@ class ModalDialog extends React.Component {
 		if (isOpen) {
 			// if modal document is opened hide scroolbars on body element
 			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
 		}
 
 		return tmplModel ? (
@@ -207,7 +209,6 @@ class ModalDialog extends React.Component {
 	_closeModal() {
 		const { onModalClose } = this.props;
 
-		document.body.style.overflow = null;
 		this.setState(
 			{
 				isOpen: false,
