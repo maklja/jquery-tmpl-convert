@@ -8,6 +8,7 @@ import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 import 'prismjs/plugins/line-highlight/prism-line-highlight.css';
 
 import './template_preview.css';
+import { clearTimeout } from 'timers';
 
 class TemplatePreview extends React.Component {
 	constructor(props) {
@@ -18,7 +19,11 @@ class TemplatePreview extends React.Component {
 
 	componentDidMount() {
 		// expensive operation do it async
-		setTimeout(() => Prism.highlightElement(this.templateCode.current), 0);
+		this._colorTimeout = setTimeout(() => Prism.highlightElement(this.templateCode.current), 0);
+	}
+
+	componentWillUnmount() {
+		window.clearTimeout(this._colorTimeout);
 	}
 
 	shouldComponentUpdate(nextProps) {

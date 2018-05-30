@@ -4,6 +4,14 @@ import TemplatePreview from 'app-js/components/TemplatePreview';
 import './template_list_preview.css';
 import ModalDialog from './ModalDialog';
 
+function isElementInViewport(rect) {
+	var pageTop = window.pageYOffset;
+	var pageBottom = pageTop + window.innerHeight;
+	var elementTop = rect.top;
+	var elementBottom = elementTop + rect.height;
+	return elementTop <= pageBottom && elementBottom >= pageTop;
+}
+
 const TemplatesListHeader = ({
 	converters,
 	selectedConverter,
@@ -71,14 +79,19 @@ class TemplatesList extends React.Component {
 			modalTmplModel: null,
 			converters: [],
 			selectedConverterId: '',
-			error: null
+			error: null,
+			visibleElements: []
 		};
+
+		this.bodyEl = React.createRef();
 
 		this._onScroll = this._onScroll.bind(this);
 		this._openModal = this._openModal.bind(this);
 		this._onModelChange = this._onModelChange.bind(this);
 		this._onModalClose = this._onModalClose.bind(this);
 		this._onCoverterChange = this._onCoverterChange.bind(this);
+
+		this._offsetHeights = [];
 	}
 
 	componentDidMount() {
@@ -88,6 +101,24 @@ class TemplatesList extends React.Component {
 			.catch(err => this.setState({ error: err }));
 
 		document.addEventListener('scroll', this._onScroll);
+	}
+
+	componentDidUpdate() {
+		const { templates } = this.state;
+
+		if (templates.originalTemplates.length > this._offsetHeights.length) {
+			const templateEl = Array.from(this.bodyEl.current.children).filter(
+				curEl => curEl.classList.contains('templates')
+			);
+			this._offsetHeights = this._offsetHeights.concat(
+				templateEl.slice(this._offsetHeights.length).map(x => {
+					return {
+						top: x.offsetTop,
+						height: x.getBoundingClientRect().height
+					};
+				})
+			);
+		}
 	}
 
 	componentWillUnmount() {
@@ -103,7 +134,8 @@ class TemplatesList extends React.Component {
 			modalTmplModel,
 			converters,
 			selectedConverterId,
-			error
+			error,
+			visibleElements
 		} = this.state;
 
 		const originalTemplates = templates.originalTemplates.map(
@@ -134,21 +166,36 @@ class TemplatesList extends React.Component {
 						onCoverterChange={this._onCoverterChange}
 					/>
 				</div>
-				<div className="templates-body">
+				<div ref={this.bodyEl} className="templates-body">
 					{error == null ? (
-						originalTemplates.map((curTmpl, i) => (
-							<div key={i} className="templates">
-								<div className="templates-index">{i + 1}</div>
-								<div className="templates-preview">
-									<div className="templates-preview-container">
-										{curTmpl}
+						originalTemplates.map(
+							(curTmpl, i) =>
+								visibleElements.indexOf(i) > -1 ||
+								this._offsetHeights.length <= i ? (
+									<div key={i} className="templates">
+										<div className="templates-index">
+											{i + 1}
+										</div>
+										<div className="templates-preview">
+											<div className="templates-preview-container">
+												{curTmpl}
+											</div>
+											<div className="templates-preview-container">
+												{convertedTemplates[i]}
+											</div>
+										</div>
 									</div>
-									<div className="templates-preview-container">
-										{convertedTemplates[i]}
-									</div>
-								</div>
-							</div>
-						))
+								) : (
+									<div
+										key={i}
+										className="templates"
+										style={{
+											height: this._offsetHeights[i]
+												.height
+										}}
+									/>
+								)
+						)
 					) : (
 						<div className="template-convert-error">{error}</div>
 					)}
@@ -316,6 +363,16 @@ class TemplatesList extends React.Component {
 
 		if (html.clientHeight + MIN_OFFSET_BEFORE_LOADING > maxHeight) {
 			this._loadNextTemplates();
+		} else {
+			const visibleElIndex = this._offsetHeights
+				.filter(rect => {
+					return isElementInViewport(rect);
+				})
+				.map(rect => this._offsetHeights.indexOf(rect));
+
+			this.setState({
+				visibleElements: visibleElIndex
+			});
 		}
 	}
 
