@@ -18,8 +18,7 @@ const IF_RULE = {
 	name: IF,
 	hasClosing: true,
 	hasExpression: true,
-	// TODO privremeno resenje dok se ne resi problem sa parserom
-	expressionMandatory: false,
+	expressionMandatory: true,
 	afterTokens: null
 };
 

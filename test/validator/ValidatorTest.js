@@ -84,16 +84,15 @@ describe('Rule Matcher test', () => {
 			// because mandatory expression is not set
 			const noStatementError = validator.validate();
 
-			// TODO privremeno resenje dok se ne resi problem sa parserom
-			// expect(noStatementError)
-			// 	.that.is.an('array')
-			// 	.that.have.lengthOf(1);
-			//
-			// compareValidationErrorState(
-			// 	noStatementError[0],
-			// 	validateTokens[0].id,
-			// 	EXPRESSION_MISSING.code
-			// );
+			expect(noStatementError)
+				.that.is.an('array')
+				.that.have.lengthOf(1);
+
+			compareValidationErrorState(
+				noStatementError[0],
+				validateTokens[0].id,
+				EXPRESSION_MISSING.code
+			);
 		});
 
 		it('invalid IF_END token unexpected statement', () => {
