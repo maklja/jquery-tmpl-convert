@@ -34,14 +34,14 @@ class ConvertService {
 		return converter;
 	}
 
-	convertTemplate(convId, tmplId) {
+	convertTemplate(convId, tmplGuid) {
 		const tmplToConvert = this._originalTmpl.find(
-				curTmpl => curTmpl.id === tmplId
+				curTmpl => curTmpl.guid === tmplGuid
 			),
 			i = this._originalTmpl.indexOf(tmplToConvert);
 
 		if (tmplToConvert == null) {
-			throw new Error(`Template with id ${tmplId} is not found.`);
+			throw new Error(`Template with guid ${tmplGuid} is not found.`);
 		}
 
 		const converter = this.getConverter(convId);
@@ -95,7 +95,7 @@ class ConvertService {
 		};
 	}
 
-	updateTemplate(convId, tmplId, tmplHTML) {
+	updateTemplate(convId, tmplGuid, tmplHTML) {
 		const updatedTmplData = TemplateParser.extractTemplateHTML(tmplHTML);
 
 		if (updatedTmplData.length === 0) {
@@ -107,10 +107,12 @@ class ConvertService {
 		}
 
 		const convTemplates = this._convertedTmpl.get(convId);
-		const tmplModel = convTemplates.find(curTmpl => curTmpl.id === tmplId);
+		const tmplModel = convTemplates.find(
+			curTmpl => curTmpl.guid === tmplGuid
+		);
 
 		if (tmplModel == null) {
-			throw new Error(`Template with id ${tmplId} is not found.`);
+			throw new Error(`Template with guid ${tmplGuid} is not found.`);
 		}
 
 		// update template

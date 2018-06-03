@@ -2,6 +2,14 @@
 	border-top: 1px solid #eee;
 }
 
+.templates-item-loading {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 22px;
+}
+
 .templates .templates-index {
 	padding: 3px 5px;
 	text-align: right;

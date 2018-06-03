@@ -1,17 +1,20 @@
 import React from 'react';
 import Modal from 'react-modal';
 import PropTypes from 'prop-types';
+import { convertTemplate, updateTemplate } from 'app-js/requests';
+
 import './template_modal.css';
 
 class ModalDialog extends React.Component {
 	constructor(props) {
 		super(props);
 
-		const { isOpen, tmplModel, converterId } = props;
+		const { isOpen, tmplModel, originalTemplate, converterId } = props;
 
 		this.state = {
 			isOpen: isOpen,
 			tmplModel: tmplModel,
+			originalTemplate: originalTemplate,
 			htmlText: tmplModel ? tmplModel.html : '',
 			converterId
 		};
@@ -28,18 +31,19 @@ class ModalDialog extends React.Component {
 	}
 
 	static getDerivedStateFromProps(newProps, state) {
-		const { isOpen, tmplModel, converterId } = newProps;
+		const { isOpen, tmplModel, originalTemplate, converterId } = newProps;
 
 		if (tmplModel !== state.tmplModel) {
 			return {
 				isOpen: isOpen,
 				tmplModel: tmplModel,
+				originalTemplate: originalTemplate,
 				htmlText: tmplModel ? tmplModel.html : '',
 				converterId
 			};
-		} else {
-			return null;
 		}
+
+		return null;
 	}
 
 	render() {
@@ -120,30 +124,10 @@ class ModalDialog extends React.Component {
 	_onResetClick(e) {
 		e.preventDefault();
 
-		const url = `/convertTemplate`;
-		const { tmplModel, converterId } = this.state;
+		const { originalTemplate, converterId } = this.state;
 		const { onModelChange } = this.props;
 
-		window
-			.fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					convertTemplate: {
-						converterId,
-						id: tmplModel.id
-					}
-				})
-			})
-			.then(response => {
-				if (response.ok === false) {
-					throw response;
-				}
-
-				return response.json();
-			})
+		convertTemplate(converterId, originalTemplate.guid)
 			.then(newTmplModel => {
 				this.setState({
 					tmplModel: newTmplModel,
@@ -152,43 +136,20 @@ class ModalDialog extends React.Component {
 				});
 				onModelChange(newTmplModel);
 			})
-			.catch(errResp => {
-				errResp.json().then(errObj =>
-					this.setState({
-						error: errObj.err
-					})
-				);
+			.catch(errObj => {
+				this.setState({
+					error: errObj.err
+				});
 			});
 	}
 
 	_onSaveClick(e) {
 		e.preventDefault();
 
-		const url = `/updateTemplate`;
 		const { tmplModel, htmlText, converterId } = this.state;
 		const { onModelChange } = this.props;
 
-		window
-			.fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					templateUpdate: {
-						converterId,
-						id: tmplModel.id,
-						html: htmlText
-					}
-				})
-			})
-			.then(response => {
-				if (response.ok === false) {
-					throw response;
-				}
-
-				return response.json();
-			})
+		updateTemplate(converterId, tmplModel.guid, htmlText)
 			.then(newTmplModel => {
 				this.setState({
 					tmplModel: newTmplModel,
@@ -197,12 +158,10 @@ class ModalDialog extends React.Component {
 				});
 				onModelChange(newTmplModel);
 			})
-			.catch(errResp => {
-				errResp.json().then(errObj =>
-					this.setState({
-						error: errObj.err
-					})
-				);
+			.catch(errObj => {
+				this.setState({
+					error: errObj.err
+				});
 			});
 	}
 
@@ -212,7 +171,8 @@ class ModalDialog extends React.Component {
 		this.setState(
 			{
 				isOpen: false,
-				tmplModel: null
+				tmplModel: null,
+				originalTemplate: null
 			},
 			() => onModalClose()
 		);
@@ -222,6 +182,7 @@ class ModalDialog extends React.Component {
 ModalDialog.propTypes = {
 	isOpen: PropTypes.bool,
 	tmplModel: PropTypes.object,
+	originalTemplate: PropTypes.object,
 	converterId: PropTypes.string.isRequired,
 	onModelChange: PropTypes.func,
 	onModalClose: PropTypes.func
@@ -229,7 +190,6 @@ ModalDialog.propTypes = {
 
 ModalDialog.defaultProps = {
 	isOpen: false,
-	tmplModel: {},
 	onModelChange: () => {},
 	onModalClose: () => {}
 };

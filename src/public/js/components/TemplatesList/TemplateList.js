@@ -1,16 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import TemplatePreview from 'app-js/components/TemplatePreview';
+import {
+	TemplatePreview,
+	TemplatePreviewLoading
+} from 'app-js/components/TemplatePreview';
+import { convertTemplates, loadConverters } from 'app-js/requests';
 import './template_list_preview.css';
 import ModalDialog from './ModalDialog';
-
-function isElementInViewport(rect) {
-	var pageTop = window.pageYOffset;
-	var pageBottom = pageTop + window.innerHeight;
-	var elementTop = rect.top;
-	var elementBottom = elementTop + rect.height;
-	return elementTop <= pageBottom && elementBottom >= pageTop;
-}
 
 const TemplatesListHeader = ({
 	converters,
@@ -62,6 +58,27 @@ TemplatesListHeader.defaultProps = {
 	onCoverterChange: () => {}
 };
 
+const TemplatesListFooter = () => {
+	return (
+		<div className="templates-footer">
+			<a
+				target="_blank"
+				rel="noopener noreferrer"
+				href="http://web.archive.org/web/20120920065217/http://api.jquery.com/category/plugins/templates/"
+			>
+				JQuery template docs
+			</a>
+			<a
+				target="_blank"
+				rel="noopener noreferrer"
+				href="http://tryhandlebarsjs.com/"
+			>
+				Try handlebars
+			</a>
+		</div>
+	);
+};
+
 class TemplatesList extends React.Component {
 	constructor(props) {
 		super(props);
@@ -96,20 +113,32 @@ class TemplatesList extends React.Component {
 
 	componentDidMount() {
 		// first load supported converters
-		this._loadConverters()
-			.then(() => this._loadNextTemplates())
+		loadConverters()
+			.then(converters => {
+				this.setState(
+					{
+						converters: converters,
+						selectedConverterId: converters[0].id
+					},
+					() => this._loadNextTemplates()
+				);
+			})
 			.catch(err => this.setState({ error: err }));
 
 		document.addEventListener('scroll', this._onScroll);
 	}
 
-	componentDidUpdate() {
-		const { templates } = this.state;
+	componentDidUpdate(prevProps, prevState) {
+		const { templates, visibleElements } = this.state;
+		// get all children from template body that contains class templates
+		const templateEl = Array.from(this.bodyEl.current.children).filter(
+			curEl => curEl.classList.contains('templates')
+		);
 
+		// if there is more template in DOM then we have in offsetHeights then program
+		// lazy loaded more templates and we need to get there heights and top offset
 		if (templates.originalTemplates.length > this._offsetHeights.length) {
-			const templateEl = Array.from(this.bodyEl.current.children).filter(
-				curEl => curEl.classList.contains('templates')
-			);
+			// add new DOM elements height to collection
 			this._offsetHeights = this._offsetHeights.concat(
 				templateEl.slice(this._offsetHeights.length).map(x => {
 					return {
@@ -118,6 +147,38 @@ class TemplatesList extends React.Component {
 					};
 				})
 			);
+		}
+
+		let isUpdated = false;
+		// first we need to check is some of visible elements is changed it
+		// height this is only posible if user manually update some template
+		// (using edit template option through modal dialog)
+		visibleElements.forEach(curElIndex => {
+			const curEl = templateEl[curElIndex];
+			const height = curEl.getBoundingClientRect().height;
+			// if diffrence between current height and prevous height is larger then
+			// 20px we will consider that template is changed
+			if (
+				Math.abs(height - this._offsetHeights[curElIndex].height) > 20
+			) {
+				this._offsetHeights[curElIndex].top = curEl.offsetTop;
+				this._offsetHeights[curElIndex].height = height;
+				isUpdated = true;
+			}
+		});
+
+		// if at least one template is changed then we need to update top offset
+		// of all elements bellow it in order to support smooth scroling without bugs
+		if (isUpdated) {
+			const firstInvisibleElIndex =
+				visibleElements[visibleElements.length - 1] + 1;
+			const elementsToUpdateTop = this._offsetHeights.slice(
+				firstInvisibleElIndex
+			);
+
+			elementsToUpdateTop.forEach((curEl, i) => {
+				curEl.top = templateEl[firstInvisibleElIndex + i].offsetTop;
+			});
 		}
 	}
 
@@ -132,6 +193,7 @@ class TemplatesList extends React.Component {
 			maxTmpls,
 			modalIsOpen,
 			modalTmplModel,
+			modalTmplOrig,
 			converters,
 			selectedConverterId,
 			error,
@@ -141,16 +203,17 @@ class TemplatesList extends React.Component {
 		const originalTemplates = templates.originalTemplates.map(
 			curTemplate => (
 				<TemplatePreview
-					key={`${curTemplate.path}_${curTemplate.id}`}
+					key={`${curTemplate.guid}`}
 					template={curTemplate}
 				/>
 			)
 		);
 		const convertedTemplates = templates.convertedTemplates.map(
-			curTemplate => (
+			(curTemplate, i) => (
 				<TemplatePreview
-					key={`${curTemplate.path}_${curTemplate.id}`}
+					key={`${curTemplate.guid}`}
 					template={curTemplate}
+					originalTemplate={templates.originalTemplates[i]}
 					onOpenModal={this._openModal}
 				/>
 			)
@@ -170,6 +233,7 @@ class TemplatesList extends React.Component {
 					{error == null ? (
 						originalTemplates.map(
 							(curTmpl, i) =>
+								visibleElements.length === 0 ||
 								visibleElements.indexOf(i) > -1 ||
 								this._offsetHeights.length <= i ? (
 									<div key={i} className="templates">
@@ -186,13 +250,9 @@ class TemplatesList extends React.Component {
 										</div>
 									</div>
 								) : (
-									<div
+									<TemplatePreviewLoading
 										key={i}
-										className="templates"
-										style={{
-											height: this._offsetHeights[i]
-												.height
-										}}
+										height={this._offsetHeights[i].height}
 									/>
 								)
 						)
@@ -205,33 +265,20 @@ class TemplatesList extends React.Component {
 						''
 					)}
 				</div>
-				<div className="templates-footer">
-					<a
-						target="_blank"
-						rel="noopener noreferrer"
-						href="http://web.archive.org/web/20120920065217/http://api.jquery.com/category/plugins/templates/"
-					>
-						JQuery template docs
-					</a>
-					<a
-						target="_blank"
-						rel="noopener noreferrer"
-						href="http://tryhandlebarsjs.com/"
-					>
-						Try handlebars
-					</a>
-				</div>
+				<TemplatesListFooter />
 				<ModalDialog
 					converterId={selectedConverterId}
 					isOpen={modalIsOpen}
 					onModalClose={this._onModalClose}
 					tmplModel={modalTmplModel}
+					originalTemplate={modalTmplOrig}
 					onModelChange={this._onModelChange}
 				/>
 			</div>
 		);
 	}
 
+	// method will be called after some converted model is changed
 	_onModelChange(changedModel) {
 		this.setState(prevState => {
 			const { templates, modalTmplModel } = prevState;
@@ -257,17 +304,20 @@ class TemplatesList extends React.Component {
 	}
 
 	_loadNextTemplates() {
-		const { isLoading, index, maxTmpls } = this.state;
+		const { isLoading, index, maxTmpls, selectedConverterId } = this.state;
 		const { tmplsToFetch } = this.props;
 
+		// if loading is in progress or we loaded all templates from server
 		if (isLoading || index === maxTmpls) {
 			return;
 		}
 
 		this.setState({
+			// show that new templates download is in progress
 			isLoading: true
 		});
-		this._convertTemplates(index, tmplsToFetch)
+		// fetch new templates from server
+		convertTemplates(selectedConverterId, index, tmplsToFetch)
 			.then(convTmpl => {
 				this.setState(prevState => {
 					const {
@@ -275,6 +325,7 @@ class TemplatesList extends React.Component {
 						convertedTemplates
 					} = prevState.templates;
 
+					// update state with newly fetched template models
 					return Object.assign({}, prevState, {
 						templates: {
 							originalTemplates: originalTemplates.concat(
@@ -293,63 +344,6 @@ class TemplatesList extends React.Component {
 			.catch(err => this.setState({ error: err }));
 	}
 
-	_loadConverters() {
-		const url = '/converters';
-		return new Promise((fulfill, reject) => {
-			window
-				.fetch(url, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				})
-				.then(response => {
-					if (response.ok === false) {
-						throw response;
-					}
-
-					return response.json();
-				})
-				.then(converters =>
-					this.setState(
-						{
-							converters: converters,
-							selectedConverterId: converters[0].id
-						},
-						() => fulfill()
-					)
-				)
-				.catch(errResp =>
-					errResp.json().then(errObj => reject(errObj.err))
-				);
-		});
-	}
-
-	_convertTemplates(index, limit) {
-		const { selectedConverterId } = this.state;
-		const url = `/convert?conv=${selectedConverterId}&index=${index}&limit=${limit}`;
-		return new Promise((fulfill, reject) => {
-			window
-				.fetch(url, {
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				})
-				.then(response => {
-					if (response.ok === false) {
-						throw response;
-					}
-
-					return response.json();
-				})
-				.then(json => fulfill(json))
-				.catch(errResp =>
-					errResp.json().then(errObj => reject(errObj.err))
-				);
-		});
-	}
-
 	_onScroll() {
 		const { isLoading } = this.state;
 
@@ -364,16 +358,32 @@ class TemplatesList extends React.Component {
 		if (html.clientHeight + MIN_OFFSET_BEFORE_LOADING > maxHeight) {
 			this._loadNextTemplates();
 		} else {
-			const visibleElIndex = this._offsetHeights
-				.filter(rect => {
-					return isElementInViewport(rect);
-				})
-				.map(rect => this._offsetHeights.indexOf(rect));
+			// clear prevoust calculation for visible elements
+			clearTimeout(this._newVisibleElTimeout);
 
-			this.setState({
-				visibleElements: visibleElIndex
-			});
+			// set timeout if user is scrolling too fast through templates to
+			// prevent unnecessary render and highlight of templates, insted show
+			// only place holder and loading message for templates
+			this._newVisibleElTimeout = setTimeout(() => {
+				this.setState({
+					visibleElements: this._offsetHeights
+						.filter(rect => {
+							return this._isElementInViewport(rect, 1200);
+						})
+						.map(rect => this._offsetHeights.indexOf(rect))
+				});
+			}, 200);
 		}
+	}
+
+	_isElementInViewport(rect, extendBounds = 0) {
+		const { pageYOffset, innerHeight } = window;
+		const pageTop = Math.max(pageYOffset - extendBounds, 0);
+		const pageBottom = pageYOffset + innerHeight + extendBounds;
+		const elementTop = rect.top;
+		const elementBottom = elementTop + rect.height;
+
+		return elementTop <= pageBottom && elementBottom >= pageTop;
 	}
 
 	_onCoverterChange(e) {
@@ -383,17 +393,19 @@ class TemplatesList extends React.Component {
 		});
 	}
 
-	_openModal(tmplModel) {
+	_openModal(tmplModel, originalTemplate) {
 		this.setState({
 			modalIsOpen: true,
-			modalTmplModel: tmplModel
+			modalTmplModel: tmplModel,
+			modalTmplOrig: originalTemplate
 		});
 	}
 
 	_onModalClose() {
 		this.setState({
 			modalIsOpen: false,
-			modalTmplModel: null
+			modalTmplModel: null,
+			modalTmplOrig: null
 		});
 	}
 }

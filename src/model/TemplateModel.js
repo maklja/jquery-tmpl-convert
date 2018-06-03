@@ -1,4 +1,10 @@
+const uuidv1 = require('uuid/v1');
+
 module.exports = class TemplateModel {
+	get guid() {
+		return this._guid;
+	}
+
 	get id() {
 		return this._id;
 	}
@@ -44,6 +50,7 @@ module.exports = class TemplateModel {
 	}
 
 	constructor(id, type, path, value, html) {
+		this._guid = uuidv1();
 		this._id = id;
 		this._type = type;
 		this._path = path;
@@ -54,10 +61,10 @@ module.exports = class TemplateModel {
 	}
 
 	toJSON() {
-		let { id, type, path, value, html } = this,
+		let { guid, id, type, path, value, html } = this,
 			tokenNodes = this.tokenNodes.map(curNode => curNode.toJSON()),
 			errors = this.errors.map(curErr => curErr.toJSON());
 
-		return { id, type, path, value, tokenNodes, errors, html };
+		return { guid, id, type, path, value, tokenNodes, errors, html };
 	}
 };

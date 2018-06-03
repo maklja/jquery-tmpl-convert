@@ -19,7 +19,7 @@ const setRoutes = (app, convertService) => {
 		try {
 			const tmpl = convertService.updateTemplate(
 				templateUpdate.converterId,
-				templateUpdate.id,
+				templateUpdate.guid,
 				templateUpdate.html
 			);
 			res.send(tmpl);
@@ -35,7 +35,7 @@ const setRoutes = (app, convertService) => {
 		try {
 			const tmpl = convertService.convertTemplate(
 				convertTemplate.converterId,
-				convertTemplate.id
+				convertTemplate.guid
 			);
 			res.send(tmpl);
 		} catch (e) {

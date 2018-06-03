@@ -1,3 +1,6 @@
-import TemplatePreview from 'app-js/components/TemplatePreview/TemplatePreview';
+import {
+	TemplatePreview,
+	TemplatePreviewLoading
+} from 'app-js/components/TemplatePreview/TemplatePreview';
 
-export default TemplatePreview;
+export { TemplatePreview, TemplatePreviewLoading };

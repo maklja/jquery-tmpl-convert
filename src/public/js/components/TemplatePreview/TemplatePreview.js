@@ -8,9 +8,8 @@ import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 import 'prismjs/plugins/line-highlight/prism-line-highlight.css';
 
 import './template_preview.css';
-import { clearTimeout } from 'timers';
 
-class TemplatePreview extends React.Component {
+export class TemplatePreview extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -19,7 +18,10 @@ class TemplatePreview extends React.Component {
 
 	componentDidMount() {
 		// expensive operation do it async
-		this._colorTimeout = setTimeout(() => Prism.highlightElement(this.templateCode.current), 0);
+		this._colorTimeout = setTimeout(
+			() => Prism.highlightElement(this.templateCode.current),
+			0
+		);
 	}
 
 	componentWillUnmount() {
@@ -48,7 +50,7 @@ class TemplatePreview extends React.Component {
 	}
 
 	render() {
-		const { template, onOpenModal } = this.props,
+		const { template, originalTemplate, onOpenModal } = this.props,
 			linesWithError = template.errors
 				.map(curErr => curErr.lineNumber.join(','))
 				.join(',');
@@ -57,7 +59,9 @@ class TemplatePreview extends React.Component {
 			<div className="template-preview">
 				<div className="template-body">
 					<pre
-						onDoubleClick={() => onOpenModal(template)}
+						onDoubleClick={() =>
+							onOpenModal(template, originalTemplate)
+						}
 						data-line={linesWithError}
 						className="line-numbers language-html"
 					>
@@ -96,6 +100,7 @@ class TemplatePreview extends React.Component {
 
 TemplatePreview.propTypes = {
 	template: PropTypes.object.isRequired,
+	originalTemplate: PropTypes.object,
 	onOpenModal: PropTypes.func
 };
 
@@ -103,4 +108,19 @@ TemplatePreview.defaultProps = {
 	onOpenModal: () => {}
 };
 
-export default TemplatePreview;
+export const TemplatePreviewLoading = ({ height }) => {
+	return (
+		<div
+			className="templates"
+			style={{
+				height: height
+			}}
+		>
+			<div className="templates-item-loading">Loading</div>
+		</div>
+	);
+};
+
+TemplatePreviewLoading.propTypes = {
+	height: PropTypes.number.isRequired
+};
