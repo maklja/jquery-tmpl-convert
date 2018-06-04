@@ -1,7 +1,12 @@
 const AbstractConverter = require('./AbstractConverter');
 const { Info } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
-const { CONVERT_ERROR } = require('../../model/error_code');
+const {
+	INVALID_EXPRESSION_TYPE,
+	PARTIAL_TEMPLATE_VALID_PARAMS,
+	REGISTER_PARTIAL_TEMPLATE,
+	WRAP_NODE_CONVERT_NOT_SUPPORTED
+} = require('../../model/error_code');
 const { WRAP } = require('../../tokens/tokens');
 
 class WrapConverter extends AbstractConverter {
@@ -13,10 +18,8 @@ class WrapConverter extends AbstractConverter {
 		errors.push(
 			new ValidationError(
 				wrapToken.id,
-				CONVERT_ERROR.code,
-				CONVERT_ERROR.message(
-					'Converting WRAP node is not supported. Create partial template with @partial-block, see http://handlebarsjs.com/partials.html.'
-				),
+				WRAP_NODE_CONVERT_NOT_SUPPORTED.code,
+				WRAP_NODE_CONVERT_NOT_SUPPORTED.message(),
 				wrapToken.lineNumber
 			)
 		);
@@ -37,10 +40,8 @@ class WrapConverter extends AbstractConverter {
 				errors.push(
 					new ValidationError(
 						wrapToken.id,
-						CONVERT_ERROR.code,
-						CONVERT_ERROR.message(
-							'Pass valid parameters to partial template.'
-						),
+						PARTIAL_TEMPLATE_VALID_PARAMS.code,
+						PARTIAL_TEMPLATE_VALID_PARAMS.message(),
 						wrapToken.lineNumber
 					)
 				);
@@ -51,10 +52,8 @@ class WrapConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					wrapToken.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						'Make sure that partial template is register to handlebars. See http://handlebarsjs.com/partials.html'
-					),
+					REGISTER_PARTIAL_TEMPLATE.code,
+					REGISTER_PARTIAL_TEMPLATE.message(),
 					wrapToken.lineNumber,
 					Info
 				)
@@ -63,9 +62,9 @@ class WrapConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					wrapToken.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						'Template wrap expression must be literal.'
+					INVALID_EXPRESSION_TYPE.code,
+					INVALID_EXPRESSION_TYPE.message(
+						node.token.expression.treeType
 					),
 					wrapToken.lineNumber
 				)

@@ -1,7 +1,11 @@
 const AbstractConverter = require('./AbstractConverter');
 const { Info } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
-const { CONVERT_ERROR } = require('../../model/error_code');
+const {
+	REGISTER_PARTIAL_TEMPLATE,
+	INVALID_EXPRESSION_TYPE,
+	PARTIAL_TEMPLATE_VALID_PARAMS
+} = require('../../model/error_code');
 const { TMPL } = require('../../tokens/tokens');
 
 class TmplConverter extends AbstractConverter {
@@ -26,10 +30,8 @@ class TmplConverter extends AbstractConverter {
 				errors.push(
 					new ValidationError(
 						tmplToken.id,
-						CONVERT_ERROR.code,
-						CONVERT_ERROR.message(
-							'Pass valid parameters to partial template.'
-						),
+						PARTIAL_TEMPLATE_VALID_PARAMS.code,
+						PARTIAL_TEMPLATE_VALID_PARAMS.message(),
 						tmplToken.lineNumber
 					)
 				);
@@ -40,10 +42,8 @@ class TmplConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					tmplToken.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						'Make sure that partial template is register to handlebars. See http://handlebarsjs.com/partials.html'
-					),
+					REGISTER_PARTIAL_TEMPLATE.code,
+					REGISTER_PARTIAL_TEMPLATE.message(),
 					tmplToken.lineNumber,
 					Info
 				)
@@ -52,9 +52,9 @@ class TmplConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					tmplToken.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						'Template tag expression must be literal.'
+					INVALID_EXPRESSION_TYPE.code,
+					INVALID_EXPRESSION_TYPE.message(
+						node.token.expression.treeType
 					),
 					tmplToken.lineNumber
 				)

@@ -2,29 +2,27 @@
 
 const program = require('commander');
 const Application = require('./application/Application');
+const npmPackage = require('../package.json');
 
 program
-	.version('1.0.0')
-	.option('-p, --port <n>', 'Server port', x => parseInt(x), 3000)
+	.version(npmPackage.version)
+	.option('-p, --port <n>', 'server port', x => parseInt(x), 3000)
+	.option('-s, --server', 'run application is server mode')
 	.option(
-		'-s, --server',
-		'Use server to preview templates insted of command line'
-	)
-	.option(
-		'-o, --output [type]',
-		'Command line output dir for converted templates',
+		'-o, --output [path]',
+		'output directory for converted files (default: ./results)',
 		'./results'
 	)
 	.option(
-		'-f, --files <items>',
-		'Input files pattern for jquery templates to convert',
+		'-f, --files <globs>',
+		'input files pattern for jquery templates to convert',
 		val => val.split(',').map(pattern => pattern.trim()),
 		['./*.(htm|html)']
 	)
-	.option('-c, --converter <id>', 'Id of the target converter', 'hbs')
+	.option('-c, --converter <id>', 'id of the target converter', 'hbs')
 	.option(
 		'-e, --extension <extension>',
-		'File extension of converted templates'
+		'file extension of converted templates (default: define by chosen converter)'
 	)
 	.parse(process.argv);
 

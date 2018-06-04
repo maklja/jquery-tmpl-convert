@@ -7,7 +7,11 @@ const {
 	compareExpressionTokenState
 } = require('../utils/utils');
 const ValidationError = require('../../src/model/ValidationError');
-const { CONVERT_ERROR } = require('../../src/model/error_code');
+const {
+	PARTIAL_TEMPLATE_VALID_PARAMS,
+	REGISTER_PARTIAL_TEMPLATE,
+	WRAP_NODE_CONVERT_NOT_SUPPORTED
+} = require('../../src/model/error_code');
 const TemplateParser = require('../../src/parser/TemplateParser');
 
 const expect = chai.expect;
@@ -63,13 +67,13 @@ describe('Test handlebars WRAP converter', () => {
 			expect(unsupportedFullConvertError)
 				.to.be.instanceOf(ValidationError)
 				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+				.that.is.equal(WRAP_NODE_CONVERT_NOT_SUPPORTED.code);
 
 			let error = this.templateModel.errors[1];
 			expect(error)
 				.to.be.instanceOf(ValidationError)
 				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+				.that.is.equal(REGISTER_PARTIAL_TEMPLATE.code);
 		});
 
 		it('Check if both opening and closing nodes are present', () => {
@@ -118,19 +122,19 @@ describe('Test handlebars WRAP converter', () => {
 			expect(unsupportedFullConvertError)
 				.to.be.instanceOf(ValidationError)
 				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+				.that.is.equal(WRAP_NODE_CONVERT_NOT_SUPPORTED.code);
 
 			let paramsError = this.templateModel.errors[1];
 			expect(paramsError)
 				.to.be.instanceOf(ValidationError)
 				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+				.that.is.equal(PARTIAL_TEMPLATE_VALID_PARAMS.code);
 
 			let registerTemplateError = this.templateModel.errors[2];
 			expect(registerTemplateError)
 				.to.be.instanceOf(ValidationError)
 				.that.have.property('code')
-				.that.is.equal(CONVERT_ERROR.code);
+				.that.is.equal(REGISTER_PARTIAL_TEMPLATE.code);
 		});
 
 		it('Check if both opening and closing nodes are present', () => {

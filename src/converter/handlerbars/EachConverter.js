@@ -2,7 +2,10 @@ const AbstractConverter = require('./AbstractConverter');
 const { EACH } = require('../../tokens/tokens');
 const { Warning } = require('../../model/ErrorTypes');
 const ValidationError = require('../../model/ValidationError');
-const { CONVERT_ERROR } = require('../../model/error_code');
+const {
+	CONVERT_CHECK_IS_REQUIRED,
+	INVALID_PARAMETERS_NUMBER
+} = require('../../model/error_code');
 
 class EachConverter extends AbstractConverter {
 	constructor() {
@@ -35,10 +38,8 @@ class EachConverter extends AbstractConverter {
 				errors.push(
 					new ValidationError(
 						convEachStatement.id,
-						CONVERT_ERROR.code,
-						CONVERT_ERROR.message(
-							`Handlebars support only 2 parameters in each function.`
-						),
+						INVALID_PARAMETERS_NUMBER.code,
+						INVALID_PARAMETERS_NUMBER.message(2, 'each'),
 						convEachStatement.lineNumber
 					)
 				);
@@ -55,9 +56,9 @@ class EachConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					convEachStatement.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						`Check named parameters in each function`
+					CONVERT_CHECK_IS_REQUIRED.code,
+					CONVERT_CHECK_IS_REQUIRED.message(
+						`Check named parameters in each function.`
 					),
 					convEachStatement.lineNumber,
 					Warning
@@ -82,8 +83,8 @@ class EachConverter extends AbstractConverter {
 			errors.push(
 				new ValidationError(
 					convEachStatement.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
+					CONVERT_CHECK_IS_REQUIRED.code,
+					CONVERT_CHECK_IS_REQUIRED.message(
 						`Check if @index is correct or @key needs to go if expresion value is object and not an array.`
 					),
 					convEachStatement.lineNumber,

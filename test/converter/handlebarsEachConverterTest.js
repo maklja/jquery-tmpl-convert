@@ -8,7 +8,10 @@ const {
 	compareExpressionTokenState
 } = require('../utils/utils');
 const ValidationError = require('../../src/model/ValidationError');
-const { CONVERT_ERROR } = require('../../src/model/error_code');
+const {
+	CONVERT_CHECK_IS_REQUIRED,
+	INVALID_EXPRESSION_TYPE
+} = require('../../src/model/error_code');
 const TemplateParser = require('../../src/parser/TemplateParser');
 
 const expect = chai.expect;
@@ -202,16 +205,24 @@ describe('Test handlebars EACH converter', () => {
 				.to.be.an('array')
 				.that.have.lengthOf(3);
 
-			for (let curError of this.templateModel.errors) {
-				// 3 errors
-				// for convert from $item to this
-				// named parameters check warning
-				// error for function call in expression
-				expect(curError)
-					.to.be.instanceOf(ValidationError)
-					.that.have.property('code')
-					.that.is.equal(CONVERT_ERROR.code);
-			}
+			// 3 errors
+			// for convert from $item to this
+			// named parameters check warning
+			// error for function call in expression
+			expect(this.templateModel.errors[0])
+				.to.be.instanceOf(ValidationError)
+				.that.have.property('code')
+				.that.is.equal(CONVERT_CHECK_IS_REQUIRED.code);
+
+			expect(this.templateModel.errors[1])
+				.to.be.instanceOf(ValidationError)
+				.that.have.property('code')
+				.that.is.equal(INVALID_EXPRESSION_TYPE.code);
+
+			expect(this.templateModel.errors[2])
+				.to.be.instanceOf(ValidationError)
+				.that.have.property('code')
+				.that.is.equal(CONVERT_CHECK_IS_REQUIRED.code);
 		});
 
 		it('Check EACH nodes', () => {

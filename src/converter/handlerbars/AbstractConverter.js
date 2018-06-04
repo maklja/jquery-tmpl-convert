@@ -1,4 +1,7 @@
-const { CONVERT_ERROR } = require('../../model/error_code');
+const {
+	CONVERT_CHECK_IS_REQUIRED,
+	INVALID_EXPRESSION_TYPE
+} = require('../../model/error_code');
 const { extractTokenText } = require('../../parser/parserUtils');
 const ValidationError = require('../../model/ValidationError');
 const { Warning } = require('../../model/ErrorTypes');
@@ -28,8 +31,8 @@ class AbstractConverter {
 			errors.push(
 				new ValidationError(
 					expression.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
+					CONVERT_CHECK_IS_REQUIRED.code,
+					CONVERT_CHECK_IS_REQUIRED.message(
 						`Replacing $item with ${newTokenName}, check that scope and value are correct.`
 					),
 					expression.lineNumber,
@@ -72,10 +75,8 @@ class AbstractConverter {
 			errors.push(
 				new ValidationError(
 					expression.id,
-					CONVERT_ERROR.code,
-					CONVERT_ERROR.message(
-						`Expression can't be type of ${token.treeType}.`
-					),
+					INVALID_EXPRESSION_TYPE.code,
+					INVALID_EXPRESSION_TYPE.message(token.treeType),
 					expression.lineNumber
 				)
 			);
