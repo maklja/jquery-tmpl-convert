@@ -8,7 +8,7 @@ To install package globally run command:
 npm install jquery-tmpl-convert -g
 ```
 
-If you need to use package API install it locally runing command:
+If you need to use package API install it locally running command:
 ```
 npm install jquery-tmpl-convert --save
 ```
@@ -84,7 +84,7 @@ Example how to write your custom template converter:
 			Converter,
 			// helper functions
 			Utils,
-			// application modes
+			// application models
 			Models
 	} = require('jquery-tmpl-convert');
 
@@ -133,3 +133,7 @@ Use command below to run test locally:
 ```
 npm run test
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/maklja/jquery-tmpl-convert/blob/master/LICENSE) file for details

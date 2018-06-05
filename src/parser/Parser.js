@@ -273,11 +273,23 @@ class Parser {
 				statementTree: bodyTokens[0],
 				expressionTree: bodyTokens[1]
 			};
-		} else if (isIdentifier(tokenTree) || isCallExpression(tokenTree)) {
+		} else if (isIdentifier(tokenTree)) {
 			return {
 				statementTree: tokenTree,
 				expressionTree: null
 			};
+		} else if (isCallExpression(tokenTree)) {
+			if (tokenTree.arguments.length === 1) {
+				return {
+					statementTree: tokenTree.callee,
+					expressionTree: tokenTree.arguments[0]
+				};
+			} else {
+				return {
+					statementTree: tokenTree,
+					expressionTree: null
+				};
+			}
 		} else if (isClosingToken(tokenTree)) {
 			// if this is closing token
 			return {

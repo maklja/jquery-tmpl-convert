@@ -177,4 +177,39 @@ describe('parse IF token', () => {
 			compareStatementTokenState(ifEndTag, tokens.IF, 'if', true);
 		});
 	});
+
+	describe('valid if token with logical expression inside parentheses', () => {
+		beforeEach(() => {
+			const template = '{{if (logicalStatment)}}{{/if}}';
+			let parser = new Parser(template);
+			parser.parse();
+
+			this.tokens = parser.tokens;
+		});
+
+		it('check if both tokens exists(IF_START and IF_END)', () => {
+			// we have two tags, one for opening tag and one for closing tag
+			expect(this.tokens)
+				.to.be.an('array')
+				.that.have.lengthOf(2);
+		});
+
+		it('check IF_START token', () => {
+			let ifStartTag = this.tokens[0];
+
+			compareStatementTokenState(ifStartTag, tokens.IF, 'if', false);
+
+			// expected expression value
+			compareExpressionTokenState(
+				ifStartTag.expression,
+				'logicalStatment'
+			);
+		});
+
+		it('check IF_END token', () => {
+			let ifEndTag = this.tokens[1];
+
+			compareStatementTokenState(ifEndTag, tokens.IF, 'if', true);
+		});
+	});
 });

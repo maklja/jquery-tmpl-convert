@@ -134,6 +134,6 @@ module.exports = (convertService, config) => {
 
 	app.listen(config.port, () =>
 		// eslint-disable-next-line no-console
-		console.log(`Example app listening on port ${config.port}!`)
+		console.log(`jquery-tmpl-convert app listening on port ${config.port}!`)
 	);
 };
