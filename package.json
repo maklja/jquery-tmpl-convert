@@ -1,6 +1,6 @@
 {
 	"name": "jquery-tmpl-convert",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Application is created to help in migration from deprecated jQuery template library. Application is able to converte jQuery template to handlebar templates. Application supports two working modes: command-line interface(CLI) and server preview for interactive template converting. If needed application can be extended to convert other template types.",
 	"keywords": [
 		"jQuery",
@@ -26,8 +26,8 @@
 		"npm": ">=3.10.10"
 	},
 	"scripts": {
-		"test": "./node_modules/mocha/bin/mocha ./test/**/*.js",
-		"test:dev": "./node_modules/mocha/bin/mocha ./test/**/*.js --watch",
+		"test": "node_modules/mocha/bin/mocha ./test/**/*.js",
+		"test:dev": "mocha ./test/**/*.js --watch",
 		"test:debug": "./node_modules/mocha/bin/mocha ./test/**/*.js --inspect-brk",
 		"start": "node ./src/app.js",
 		"start:debug": "nodemon --inspect ./src/app.js -- --server",
